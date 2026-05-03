@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://asqdogadhpwqpeekvxny.supabase.co',
     anonKey: 'sb_publishable_pEhvPEbg84LgQlNm9kfsUg_f-AThaqn',
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,106 +16,91 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Todos',
-      home: HomePage(),
+      title: 'My Book Log',
+      home: SplashScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final _future = Supabase.instance.client
-      .from('todos')
-      .select();
+class _SplashScreenState extends State<SplashScreen> {
+  String? _statusMessage;
+  bool _checking = true;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-        future: _future,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final todos = snapshot.data!;
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: ((context, index) {
-              final todo = todos[index];
-              return ListTile(
-                title: Text(todo['name']),
-              );
-            }),
-          );
-        },
-      ),
-    );
+  void initState() {
+    super.initState();
+    _checkConnection();
   }
-}
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+
+
+
+  
+  // This method attempts to connect to the Supabase database and updates the UI based on the result.
+
+  Future<void> _checkConnection() async {
+    setState(() {
+      _checking = true;
+      _statusMessage = null;
     });
+    try {
+      final response = await Supabase.instance.client
+          .from('randomTableName')
+          .select()
+          .limit(1);
+      setState(() {
+        _statusMessage = 'Connection successful!';
+        _checking = false;
+      });
+    } catch (e, stack) {
+      setState(() {
+        _statusMessage = 'Connection failed.';
+        _checking = false;
+      });
+    }
   }
+
+  //End of check connection method
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      backgroundColor: const Color.fromARGB(207, 211, 211, 211),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const Text(
+              'My Book Log',
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 12),
+            const Text(
+              'crafted with love',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 32),
+            if (_checking)
+              const CircularProgressIndicator()
+            else if (_statusMessage != null)
+              Text(
+                _statusMessage!,
+                style: TextStyle(
+                  color: _statusMessage == 'Connection successful!'
+                      ? Colors.green
+                      : Colors.red,
+                  fontSize: 16,
+                ),
+              ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
