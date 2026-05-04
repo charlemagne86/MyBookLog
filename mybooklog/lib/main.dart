@@ -1,7 +1,4 @@
-
-// Import Flutter material design package for UI components
 import 'package:flutter/material.dart';
-// Import Supabase Flutter package for backend/database connectivity
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
@@ -46,16 +43,18 @@ class SplashScreen extends StatefulWidget {
 
 // State for SplashScreen, manages connection status
 class _SplashScreenState extends State<SplashScreen> {
-  // Message to display connection status
-  String? _statusMessage;
-  // Whether the app is currently checking the connection
-  bool _checking = true;
+  // Whether to show the splash screen or the login UI
+  bool _showSplash = true;
 
   @override
   void initState() {
     super.initState();
-    // Start connection check when splash screen is shown
-    _checkConnection();
+    // Show splash screen for 2 seconds, then show login UI
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _showSplash = false;
+      });
+    });
   }
 
 
@@ -63,68 +62,139 @@ class _SplashScreenState extends State<SplashScreen> {
   
 
   // Attempts to connect to Supabase and updates the UI with the result
-  Future<void> _checkConnection() async {
-    setState(() {
-      _checking = true;
-      _statusMessage = null;
-    });
-    try {
-      // Try to select one row from the 'books' table
-      final response = await Supabase.instance.client
-          .from('books')
-          .select()
-          .limit(1);
-      setState(() {
-        _statusMessage = 'Connection successful!';
-        _checking = false;
-      });
-    } catch (e, stack) {
-      // If an error occurs, show failure message
-      setState(() {
-        _statusMessage = 'Connection failed.';
-        _checking = false;
-      });
-    }
-  }
+  // Future<void> _checkConnection() async {
+  //   setState(() {
+  //     _checking = true;
+  //     _statusMessage = null;
+  //   });
+  //   try {
+  //     // Try to select one row from the 'books' table
+  //     final response = await Supabase.instance.client
+  //         .from('users')
+  //         .select()
+  //         .limit(1);
+  //     setState(() {
+  //       _statusMessage = 'Connection successful!';
+  //       _checking = false;
+  //     });
+  //   } catch (e, stack) {
+  //     // If an error occurs, show failure message
+  //     setState(() {
+  //       _statusMessage = 'Connection failed.';
+  //       _checking = false;
+  //     });
+  //   }
+  // }
 
-  // Builds the splash screen UI
+  // Builds the splash screen or login UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(207, 211, 211, 211),
       body: Center(
+        child: _showSplash
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'My Book Log',
+                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'crafted with love',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  SizedBox(height: 32),
+                  CircularProgressIndicator(),
+                ],
+              )
+            : const LoginScreen(),
+      ),
+    );
+  }
+}
+
+// Login screen UI with username, password, sign up, and forgot password
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App title
             const Text(
-              'My Book Log',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            // Subtitle
-            const Text(
-              'crafted with love',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              'Login',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
-            // Show loading indicator while checking
-            if (_checking)
-              const CircularProgressIndicator()
-            // Show status message if available
-            else if (_statusMessage != null)
-              Text(
-                _statusMessage!,
-                style: TextStyle(
-                  color: _statusMessage == 'Connection successful!'
-                      ? Colors.green
-                      : Colors.red,
-                  fontSize: 16,
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.visibility),
+                  onPressed: null, // Will be replaced below
                 ),
               ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  // TODO: Implement forgot password logic
+                },
+                child: const Text('Forgot password?'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement login logic
+              },
+              child: const Text('Login'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Don't have an account? "),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Implement sign up logic
+                  },
+                  child: const Text('Sign up'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 }
+// ...existing code...
