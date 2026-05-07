@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert'; // For utf8.encode (used in password hashing)
+import 'package:crypto/crypto.dart'; // For sha256 (used in password hashing)
+import 'package:supabase_flutter/supabase_flutter.dart'; // Supabase client for backend/auth
+import 'package:flutter/material.dart'; // Flutter UI framework
 
 
-// Entry point of the Flutter application
+/// Entry point of the Flutter application
 Future<void> main() async {
   // Ensures Flutter engine is initialized before running asynchronous code
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +18,11 @@ Future<void> main() async {
 }
 
 
-// Root widget of the application
+/// Root widget of the application
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Builds the MaterialApp, which sets up app-wide configuration and theming
+  /// Builds the MaterialApp, which sets up app-wide configuration and theming
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -32,22 +34,21 @@ class MyApp extends StatelessWidget {
 }
 
 
-// Splash screen widget that transitions to login after a delay
+/// Splash screen widget that transitions to login after a delay
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
-  // Creates the mutable state for this widget
+  /// Creates the mutable state for this widget
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-
-// State for SplashScreen, manages splash/login transition
+/// State for SplashScreen, manages splash/login transition
 class _SplashScreenState extends State<SplashScreen> {
   // Whether to show the splash screen or the login UI
   bool _showSplash = true;
 
-  // Called when the widget is inserted into the widget tree
+  /// Called when the widget is inserted into the widget tree
   @override
   void initState() {
     super.initState();
@@ -88,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
   //   }
   // }
 
-  // Builds the splash screen or login UI
+  /// Builds the splash screen or login UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,22 +120,61 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// Login screen UI with username, password, sign up, and forgot password
+
+/// Login screen UI with username, password, sign up, and forgot password
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
-  // Creates the mutable state for this widget
+  /// Creates the mutable state for this widget
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+/// State for LoginScreen, manages login logic and UI
 class _LoginScreenState extends State<LoginScreen> {
+  String? _errorText; // Error message to display
+  bool _isSubmitting = false; // Whether a login request is in progress
   // Controllers for username and password fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  bool _obscurePassword = true; // Controls password visibility
 
-  // Builds the login form UI
+  /// Handles user login using Supabase Auth
+  Future<void> _login() async {
+    setState(() {
+      _errorText = null;
+      _isSubmitting = true;
+    });
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: _usernameController.text.trim(),
+        password: _passwordController.text,
+      );
+      final session = response.session;
+      if (session == null || session.user == null) {
+        setState(() {
+          _errorText = 'Login failed: Invalid credentials or user not found.';
+          _isSubmitting = false;
+        });
+        return;
+      }
+      // Optionally, fetch user profile or navigate to home page
+      // Navigator.of(context).pushReplacement(...)
+      setState(() {
+        _isSubmitting = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login successful!')),
+      );
+    } catch (e) {
+      setState(() {
+        _errorText = 'Login failed: $e';
+        _isSubmitting = false;
+      });
+    }
+  }
+
+  /// Builds the login form UI
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -149,11 +189,11 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
-            // Username input
+            // Username input (email)
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                labelText: 'Username',
+                labelText: 'Username (email)',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -176,7 +216,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Forgot password link
+            // Error message display
+            if (_errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
+              ),
+            // Forgot password link (not implemented)
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -189,10 +235,14 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
             // Login button
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement login logic
-              },
-              child: const Text('Login'),
+              onPressed: _isSubmitting ? null : _login,
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Login'),
             ),
             const SizedBox(height: 16),
             // Sign up link
@@ -218,16 +268,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Sign Up Page for new users
+
+/// Sign Up Page for new users
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
 
-  // Creates the mutable state for this widget
+  /// Creates the mutable state for this widget
   @override
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
+/// State for SignUpPage, manages registration logic and UI
 class _SignUpPageState extends State<SignUpPage> {
+  /// Hashes the password using SHA-256 for secure storage
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
   // Controllers for each input field
@@ -236,12 +295,12 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  String? _errorText;
-  bool _isSubmitting = false;
+  bool _obscurePassword = true; // Controls password visibility
+  bool _obscureConfirmPassword = true; // Controls confirm password visibility
+  String? _errorText; // Error message to display
+  bool _isSubmitting = false; // Whether a sign up request is in progress
 
-  // Validates password for required complexity
+  /// Validates password for required complexity
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -250,6 +309,7 @@ class _SignUpPageState extends State<SignUpPage> {
     final hasNumber = RegExp(r'[0-9]').hasMatch(value);
     final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value);
     if (!hasLetter || !hasNumber || !hasSpecial) {
+      //print("Password validation failed: hasLetter=$hasLetter, hasNumber=$hasNumber, hasSpecial=$hasSpecial");
       return 'Password must have at least 1 letter, 1 number, and 1 special character.';
     }
     if (value.length < 8) {
@@ -258,7 +318,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return null;
   }
 
-  // Handles form submission and sends data to Supabase
+  /// Handles form submission, creates Supabase Auth user, and inserts user profile
   Future<void> _submit() async {
     setState(() {
       _errorText = null;
@@ -278,25 +338,52 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
     try {
-      // Insert user details into Supabase users table
-      final response = await Supabase.instance.client.from('users').insert({
+      // 1. Create user in Supabase Auth
+      final signUpResponse = await Supabase.instance.client.auth.signUp(
+        email: _usernameController.text.trim(),
+        password: _passwordController.text,
+      );
+      final user = signUpResponse.user;
+      if (user == null) {
+        // This should not happen unless signUp throws, but handle defensively
+        setState(() {
+          _errorText = 'Sign up failed: No user returned.';
+          _isSubmitting = false;
+        });
+        return;
+      }
+      // 2. Insert user profile row in public.users with id = auth.uid()
+      final hashedPassword = _hashPassword(_passwordController.text);
+      final profileResponse = await Supabase.instance.client.from('users').upsert({
+        'id': user.id, // Use Supabase Auth user UUID for RLS compliance
         'first_name': _firstNameController.text.trim(),
         'last_name': _lastNameController.text.trim(),
         'username': _usernameController.text.trim(),
-        'password': _passwordController.text, // In production, hash passwords!
+        'encrypted_password': hashedPassword,
       });
-      if (response.error != null) {
+      if (profileResponse.error != null) {
         setState(() {
-          _errorText = response.error!.message;
+          _errorText = profileResponse.error!.message;
           _isSubmitting = false;
         });
-      } else {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign up successful! Please log in.')),
-        );
+        return;
       }
+      // On success, show a message and redirect to login after 2 seconds
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign up successful! Redirecting...')),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } on AuthException catch (e) {
+      // Handle Supabase Auth-specific errors
+      setState(() {
+        _errorText = 'Sign up failed: ${e.message}';
+        _isSubmitting = false;
+      });
     } catch (e) {
+      // Handle any other errors
       setState(() {
         _errorText = 'Sign up failed: $e';
         _isSubmitting = false;
@@ -304,7 +391,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  // Builds the sign up form UI
+  /// Builds the sign up form UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -337,11 +424,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   validator: (value) => value == null || value.isEmpty ? 'Last name is required' : null,
                 ),
                 const SizedBox(height: 16),
-                // Username input
+                // Username input (email)
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Username (email)',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || value.isEmpty ? 'Username is required' : null,
