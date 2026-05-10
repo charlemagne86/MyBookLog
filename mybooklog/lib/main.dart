@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
       final session = response.session;
-      if (session == null || session.user == null) {
+      if (session == null) {
         setState(() {
           _errorText = 'Login failed: Invalid credentials or user not found.';
           _isSubmitting = false;
@@ -240,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                     )
                   : const Text('Login'),
             ),
