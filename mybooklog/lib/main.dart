@@ -110,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                   SizedBox(height: 32),
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                 ],
               )
             // Show login screen after splash
@@ -228,6 +228,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: TextButton(
                 onPressed: () {
                   // TODO: Implement forgot password logic
+
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Forgot password functionality is not implemented yet.')),
+                    );
+
+                    
                 },
                 child: const Text('Forgot password?'),
               ),
@@ -307,7 +314,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     final hasLetter = RegExp(r'[A-Za-z]').hasMatch(value);
     final hasNumber = RegExp(r'[0-9]').hasMatch(value);
-    final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value);
+    final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>\_]').hasMatch(value);
     if (!hasLetter || !hasNumber || !hasSpecial) {
       //print("Password validation failed: hasLetter=$hasLetter, hasNumber=$hasNumber, hasSpecial=$hasSpecial");
       return 'Password must have at least 1 letter, 1 number, and 1 special character.';
@@ -320,16 +327,21 @@ class _SignUpPageState extends State<SignUpPage> {
 
   /// Handles form submission, creates Supabase Auth user, and inserts user profile
   Future<void> _submit() async {
+    // Reset error and set submitting state
     setState(() {
       _errorText = null;
       _isSubmitting = true;
     });
+
+    // Validate the form fields
     if (_formKey.currentState?.validate() != true) {
       setState(() {
         _isSubmitting = false;
       });
       return;
     }
+
+    // Check if passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorText = 'Passwords do not match';
@@ -337,23 +349,29 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       return;
     }
+
     try {
-      // 1. Create user in Supabase Auth
+      // Step 1: Create user in Supabase Auth
       final signUpResponse = await Supabase.instance.client.auth.signUp(
         email: _usernameController.text.trim(),
         password: _passwordController.text,
       );
+
+      // Get the created user from the response
       final user = signUpResponse.user;
       if (user == null) {
-        // This should not happen unless signUp throws, but handle defensively
+        // Defensive: This should not happen unless signUp throws
         setState(() {
-          _errorText = 'Sign up failed: No user returned.';
+          _errorText = 'Unable to create user due to database error. Please retry after some time.';
           _isSubmitting = false;
         });
         return;
       }
-      // 2. Insert user profile row in public.users with id = auth.uid()
+
+      // Step 2: Hash the password for secure storage in the profile
       final hashedPassword = _hashPassword(_passwordController.text);
+
+      // Step 3: Insert or update user profile in public.users table
       final profileResponse = await Supabase.instance.client.from('users').upsert({
         'id': user.id, // Use Supabase Auth user UUID for RLS compliance
         'first_name': _firstNameController.text.trim(),
@@ -361,14 +379,8 @@ class _SignUpPageState extends State<SignUpPage> {
         'username': _usernameController.text.trim(),
         'encrypted_password': hashedPassword,
       });
-      if (profileResponse.error != null) {
-        setState(() {
-          _errorText = profileResponse.error!.message;
-          _isSubmitting = false;
-        });
-        return;
-      }
-      // On success, show a message and redirect to login after 2 seconds
+
+      // Step 4: On success, show a message and redirect to login after 2 seconds
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sign up successful! Redirecting...')),
       );
@@ -379,13 +391,13 @@ class _SignUpPageState extends State<SignUpPage> {
     } on AuthException catch (e) {
       // Handle Supabase Auth-specific errors
       setState(() {
-        _errorText = 'Sign up failed: ${e.message}';
+        _errorText = 'Auth-specific: Sign up failed: ${e.message}';
         _isSubmitting = false;
       });
     } catch (e) {
       // Handle any other errors
       setState(() {
-        _errorText = 'Sign up failed: $e';
+        _errorText = ' Generic: Sign up failed: $e';
         _isSubmitting = false;
       });
     }
@@ -474,7 +486,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 24),
                 // Error message display
-                if (_errorText != null)
+                if (_errorText !=   null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
@@ -488,7 +500,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                           )
                         : const Text('Sign Up'),
                   ),
