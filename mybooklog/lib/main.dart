@@ -526,18 +526,20 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-// ...existing code...
 
 /// BookshelfScreen: Shows user's bookshelf with 3x5 grid, add/search buttons, and hardwood background
 class BookshelfScreen extends StatefulWidget {
-  const BookshelfScreen({Key? key}) : super(key: key);
+  const BookshelfScreen({super.key});
 
   @override
   State<BookshelfScreen> createState() => _BookshelfScreenState();
 }
 
+/// State for BookshelfScreen
 class _BookshelfScreenState extends State<BookshelfScreen> {
+  // List of books to display
   List<Map<String, dynamic>> _books = [];
+  // Loading state
   bool _loading = true;
 
   @override
@@ -546,6 +548,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     _fetchBooks();
   }
 
+  /// Fetches books for the current user from Supabase
   Future<void> _fetchBooks() async {
     setState(() => _loading = true);
     final user = Supabase.instance.client.auth.currentUser;
@@ -567,6 +570,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     });
   }
 
+  /// Handler for add book button
   void _onAddBook() {
     // TODO: Implement add book dialog/screen
     ScaffoldMessenger.of(context).showSnackBar(
@@ -574,6 +578,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     );
   }
 
+  /// Handler for search book button
   void _onSearchBook() {
     // TODO: Implement search book dialog/screen
     ScaffoldMessenger.of(context).showSnackBar(
@@ -581,6 +586,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     );
   }
 
+  /// Builds the bookshelf UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -589,13 +595,14 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/hardwood_bookshelf_bg.jpg'),
+            image: AssetImage('assets/images/woodwork-oak-bakground.jpg'),
             fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
+              // Top bar with add/search buttons and title
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                 child: Row(
@@ -623,6 +630,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                   ],
                 ),
               ),
+              // Books grid
               Expanded(
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
@@ -657,14 +665,18 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
 
 /// Widget for a single book on the shelf
 class _BookOnShelf extends StatelessWidget {
+  /// Book cover image URL
   final String? imageUrl;
+  /// Book title
   final String title;
   const _BookOnShelf({this.imageUrl, required this.title});
 
+  /// Builds the book tile UI
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Book cover
         Expanded(
           child: AspectRatio(
             aspectRatio: 0.7,
@@ -693,6 +705,7 @@ class _BookOnShelf extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        // Book title
         Text(
           title,
           maxLines: 2,
