@@ -158,14 +158,26 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         return;
       }
-      // Optionally, fetch user profile or navigate to home page
-      // Navigator.of(context).pushReplacement(...)
-      setState(() {
-        _isSubmitting = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful!')),
-      );
+        // On successful login, create bookshelf if not exists, then navigate
+        final userId = response.user?.id;
+        if (userId != null) {
+          // Create bookshelf for user if not exists
+          await Supabase.instance.client.from('bookshelves').upsert({
+            'user_id': userId,
+          });
+        }
+        setState(() {
+          _isSubmitting = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful!')),
+        );
+        // Navigate to bookshelf screen
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const BookshelfScreen()),
+          );
+        }
     } catch (e) {
       setState(() {
         _errorText = 'Login failed: $e';
@@ -515,3 +527,185 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 // ...existing code...
+
+/// BookshelfScreen: Shows user's bookshelf with 3x5 grid, add/search buttons, and hardwood background
+class BookshelfScreen extends StatefulWidget {
+  const BookshelfScreen({Key? key}) : super(key: key);
+
+  @override
+  State<BookshelfScreen> createState() => _BookshelfScreenState();
+}
+
+class _BookshelfScreenState extends State<BookshelfScreen> {
+  List<Map<String, dynamic>> _books = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBooks();
+  }
+
+  Future<void> _fetchBooks() async {
+    setState(() => _loading = true);
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      setState(() {
+        _books = [];
+        _loading = false;
+      });
+      return;
+    }
+    final response = await Supabase.instance.client
+        .from('books')
+        .select()
+        .eq('user_id', user.id)
+        .limit(15);
+    setState(() {
+      _books = List<Map<String, dynamic>>.from(response);
+      _loading = false;
+    });
+  }
+
+  void _onAddBook() {
+    // TODO: Implement add book dialog/screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Add Book not implemented.')),
+    );
+  }
+
+  void _onSearchBook() {
+    // TODO: Implement search book dialog/screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Search Book not implemented.')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/hardwood_bookshelf_bg.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_box_rounded, size: 32, color: Color(0xFF7B4A1D)),
+                      tooltip: 'Add Book',
+                      onPressed: _onAddBook,
+                    ),
+                    const Text(
+                      'My Bookshelf',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF7B4A1D),
+                        shadows: [Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(2,2))],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.search_rounded, size: 32, color: Color(0xFF7B4A1D)),
+                      tooltip: 'Search Book',
+                      onPressed: _onSearchBook,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 32,
+                          crossAxisSpacing: 32,
+                          childAspectRatio: 0.65,
+                        ),
+                        itemCount: 15,
+                        itemBuilder: (context, index) {
+                          if (index >= _books.length) {
+                            return const SizedBox();
+                          }
+                          final book = _books[index];
+                          return _BookOnShelf(
+                            imageUrl: book['image_url'] as String?,
+                            title: book['title'] as String? ?? '',
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget for a single book on the shelf
+class _BookOnShelf extends StatelessWidget {
+  final String? imageUrl;
+  final String title;
+  const _BookOnShelf({this.imageUrl, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: AspectRatio(
+            aspectRatio: 0.7,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.brown[100],
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 6,
+                    offset: const Offset(2, 4),
+                  ),
+                ],
+                image: imageUrl != null && imageUrl!.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(imageUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: imageUrl == null || imageUrl!.isEmpty
+                  ? const Center(child: Icon(Icons.menu_book, size: 48, color: Color(0xFF7B4A1D)))
+                  : null,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            color: Color(0xFF7B4A1D),
+            shadows: [Shadow(blurRadius: 2, color: Colors.black12, offset: Offset(1,1))],
+          ),
+        ),
+      ],
+    );
+  }
+}
