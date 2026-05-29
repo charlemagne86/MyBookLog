@@ -1,28 +1,34 @@
+
+// Dart imports for encoding and hashing passwords securely
 import 'dart:convert'; // For utf8.encode (used in password hashing)
 import 'package:crypto/crypto.dart'; // For sha256 (used in password hashing)
+
+// Supabase and Flutter imports for backend and UI
 import 'package:supabase_flutter/supabase_flutter.dart'; // Supabase client for backend/auth
 import 'package:flutter/material.dart'; // Flutter UI framework
 
 
 /// Entry point of the Flutter application
 Future<void> main() async {
-  // Ensures Flutter engine is initialized before running asynchronous code
+  // Ensure Flutter engine is initialized before any async code
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize Supabase with project URL and anon key
+
+  // Initialize Supabase with your project URL and anon key for backend/auth
   await Supabase.initialize(
     url: 'https://asqdogadhpwqpeekvxny.supabase.co',
     anonKey: 'sb_publishable_pEhvPEbg84LgQlNm9kfsUg_f-AThaqn',
   );
-  // Start the Flutter app by running MyApp widget
+
+  // Start the Flutter app by running the root widget
   runApp(const MyApp());
 }
 
 
 /// Root widget of the application
+/// The root widget of the application, sets up theming and home screen
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  /// Builds the MaterialApp, which sets up app-wide configuration and theming
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -35,24 +41,22 @@ class MyApp extends StatelessWidget {
 
 
 /// Splash screen widget that transitions to login after a delay
+/// SplashScreen widget: shows a splash for 2 seconds, then transitions to login
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
-  /// Creates the mutable state for this widget
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-/// State for SplashScreen, manages splash/login transition
 class _SplashScreenState extends State<SplashScreen> {
-  // Whether to show the splash screen or the login UI
+  // Controls whether splash or login is shown
   bool _showSplash = true;
 
-  /// Called when the widget is inserted into the widget tree
   @override
   void initState() {
     super.initState();
-    // Show splash screen for 2 seconds, then show login UI
+    // Show splash for 2 seconds, then show login
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         _showSplash = false;
@@ -93,10 +97,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(207, 211, 211, 211),
+      backgroundColor: const Color.fromARGB(255, 244, 235, 208),
       body: Center(
         child: _showSplash
-            // Splash screen content
+            // Splash screen content: app name, subtitle, and spinner
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
@@ -113,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                 ],
               )
-            // Show login screen after splash
+            // After splash, show login screen
             : const LoginScreen(),
       ),
     );
@@ -122,30 +126,35 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
 /// Login screen UI with username, password, sign up, and forgot password
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
 
-  /// Creates the mutable state for this widget
+/// LoginScreen: Handles user login, error display, and navigation
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-/// State for LoginScreen, manages login logic and UI
 class _LoginScreenState extends State<LoginScreen> {
-  String? _errorText; // Error message to display
-  bool _isSubmitting = false; // Whether a login request is in progress
+  // Error message to display below form
+  String? _errorText;
+  // Whether a login request is in progress
+  bool _isSubmitting = false;
   // Controllers for username and password fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword = true; // Controls password visibility
+  // Controls password visibility
+  bool _obscurePassword = true;
 
   /// Handles user login using Supabase Auth
+  /// On success, creates bookshelf if needed and navigates to BookshelfScreen
   Future<void> _login() async {
     setState(() {
       _errorText = null;
       _isSubmitting = true;
     });
     try {
+      // Attempt login with Supabase Auth
       final response = await Supabase.instance.client.auth.signInWithPassword(
         email: _usernameController.text.trim(),
         password: _passwordController.text,
@@ -158,26 +167,28 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         return;
       }
-        // On successful login, create bookshelf if not exists, then navigate
-        final userId = response.user?.id;
-        if (userId != null) {
-          // Create bookshelf for user if not exists
-          await Supabase.instance.client.from('bookshelves').upsert({
-            'user_id': userId,
-          });
-        }
-        setState(() {
-          _isSubmitting = false;
+      // On successful login, create bookshelf for user if not exists
+      final userId = response.user?.id;
+      if (userId != null) {
+        // Upsert ensures bookshelf is created only if missing
+        await Supabase.instance.client.from('bookshelf').upsert({
+          'user_id': userId,
         });
+      }
+      setState(() {
+        _isSubmitting = false;
+      });
+      // Only use context if still mounted after async gap
+      if (mounted) {
+        // Show login success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
         // Navigate to bookshelf screen
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const BookshelfScreen()),
-          );
-        }
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const BookshelfScreen()),
+        );
+      }
     } catch (e) {
       setState(() {
         _errorText = 'Login failed: $e';
@@ -220,6 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
+                    // Toggle password visibility
                     setState(() {
                       _obscurePassword = !_obscurePassword;
                     });
@@ -228,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Error message display
+            // Error message display if login fails
             if (_errorText != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
@@ -239,20 +251,16 @@ class _LoginScreenState extends State<LoginScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  // TODO: Implement forgot password logic
-
-
+                  // Show not implemented message for forgot password
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Forgot password functionality is not implemented yet.')),
-                    );
-
-                    
+                    const SnackBar(content: Text('Forgot password functionality is not implemented yet.')),
+                  );
                 },
                 child: const Text('Forgot password?'),
               ),
             ),
             const SizedBox(height: 16),
-            // Login button
+            // Login button, shows spinner if submitting
             ElevatedButton(
               onPressed: _isSubmitting ? null : _login,
               child: _isSubmitting
@@ -264,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   : const Text('Login'),
             ),
             const SizedBox(height: 16),
-            // Sign up link
+            // Sign up link to registration page
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -290,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
 /// Sign Up Page for new users
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   /// Creates the mutable state for this widget
   @override
@@ -384,7 +392,7 @@ class _SignUpPageState extends State<SignUpPage> {
       final hashedPassword = _hashPassword(_passwordController.text);
 
       // Step 3: Insert or update user profile in public.users table
-      final profileResponse = await Supabase.instance.client.from('users').upsert({
+      await Supabase.instance.client.from('users').upsert({
         'id': user.id, // Use Supabase Auth user UUID for RLS compliance
         'first_name': _firstNameController.text.trim(),
         'last_name': _lastNameController.text.trim(),
@@ -560,9 +568,9 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       return;
     }
     final response = await Supabase.instance.client
-        .from('books')
+        .from('bookshelf_items')
         .select()
-        .eq('user_id', user.id)
+        .eq('bookshelf_user_id', user.id)
         .limit(15);
     setState(() {
       _books = List<Map<String, dynamic>>.from(response);
@@ -595,7 +603,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/woodwork-oak-bakground.jpg'),
+            image: AssetImage('assets/images/woodwork-oak-background.jpg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -684,9 +692,9 @@ class _BookOnShelf extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.brown[100],
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: (0.15 * 255)),
                     blurRadius: 6,
                     offset: const Offset(2, 4),
                   ),
