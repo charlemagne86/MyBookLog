@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final userId = response.user?.id;
       if (userId != null) {
         // Upsert ensures bookshelf is created only if missing
-        await Supabase.instance.client.from('bookshelves').upsert({
+        await Supabase.instance.client.from('bookshelf').upsert({
           'user_id': userId,
         });
       }
