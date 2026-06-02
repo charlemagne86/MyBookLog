@@ -171,29 +171,30 @@ class _LoginScreenState extends State<LoginScreen> {
       final userId = response.user?.id;
       if (userId != null) {
         // Upsert ensures bookshelf is created only if missing
-        await Supabase.instance.client.from('bookshelf').upsert({
+        await Supabase.instance.client.from('bookshelves').upsert({
           'user_id': userId,
         });
       }
+      // After async operations, ensure widget is still mounted before touching state or context
+      if (!mounted) return;
       setState(() {
         _isSubmitting = false;
       });
-      // Only use context if still mounted after async gap
-      if (mounted) {
-        // Show login success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-        // Navigate to bookshelf screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const BookshelfScreen()),
-        );
-      }
+      // Show login success message and navigate
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login successful!')),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const BookshelfScreen()),
+      );
     } catch (e) {
-      setState(() {
-        _errorText = 'Login failed: $e';
-        _isSubmitting = false;
-      });
+      // Guard setState with mounted check after async failure
+      if (mounted) {
+        setState(() {
+          _errorText = 'Login failed: $e';
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -401,25 +402,32 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       // Step 4: On success, show a message and redirect to login after 2 seconds
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign up successful! Redirecting...')),
-      );
+      // Ensure widget is still mounted before using context
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sign up successful! Redirecting...')),
+        );
+      }
       await Future.delayed(const Duration(seconds: 2));
       if (mounted) {
         Navigator.of(context).pop();
       }
     } on AuthException catch (e) {
       // Handle Supabase Auth-specific errors
-      setState(() {
-        _errorText = 'Auth-specific: Sign up failed: ${e.message}';
-        _isSubmitting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorText = 'Auth-specific: Sign up failed: ${e.message}';
+          _isSubmitting = false;
+        });
+      }
     } catch (e) {
       // Handle any other errors
-      setState(() {
-        _errorText = ' Generic: Sign up failed: $e';
-        _isSubmitting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorText = ' Generic: Sign up failed: $e';
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -572,6 +580,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         .select()
         .eq('bookshelf_user_id', user.id)
         .limit(15);
+    // Ensure the widget is still in the tree before calling setState
+    if (!mounted) return;
     setState(() {
       _books = List<Map<String, dynamic>>.from(response);
       _loading = false;
@@ -694,10 +704,11 @@ class _BookOnShelf extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: (0.15 * 255)),
-                    blurRadius: 6,
-                    offset: const Offset(2, 4),
-                  ),
+                      // Use withAlpha(int) to set opacity without precision loss
+                      color: Colors.black.withAlpha((0.15 * 255).round()),
+                      blurRadius: 6,
+                      offset: const Offset(2, 4),
+                    ),
                 ],
                 image: imageUrl != null && imageUrl!.isNotEmpty
                     ? DecorationImage(
