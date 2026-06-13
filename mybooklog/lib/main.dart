@@ -6,7 +6,10 @@ import 'package:crypto/crypto.dart'; // For sha256 (used in password hashing)
 // Supabase and Flutter imports for backend and UI
 import 'package:supabase_flutter/supabase_flutter.dart'; // Supabase client for backend/auth
 import 'package:flutter/material.dart'; // Flutter UI framework
+import 'package:http/http.dart' as http; // HTTP client for Google Books API requests
 
+const String _googleBooksApiKey = 'AIzaSyB4bO6BYBHZgNbV-cTTRTRAeKZV4di5KqI';
+const Color parchmentBackground = Color(0xFFFAF3D4);
 
 /// Entry point of the Flutter application
 Future<void> main() async {
@@ -31,9 +34,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'My Book Log',
-      home: SplashScreen(), // Show splash screen on launch
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color.fromARGB(255, 231, 223, 188),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+      ),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -97,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 244, 235, 208),
+      backgroundColor: parchmentBackground,
       body: Center(
         child: _showSplash
             // Splash screen content: app name, subtitle, and spinner
@@ -230,7 +238,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 labelText: 'Password',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.grey[700],
+                  ),
                   onPressed: () {
                     // Toggle password visibility
                     setState(() {
@@ -483,7 +494,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     border: const OutlineInputBorder(),
                     helperText: 'At least 8 chars, 1 letter, 1 number, 1 special character',
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey[700],
+                      ),
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -502,7 +516,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     labelText: 'Confirm Password',
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey[700],
+                      ),
                       onPressed: () {
                         setState(() {
                           _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -543,7 +560,7 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 
-/// BookshelfScreen: Shows user's bookshelf with 3x5 grid, add/search buttons, and hardwood background
+/// BookshelfScreen: Shows user's bookshelf with 3x5 grid, add/search buttons, and parchment background
 class BookshelfScreen extends StatefulWidget {
   const BookshelfScreen({super.key});
 
@@ -588,11 +605,10 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     });
   }
 
-  /// Handler for add book button
+  /// Handler for add book button; navigates to add/search book screen
   void _onAddBook() {
-    // TODO: Implement add book dialog/screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add Book not implemented.')),
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AddBookPage()),
     );
   }
 
@@ -608,16 +624,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/woodwork-oak-background.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: SafeArea(
+      backgroundColor: parchmentBackground,
+      body: SafeArea(
           child: Column(
             children: [
               // Top bar with add/search buttons and title
@@ -627,7 +635,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.add_box_rounded, size: 32, color: Color(0xFF7B4A1D)),
+                      icon: const Icon(Icons.add, size: 32, color: Color(0xFF7B4A1D)),
                       tooltip: 'Add Book',
                       onPressed: _onAddBook,
                     ),
@@ -641,7 +649,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.search_rounded, size: 32, color: Color(0xFF7B4A1D)),
+                      icon: const Icon(Icons.search, size: 32, color: Color(0xFF7B4A1D)),
                       tooltip: 'Search Book',
                       onPressed: _onSearchBook,
                     ),
@@ -672,12 +680,213 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                           );
                         },
                       ),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            );
+  }
+}
+
+/// AddBookPage: allows the user to search Google Books by title or author
+class AddBookPage extends StatefulWidget {
+  const AddBookPage({super.key});
+
+  @override
+  State<AddBookPage> createState() => _AddBookPageState();
+}
+
+class _AddBookPageState extends State<AddBookPage> {
+  // Controllers for title and author search fields
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _authorController = TextEditingController();
+  bool _isSearching = false;
+  String? _errorText;
+
+  /// Build a Google Books API query from title and author fields
+  String _buildGoogleBooksQuery() {
+    final title = _titleController.text.trim();
+    final author = _authorController.text.trim();
+    final queryParts = <String>[];
+    if (title.isNotEmpty) queryParts.add('intitle:${Uri.encodeQueryComponent(title)}');
+    if (author.isNotEmpty) queryParts.add('inauthor:${Uri.encodeQueryComponent(author)}');
+    return queryParts.isEmpty ? '' : queryParts.join('+');
+  }
+
+  /// Performs a search request against the Google Books API and navigates to results page
+  Future<void> _searchBooks() async {
+    final query = _buildGoogleBooksQuery();
+    if (query.isEmpty) {
+      setState(() {
+        _errorText = 'Enter a title, an author, or both before searching.';
+      });
+      return;
+    }
+
+    setState(() {
+      _errorText = null;
+      _isSearching = true;
+    });
+
+    try {
+      final url = Uri.parse('https://www.googleapis.com/books/v1/volumes?q=$query&maxResults=20&key=$_googleBooksApiKey');
+      final response = await http.get(url);
+      if (response.statusCode != 200) {
+        throw Exception('Google Books API returned status ${response.statusCode}');
+      }
+
+      final payload = response.body.isNotEmpty ? jsonDecode(response.body) as Map<String, dynamic> : <String, dynamic>{};
+      final items = payload['items'] as List<dynamic>?;
+      final results = <Map<String, dynamic>>[];
+
+      if (items != null) {
+        for (final item in items) {
+          final volumeInfo = (item as Map<String, dynamic>)['volumeInfo'] as Map<String, dynamic>?;
+          if (volumeInfo == null) continue;
+
+          final thumbnails = volumeInfo['imageLinks'] as Map<String, dynamic>?;
+          final thumbnail = thumbnails != null ? thumbnails['thumbnail'] as String? : null;
+          final title = volumeInfo['title'] as String? ?? 'No Title';
+          final authors = (volumeInfo['authors'] as List<dynamic>?)?.cast<String>() ?? <String>[];
+
+          results.add({
+            'title': title,
+            'authors': authors,
+            'thumbnail': thumbnail ?? '',
+          });
+        }
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => SearchResultsPage(results: results)),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorText = 'Search failed: $e';
+          _isSearching = false;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Add Book')),
+      backgroundColor: parchmentBackground,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Search for a book using Google Books',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF7B4A1D)),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white70,
+                    labelText: 'Title',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _authorController,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white70,
+                    labelText: 'Author',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (_errorText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
+                  ),
+                ElevatedButton.icon(
+                  onPressed: _isSearching ? null : _searchBooks,
+                  icon: const Icon(Icons.search_rounded),
+                  label: _isSearching ? const Text('Searching...') : const Text('Search Books'),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+  }
+}
+
+/// SearchResultsPage displays a list of books returned by GoogleBooks API
+class SearchResultsPage extends StatelessWidget {
+  final List<Map<String, dynamic>> results;
+  const SearchResultsPage({super.key, required this.results});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Search Results')),
+      backgroundColor: parchmentBackground,
+      body: SafeArea(
+        child: results.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No results found. Try a different search.',
+                    style: TextStyle(fontSize: 16, color: Color(0xFF7B4A1D)),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16.0),
+                  itemBuilder: (context, index) {
+                    final item = results[index];
+                    final title = item['title'] as String? ?? 'No Title';
+                    final authors = item['authors'] as List<String>? ?? <String>[];
+                    final thumbnail = item['thumbnail'] as String? ?? '';
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white70,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(30),
+                            blurRadius: 6,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(12),
+                        leading: thumbnail.isNotEmpty
+                            ? Image.network(thumbnail, width: 50, fit: BoxFit.cover)
+                            : const Icon(Icons.menu_book, size: 46, color: Color(0xFF7B4A1D)),
+                        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                          authors.isNotEmpty ? authors.join(', ') : 'Unknown author',
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (_,_) => const SizedBox(height: 12),
+                  itemCount: results.length,
+                ),
+        ),
+      );
   }
 }
 
