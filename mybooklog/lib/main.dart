@@ -6,10 +6,11 @@ import 'package:crypto/crypto.dart'; // For sha256 (used in password hashing)
 // Supabase and Flutter imports for backend and UI
 import 'package:supabase_flutter/supabase_flutter.dart'; // Supabase client for backend/auth
 import 'package:flutter/material.dart'; // Flutter UI framework
+import 'package:flutter/services.dart'; // Haptic feedback for long-press interactions
 import 'package:http/http.dart' as http; // HTTP client for Google Books API requests
 
 const String _googleBooksApiKey = 'AIzaSyB4bO6BYBHZgNbV-cTTRTRAeKZV4di5KqI';
-const Color parchmentBackground = Color.fromARGB(255, 182, 176, 147);
+const Color parchmentBackground = Color.fromARGB(255, 201, 195, 167);
 
 /// Entry point of the Flutter application
 Future<void> main() async {
@@ -40,6 +41,36 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 231, 223, 188),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+        // Consistent typography scale for accessibility and elder-friendly readability
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF5A4A3A)),
+          displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF5A4A3A)),
+          headlineSmall: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Color(0xFF5A4A3A)),
+          bodyLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Color(0xFF5A4A3A)),
+          bodyMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+          bodySmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+          labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          labelMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF5A4A3A)),
+        ),
+        // Increase default touch-target sizes for accessibility.
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(64, 56),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            minimumSize: const Size(64, 52),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            minimumSize: const Size(56, 56),
+            padding: const EdgeInsets.all(14),
+          ),
+        ),
       ),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
@@ -119,7 +150,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   SizedBox(height: 12),
                   Text(
                     'crafted with love',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: TextStyle(fontSize: 18, color: Color(0xFF5A4A3A)),
                   ),
                   SizedBox(height: 32),
                   CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
@@ -228,9 +259,11 @@ class _LoginScreenState extends State<LoginScreen> {
             // Username input (email)
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Username (email)',
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                hintStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -240,11 +273,13 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: 'Password',
+                labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                hintStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.grey[700],
+                    color: Color(0xFF5A4A3A),
                   ),
                   onPressed: () {
                     // Toggle password visibility
@@ -260,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
             if (_errorText != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
+                child: Text(_errorText!, style: const TextStyle(color: Color(0xFFB3261E), fontSize: 16, fontWeight: FontWeight.w500)),
               ),
             // Forgot password link (not implemented)
             Align(
@@ -285,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                     )
-                  : const Text('Login'),
+                  : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 16),
             // Sign up link to registration page
@@ -465,9 +500,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 // First name input
                 TextFormField(
                   controller: _firstNameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'First Name',
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    errorStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFFB3261E)),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || value.isEmpty ? 'First name is required' : null,
                 ),
@@ -475,9 +512,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Last name input
                 TextFormField(
                   controller: _lastNameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Last Name',
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    errorStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFFB3261E)),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || value.isEmpty ? 'Last name is required' : null,
                 ),
@@ -485,9 +524,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Username input (email)
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Username (email)',
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    errorStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFFB3261E)),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || value.isEmpty ? 'Username is required' : null,
                 ),
@@ -498,12 +539,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    border: const OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
                     helperText: 'At least 8 chars, 1 letter, 1 number, 1 special character',
+                    helperStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xFF5A4A3A)),
+                    errorStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFFB3261E)),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey[700],
+                        color: Color(0xFF5A4A3A),
                       ),
                       onPressed: () {
                         setState(() {
@@ -521,11 +565,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    errorStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFFB3261E)),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey[700],
+                        color: Color(0xFF5A4A3A),
                       ),
                       onPressed: () {
                         setState(() {
@@ -541,7 +587,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 if (_errorText !=   null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
+                    child: Text(_errorText!, style: const TextStyle(color: Color(0xFFB3261E), fontSize: 16, fontWeight: FontWeight.w500)),
                   ),
                 // Sign up button
                 SizedBox(
@@ -554,7 +600,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Color.fromARGB(255, 80, 110, 241)),
                           )
-                        : const Text('Sign Up'),
+                        : const Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],
@@ -567,7 +613,7 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 
-/// BookshelfScreen: Shows user's bookshelf with 3x5 grid, add/search buttons, and parchment background
+/// BookshelfScreen: Shows user's bookshelf with 3x5 grid, search/add/logout buttons, and parchment background
 class BookshelfScreen extends StatefulWidget {
   const BookshelfScreen({super.key});
 
@@ -581,11 +627,44 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   List<Map<String, dynamic>> _books = [];
   // Loading state
   bool _loading = true;
+  // Controls whether the floating bookshelf search field is visible.
+  bool _showSearchBar = false;
+  // Tracks the current search text for real-time filtering.
+  String _searchQuery = '';
+  // Controller for the floating bookshelf search field.
+  final TextEditingController _searchController = TextEditingController();
+
+  // Popup actions available from the long-press context menu on a shelf item.
+  static const String _menuActionRemove = 'remove';
+  static const String _menuActionToggleRead = 'toggle_read';
 
   @override
   void initState() {
     super.initState();
     _fetchBooks();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Returns the books currently visible in the grid after applying the active
+  // search filter rules.
+  List<Map<String, dynamic>> get _visibleBooks {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.length < 3) {
+      // Do not filter until the user has entered enough characters to make
+      // the search intentional and reduce noisy partial matches.
+      return _books;
+    }
+
+    return _books.where((book) {
+      final title = (book['title'] as String? ?? '').toLowerCase();
+      final author = (book['author'] as String? ?? '').toLowerCase();
+      return title.contains(query) || author.contains(query);
+    }).toList();
   }
 
   /// Fetches books for the current user from Supabase
@@ -624,7 +703,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         // than making one request per tile.
         final catalogRows = await Supabase.instance.client
             .from('books_catalog')
-            .select('id, title, thumbnail_uri')
+          .select('id, title, author, thumbnail_uri')
             .inFilter('id', bookIds);
 
         for (final row in List<Map<String, dynamic>>.from(catalogRows)) {
@@ -639,6 +718,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         return {
           ...item,
           'title': catalog?['title'] as String?,
+          'author': catalog?['author'] as String?,
           'thumbnail_uri': catalog?['thumbnail_uri'] as String?,
         };
       }).toList();
@@ -661,26 +741,153 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
   }
 
+  // Converts mixed backend value types to a stable bool for UI/business logic.
+  bool _isBookReadValue(dynamic raw) {
+    if (raw == true || raw == 1) return true;
+    if (raw is String) return raw.toLowerCase() == 'true';
+    return false;
+  }
+
+  // Handles long-press on a shelf tile by giving tactile confirmation and then
+  // opening a context menu anchored near the pressed position.
+  Future<void> _onBookLongPress(Map<String, dynamic> book, Offset globalPosition) async {
+    await HapticFeedback.mediumImpact();
+    if (!mounted) return;
+
+    final selectedAction = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        globalPosition.dx,
+        globalPosition.dy,
+        globalPosition.dx,
+        globalPosition.dy,
+      ),
+      items: [
+        const PopupMenuItem<String>(
+          value: _menuActionRemove,
+          child: Text('Remove Book', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        ),
+        PopupMenuItem<String>(
+          value: _menuActionToggleRead,
+          child: Text(
+            _isBookReadValue(book['is_read']) ? 'Mark as Unread' : 'Mark as Read',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    );
+
+    if (selectedAction == null) return;
+    if (selectedAction == _menuActionRemove) {
+      await _removeBookFromShelf(book);
+      return;
+    }
+    if (selectedAction == _menuActionToggleRead) {
+      await _toggleBookReadStatus(book);
+    }
+  }
+
+  // Removes only the user->book association row from bookshelf_items so the
+  // catalog entry can continue to exist for other users/references.
+  Future<void> _removeBookFromShelf(Map<String, dynamic> book) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    final bookId = book['book_id'];
+    if (user == null || bookId == null) return;
+
+    try {
+      await Supabase.instance.client
+          .from('bookshelf_items')
+          .delete()
+          .eq('bookshelf_user_id', user.id)
+          .eq('book_id', bookId);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Book removed from your bookshelf.')),
+      );
+      await _fetchBooks();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to remove book: $e')),
+      );
+    }
+  }
+
+  // Flips is_read for the selected shelf row and then refreshes data so the
+  // top-left read badge reflects the new state immediately.
+  Future<void> _toggleBookReadStatus(Map<String, dynamic> book) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    final bookId = book['book_id'];
+    if (user == null || bookId == null) return;
+
+    final currentlyRead = _isBookReadValue(book['is_read']);
+    try {
+      await Supabase.instance.client
+          .from('bookshelf_items')
+          .update({'is_read': !currentlyRead})
+          .eq('bookshelf_user_id', user.id)
+          .eq('book_id', bookId);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(!currentlyRead ? 'Book marked as read.' : 'Book marked as unread.'),
+        ),
+      );
+      await _fetchBooks();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update read status: $e')),
+      );
+    }
+  }
+
   /// Handler for add book button; navigates to add/search book screen
-  void _onAddBook() {
-    Navigator.of(context).push(
+  Future<void> _onAddBook() async {
+    // Wait until the add-book flow returns so we can immediately reload the
+    // latest shelf contents from the database.
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const AddBookPage()),
     );
+
+    if (!mounted) return;
+    await _fetchBooks();
   }
 
   /// Handler for search book button
   void _onSearchBook() {
-    // TODO: Implement search book dialog/screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Search Book not implemented.')),
-    );
+    setState(() {
+      // Toggle the floating search bar. Closing it also resets the current
+      // query so the bookshelf immediately returns to its full state.
+      _showSearchBar = !_showSearchBar;
+      if (!_showSearchBar) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
   }
 
-  /// Handler for refresh button; reloads the bookshelf from the database
-  void _onRefreshBookshelf() {
-    _fetchBooks();
+  /// Handler for logout button - signs out user and returns to login screen
+  Future<void> _onLogout() async {
+    try {
+      // Sign out the current user from Supabase
+      await Supabase.instance.client.auth.signOut();
+      if (!mounted) return;
+      // Navigate back to login screen and replace the navigation stack
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } catch (e) {
+      // Show error if logout fails
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to logout: $e')),
+      );
+    }
   }
-
+//TODO: Pagination in search results and bookshelf grid to scale beyond 15 items and reduce load times.
   /// Builds the bookshelf UI
   @override
   Widget build(BuildContext context) {
@@ -689,68 +896,157 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       body: SafeArea(
           child: Column(
             children: [
-              // Top bar with add/search buttons and title
+              // Top bar with logout icon on left, title centered, and search/add buttons on right
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Left side: Logout button
                     IconButton(
-                      icon: const Icon(Icons.add, size: 32, color: Color(0xFF7B4A1D)),
-                      tooltip: 'Add Book',
-                      onPressed: _onAddBook,
+                      icon: const Icon(Icons.logout, size: 32, color: Color(0xFF7B4A1D)),
+                      tooltip: 'Logout',
+                      onPressed: _onLogout,
                     ),
-                    const Text(
-                      'My Bookshelf',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF7B4A1D),
-                        shadows: [Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(2,2))],
+                    // Center: App title (expanded to fill remaining space and centered)
+                    Expanded(
+                      child: Center(
+                        child: const Text(
+                          'My Bookshelf',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF7B4A1D),
+                            shadows: [Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(2,2))],
+                          ),
+                        ),
                       ),
                     ),
+                    // Right side: Search and Add book buttons
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.refresh, size: 30, color: Color(0xFF7B4A1D)),
-                          tooltip: 'Refresh Bookshelf',
-                          onPressed: _onRefreshBookshelf,
-                        ),
+                        // Search button to filter bookshelf
                         IconButton(
                           icon: const Icon(Icons.search, size: 32, color: Color(0xFF7B4A1D)),
-                          tooltip: 'Search Book',
+                          tooltip: 'Search Books',
                           onPressed: _onSearchBook,
+                        ),
+                        // Add book button to search for new books
+                        IconButton(
+                          icon: const Icon(Icons.add, size: 32, color: Color(0xFF7B4A1D)),
+                          tooltip: 'Add Book',
+                          onPressed: _onAddBook,
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: _showSearchBar
+                    ? Padding(
+                        key: const ValueKey('bookshelf-search-bar'),
+                        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(14),
+                              color: Colors.white,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextField(
+                                    controller: _searchController,
+                                    autofocus: true,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _searchQuery = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: 'Search title or author',
+                                      helperText: _searchQuery.trim().length < 3 ? 'Filtering starts after 3 characters' : null,
+                                      prefixIcon: const Icon(Icons.search),
+                                      border: const OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                  ),
+                                  // Once the user has typed enough characters,
+                                  // show how many shelf items currently match.
+                                  if (_searchQuery.trim().length >= 3)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+                                      child: Text(
+                                        '${_visibleBooks.length} matching ${_visibleBooks.length == 1 ? 'book' : 'books'}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF7B4A1D),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('bookshelf-search-hidden')),
+              ),
               // Books grid
               Expanded(
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 32,
-                          crossAxisSpacing: 32,
-                            childAspectRatio: 0.48,
-                        ),
-                        itemCount: 15,
-                        itemBuilder: (context, index) {
-                          if (index >= _books.length) {
-                            return const SizedBox();
-                          }
-                          final book = _books[index];
-                          return _BookOnShelf(
-                            imageUrl: book['thumbnail_uri'] as String?,
-                            title: book['title'] as String? ?? '',
-                          );
-                        },
-                      ),
+                    : _visibleBooks.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No books match your search.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF7B4A1D),
+                              ),
+                            ),
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 32,
+                              crossAxisSpacing: 32,
+                              childAspectRatio: 0.48,
+                            ),
+                            itemCount: _visibleBooks.length,
+                            itemBuilder: (context, index) {
+                              final book = _visibleBooks[index];
+                              // Normalize database values for is_read into a
+                              // plain Dart bool. Depending on schema/migrations,
+                              // this field may arrive as bool, int, or string.
+                              final rawIsRead = book['is_read'];
+                              // Any truthy representation marks this tile as
+                              // read and enables the corner status indicator.
+                              final isRead = _isBookReadValue(rawIsRead);
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onLongPressStart: (details) {
+                                  _onBookLongPress(book, details.globalPosition);
+                                },
+                                child: _BookOnShelf(
+                                  imageUrl: book['thumbnail_uri'] as String?,
+                                  title: book['title'] as String? ?? '',
+                                  isRead: isRead,
+                                ),
+                              );
+                            },
+                          ),
                     ),
                   ],
                 ),
@@ -884,33 +1180,45 @@ class _AddBookPageState extends State<AddBookPage> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white70,
                     labelText: 'Title',
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    hintStyle: const TextStyle(fontSize: 16),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _authorController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white70,
                     labelText: 'Author',
-                    border: OutlineInputBorder(),
+                    labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF5A4A3A)),
+                    hintStyle: const TextStyle(fontSize: 16),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 if (_errorText != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Text(_errorText!, style: const TextStyle(color: Colors.red)),
+                    child: Text(_errorText!, style: const TextStyle(color: Color(0xFFB3261E), fontSize: 16, fontWeight: FontWeight.w500)),
                   ),
-                ElevatedButton.icon(
-                  onPressed: _isSearching ? null : _searchBooks,
-                  icon: const Icon(Icons.search_rounded),
-                  label: _isSearching ? const Text('Searching...') : const Text('Search Books'),
+                // Constrain button width so it's not full-width and centered
+                Center(
+                  child: SizedBox(
+                    width: 200,
+                    child: ElevatedButton.icon(
+                      onPressed: _isSearching ? null : _searchBooks,
+                      icon: const Icon(Icons.search_rounded),
+                      label: _isSearching
+                          ? const Text('Searching...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))
+                          : const Text('Search Books', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1158,7 +1466,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                     dimension: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ) : const Icon(Icons.add),
-                  label: Text(_isAdding ? 'Adding...' : 'Add to Bookshelf'),
+                  label: Text(
+                    _isAdding ? 'Adding...' : 'Add to Bookshelf',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     backgroundColor: const Color(0xFF7B4A1D),
@@ -1179,7 +1490,9 @@ class _BookOnShelf extends StatelessWidget {
   final String? imageUrl;
   /// Book title
   final String title;
-  const _BookOnShelf({this.imageUrl, required this.title});
+  /// Whether this book is marked as read for the current user.
+  final bool isRead;
+  const _BookOnShelf({this.imageUrl, required this.title, this.isRead = false});
 
   /// Builds the book tile UI
   @override
@@ -1191,27 +1504,55 @@ class _BookOnShelf extends StatelessWidget {
         // Book cover with book-appropriate aspect ratio (0.67 for tall books)
         AspectRatio(
           aspectRatio: 0.67,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.brown[100],
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha((0.15 * 255).round()),
-                  blurRadius: 6,
-                  offset: const Offset(2, 4),
-                ),
-              ],
-            ),
-            child: imageUrl != null && imageUrl!.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      imageUrl!,
-                      fit: BoxFit.contain,
+          child: Stack(
+            children: [
+              // Base layer: thumbnail (or fallback icon) with styling.
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.brown[100],
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha((0.15 * 255).round()),
+                      blurRadius: 6,
+                      offset: const Offset(2, 4),
                     ),
-                  )
-                : const Center(child: Icon(Icons.menu_book, size: 48, color: Color(0xFF7B4A1D))),
+                  ],
+                ),
+                child: imageUrl != null && imageUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          imageUrl!,
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                    : const Center(child: Icon(Icons.menu_book, size: 48, color: Color(0xFF7B4A1D))),
+              ),
+              // Overlay layer: only render the read badge when this shelf item
+              // is marked as read for the current user. Unread items intentionally
+              // show nothing to keep the grid visually clean.
+              if (isRead)
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  // Green filled circle with white checkmark per UX spec.
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -1223,7 +1564,7 @@ class _BookOnShelf extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 15,
+            fontSize: 18,
             color: Color(0xFF7B4A1D),
             shadows: [Shadow(blurRadius: 2, color: Colors.black12, offset: Offset(1,1))],
           ),
