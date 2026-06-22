@@ -592,46 +592,57 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       });
       return;
     }
-    // Fetch bookshelf_items for the user
-    final response = await Supabase.instance.client
-        .from('bookshelf_items')
-        .select()
-        .eq('bookshelf_user_id', user.id)
-        .limit(15);
-    
-    // For each bookshelf item, fetch the corresponding book details from books_catalog
-    final enrichedBooks = <Map<String, dynamic>>[];
-    for (final item in response) {
-      final bookId = item['book_id'];
-      try {
-        final catalogResponse = await Supabase.instance.client
+    try {
+      // Fetch bookshelf_items for the user.
+      final response = await Supabase.instance.client
+          .from('bookshelf_items')
+          .select()
+          .eq('bookshelf_user_id', user.id)
+          .limit(15);
+
+      final bookshelfItems = List<Map<String, dynamic>>.from(response);
+      final bookIds = bookshelfItems
+          .map((item) => item['book_id'])
+          .whereType<dynamic>()
+          .toSet()
+          .toList();
+
+      final catalogById = <dynamic, Map<String, dynamic>>{};
+      if (bookIds.isNotEmpty) {
+        final catalogRows = await Supabase.instance.client
             .from('books_catalog')
-            .select()
-            .eq('id', bookId)
-            .single();
-        
-        // Combine bookshelf_items data with books_catalog data
-        enrichedBooks.add({
-          ...item,
-          'title': catalogResponse['title'] as String?,
-          'thumbnail_uri': catalogResponse['thumbnail_uri'] as String?,
-        });
-      } catch (e) {
-        // If book not found in catalog, still add the item but with null values
-        enrichedBooks.add({
-          ...item,
-          'title': null,
-          'thumbnail_uri': null,
-        });
+            .select('id, title, thumbnail_uri')
+            .inFilter('id', bookIds);
+
+        for (final row in List<Map<String, dynamic>>.from(catalogRows)) {
+          catalogById[row['id']] = row;
+        }
       }
+
+      final enrichedBooks = bookshelfItems.map((item) {
+        final catalog = catalogById[item['book_id']];
+        return {
+          ...item,
+          'title': catalog?['title'] as String?,
+          'thumbnail_uri': catalog?['thumbnail_uri'] as String?,
+        };
+      }).toList();
+
+      if (!mounted) return;
+      setState(() {
+        _books = enrichedBooks;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _books = [];
+        _loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load bookshelf: $e')),
+      );
     }
-    
-    // Ensure the widget is still in the tree before calling setState
-    if (!mounted) return;
-    setState(() {
-      _books = enrichedBooks;
-      _loading = false;
-    });
   }
 
   /// Handler for add book button; navigates to add/search book screen
@@ -647,6 +658,11 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Search Book not implemented.')),
     );
+  }
+
+  /// Handler for refresh button; reloads the bookshelf from the database
+  void _onRefreshBookshelf() {
+    _fetchBooks();
   }
 
   /// Builds the bookshelf UI
@@ -677,10 +693,20 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                         shadows: [Shadow(blurRadius: 4, color: Colors.black26, offset: Offset(2,2))],
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.search, size: 32, color: Color(0xFF7B4A1D)),
-                      tooltip: 'Search Book',
-                      onPressed: _onSearchBook,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.refresh, size: 30, color: Color(0xFF7B4A1D)),
+                          tooltip: 'Refresh Bookshelf',
+                          onPressed: _onRefreshBookshelf,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.search, size: 32, color: Color(0xFF7B4A1D)),
+                          tooltip: 'Search Book',
+                          onPressed: _onSearchBook,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -695,7 +721,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                           crossAxisCount: 3,
                           mainAxisSpacing: 32,
                           crossAxisSpacing: 32,
-                          childAspectRatio: 0.55,
+                            childAspectRatio: 0.48,
                         ),
                         itemCount: 15,
                         itemBuilder: (context, index) {
@@ -704,7 +730,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                           }
                           final book = _books[index];
                           return _BookOnShelf(
-                            imageUrl: book['book_id'] as String?,
+                            imageUrl: book['thumbnail_uri'] as String?,
                             title: book['title'] as String? ?? '',
                           );
                         },
@@ -925,6 +951,36 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       }
       if (isbn == null || isbn.isEmpty) {
         throw Exception('Failed to add to bookshelf due to missing ISBN');
+      }
+
+      // Prevent duplicate books on the current user's shelf by ISBN.
+      final existingCatalogRows = await Supabase.instance.client
+          .from('books_catalog')
+          .select('id')
+          .eq('isbn', isbn);
+
+      if (existingCatalogRows.isNotEmpty) {
+        final existingBookIds = List<Map<String, dynamic>>.from(existingCatalogRows)
+            .map((row) => row['id'])
+            .toList();
+
+        final existingShelfRows = await Supabase.instance.client
+            .from('bookshelf_items')
+            .select('book_id')
+            .eq('bookshelf_user_id', user.id)
+            .inFilter('book_id', existingBookIds)
+            .limit(1);
+
+        if (existingShelfRows.isNotEmpty) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('This book already exists on your bookshelf.')),
+          );
+          setState(() {
+            _isAdding = false;
+          });
+          return;
+        }
       }
 
       final author = authors.join(', ');
