@@ -157,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Handles user login using Supabase Auth
   /// On success, creates bookshelf if needed and navigates to BookshelfScreen
   Future<void> _login() async {
+    // Reset visible errors and disable repeated taps while the auth request runs.
     setState(() {
       _errorText = null;
       _isSubmitting = true;
@@ -169,6 +170,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       final session = response.session;
       if (session == null) {
+        // A missing session means the credentials were not accepted strongly
+        // enough to establish a logged-in app state.
         setState(() {
           _errorText = 'Login failed: Invalid credentials or user not found.';
           _isSubmitting = false;
@@ -178,7 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
       // On successful login, create bookshelf for user if not exists
       final userId = response.user?.id;
       if (userId != null) {
-        // Upsert ensures bookshelf is created only if missing
+        // Upsert ensures every authenticated user has a bookshelf row without
+        // creating duplicates on repeated logins.
         await Supabase.instance.client.from('bookshelf').upsert({
           'user_id': userId,
         });
@@ -367,6 +371,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // Validate the form fields
     if (_formKey.currentState?.validate() != true) {
+      // Stop before any backend work if local validation already failed.
       setState(() {
         _isSubmitting = false;
       });
@@ -375,6 +380,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // Check if passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
+      // Avoid creating an auth user if the confirmation entry is inconsistent.
       setState(() {
         _errorText = 'Passwords do not match';
         _isSubmitting = false;
@@ -400,7 +406,8 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
 
-      // Step 2: Hash the password for secure storage in the profile
+      // Step 2: Hash the password for the app-specific profile record.
+      // Supabase Auth already stores the real password securely for sign-in.
       final hashedPassword = _hashPassword(_passwordController.text);
 
       // Step 3: Insert or update user profile in public.users table
@@ -583,9 +590,11 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
 
   /// Fetches books for the current user from Supabase
   Future<void> _fetchBooks() async {
+    // Every refresh starts by flipping the screen into a loading state.
     setState(() => _loading = true);
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
+      // No logged-in user means there is no bookshelf context to query.
       setState(() {
         _books = [];
         _loading = false;
@@ -600,7 +609,9 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
           .eq('bookshelf_user_id', user.id)
           .limit(15);
 
-      final bookshelfItems = List<Map<String, dynamic>>.from(response);
+        final bookshelfItems = List<Map<String, dynamic>>.from(response);
+        // bookshelf_items stores shelf membership, not the full display metadata.
+        // Collect all referenced catalog ids so we can hydrate the UI in one batch.
       final bookIds = bookshelfItems
           .map((item) => item['book_id'])
           .whereType<dynamic>()
@@ -609,6 +620,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
 
       final catalogById = <dynamic, Map<String, dynamic>>{};
       if (bookIds.isNotEmpty) {
+        // Pull the display fields needed by the grid in a single query rather
+        // than making one request per tile.
         final catalogRows = await Supabase.instance.client
             .from('books_catalog')
             .select('id, title, thumbnail_uri')
@@ -619,6 +632,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         }
       }
 
+      // Merge relationship data with catalog data so the widget tree receives a
+      // ready-to-render map for each bookshelf cell.
       final enrichedBooks = bookshelfItems.map((item) {
         final catalog = catalogById[item['book_id']];
         return {
@@ -634,6 +649,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         _loading = false;
       });
     } catch (e) {
+      // Surface backend failures to the user and end the loading state cleanly.
       if (!mounted) return;
       setState(() {
         _books = [];
@@ -763,6 +779,7 @@ class _AddBookPageState extends State<AddBookPage> {
     final title = _titleController.text.trim();
     final author = _authorController.text.trim();
     final queryParts = <String>[];
+    // Only include search clauses for fields the user actually entered.
     if (title.isNotEmpty) queryParts.add('intitle:${Uri.encodeQueryComponent(title)}');
     if (author.isNotEmpty) queryParts.add('inauthor:${Uri.encodeQueryComponent(author)}');
     return queryParts.isEmpty ? '' : queryParts.join('+');
@@ -772,6 +789,7 @@ class _AddBookPageState extends State<AddBookPage> {
   Future<void> _searchBooks() async {
     final query = _buildGoogleBooksQuery();
     if (query.isEmpty) {
+      // Avoid unnecessary API calls when there is no search input.
       setState(() {
         _errorText = 'Enter a title, an author, or both before searching.';
       });
@@ -784,6 +802,7 @@ class _AddBookPageState extends State<AddBookPage> {
     });
 
     try {
+      // Query Google Books for candidate titles the user may want to add.
       final url = Uri.parse('https://www.googleapis.com/books/v1/volumes?q=$query&maxResults=20&key=$_googleBooksApiKey');
       final response = await http.get(url);
       if (response.statusCode != 200) {
@@ -799,6 +818,8 @@ class _AddBookPageState extends State<AddBookPage> {
           final volumeInfo = (item as Map<String, dynamic>)['volumeInfo'] as Map<String, dynamic>?;
           if (volumeInfo == null) continue;
 
+          // Normalize the external API shape into the smaller structure this app
+          // passes between screens.
           final thumbnails = volumeInfo['imageLinks'] as Map<String, dynamic>?;
           final thumbnail = thumbnails != null ? thumbnails['thumbnail'] as String? : null;
           final title = volumeInfo['title'] as String? ?? 'No Title';
@@ -919,7 +940,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Future<void> _addSelectedBook() async {
     if (_selectedIndex == null) return;
 
-    // Get the selected book from the results list
+    // Resolve the selected search result into a data record we can validate and save.
     final selectedBook = widget.results[_selectedIndex!];
     final user = Supabase.instance.client.auth.currentUser;
 
@@ -937,12 +958,13 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     });
 
     try {
-      // Extract and validate required fields before inserting
+      // Extract the fields needed by both duplicate detection and database writes.
       final title = selectedBook['title'] as String?;
       final authors = selectedBook['authors'] as List<String>?;
       final isbn = selectedBook['isbn'] as String?;
 
-      // Validate that all required fields are present and non-empty
+      // Refuse to persist incomplete catalog rows. ISBN is also the business key
+      // used to determine whether a book already exists on a shelf.
       if (title == null || title.isEmpty) {
         throw Exception('Failed to add to bookshelf due to missing Title');
       }
@@ -954,6 +976,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       }
 
       // Prevent duplicate books on the current user's shelf by ISBN.
+      // First find any catalog rows that represent the same real-world book.
       final existingCatalogRows = await Supabase.instance.client
           .from('books_catalog')
           .select('id')
@@ -964,6 +987,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             .map((row) => row['id'])
             .toList();
 
+        // Then check whether this user already has one of those catalog ids on
+        // their shelf. If yes, stop before any insert happens.
         final existingShelfRows = await Supabase.instance.client
             .from('bookshelf_items')
             .select('book_id')
@@ -986,8 +1011,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       final author = authors.join(', ');
       final thumbnail = selectedBook['thumbnail'] as String?;
 
-      // First, insert the book into the books_catalog table
-      // This creates a unique book record with title, author, isbn, and thumbnail URI
+      // Persist the canonical book metadata first. bookshelf_items will point at
+      // this catalog row through book_id.
       final catalogResponse = await Supabase.instance.client
           .from('books_catalog')
           .insert({
@@ -1004,10 +1029,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         throw Exception('Failed to insert book into catalog');
       }
 
-      // Get the auto-generated id from the books_catalog insert
+      // Capture the generated catalog id so we can link it to the user's shelf.
       final bookId = catalogResponse[0]['id'];
 
-      // Now insert into bookshelf_items, referencing the book_id from books_catalog
+      // Create the user-to-book relationship record that makes the book appear
+      // on this specific user's bookshelf.
       await Supabase.instance.client.from('bookshelf_items').insert({
         'book_id': bookId,
         'bookshelf_user_id': user.id,
