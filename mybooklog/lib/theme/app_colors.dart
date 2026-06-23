@@ -5,7 +5,8 @@ class AppColors {
   AppColors._();
 
   // Backgrounds & Containers
-  static const Color background = Color(0xFFFDFBF7); // Soft Cream
+  //static const Color background = Color(0xFFFDFBF7); // Soft Cream
+  static const Color background = Color(0xFFF7F4EB); // Oatmeal
   static const Color surface = Color(0xFFFFFFFF); // Surface Containers
   static const Color border = Color(0xFFE5E0D8); // Faint Border
 
