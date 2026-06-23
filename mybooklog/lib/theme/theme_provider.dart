@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+//One step needed in Xcode (can't be done here since the .pbxproj is not in the repo):
+//Open ios/Runner.xcworkspace in Xcode
+//Select the Runner target → General → App Icons Source
+//Change it to AppIcon (pointing at the new asset catalog)
+
 /// Centralized theme mode state for app-wide switching.
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;

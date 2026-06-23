@@ -1,1 +1,0 @@
- /home/charlie/Repositories/MyBookLog/mybooklog/.dart_tool/flutter_build/2be0fd4dbe68688187128f2ac91d0ffb/native_assets.json: 

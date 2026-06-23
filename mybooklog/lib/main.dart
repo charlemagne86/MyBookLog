@@ -23,7 +23,7 @@ Future<void> main() async {
   // Initialize Supabase with your project URL and anon key for backend/auth
   await Supabase.initialize(
     url: 'https://asqdogadhpwqpeekvxny.supabase.co',
-    anonKey: 'sb_publishable_pEhvPEbg84LgQlNm9kfsUg_f-AThaqn',
+    publishableKey: 'sb_publishable_pEhvPEbg84LgQlNm9kfsUg_f-AThaqn',
   );
 
   // Start the Flutter app by running the root widget

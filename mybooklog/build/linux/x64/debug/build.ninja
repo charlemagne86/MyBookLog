@@ -181,7 +181,7 @@ build flutter/CMakeFiles/flutter_assemble: phony /home/charlie/Repositories/MyBo
 # Custom command for /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/libflutter_linux_gtk.so
 
 build /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/libflutter_linux_gtk.so /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_basic_message_channel.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_binary_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_binary_messenger.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_dart_project.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_engine.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_json_message_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_json_method_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_message_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_call.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_channel.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_response.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_plugin_registrar.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_plugin_registry.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_standard_message_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_standard_method_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_string_codec.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_value.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_view.h /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/flutter_linux.h flutter/_phony_: CUSTOM_COMMAND
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/flutter && /snap/flutter/149/usr/bin/cmake -E env FLUTTER_ROOT=/home/charlie/snap/flutter/common/flutter PROJECT_DIR=/home/charlie/Repositories/MyBookLog/mybooklog DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuNDQuMA==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049NTU5ZmZhM2Y3NQ==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NGM1MjVkYWM1ZQ==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMi4w DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=/home/charlie/Repositories/MyBookLog/mybooklog/.dart_tool/package_config.json FLUTTER_TARGET=/home/charlie/Repositories/MyBookLog/mybooklog/lib/main.dart /home/charlie/snap/flutter/common/flutter/packages/flutter_tools/bin/tool_backend.sh linux-x64 Debug
+  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/flutter && /snap/flutter/149/usr/bin/cmake -E env FLUTTER_ROOT=/home/charlie/snap/flutter/common/flutter PROJECT_DIR=/home/charlie/Repositories/MyBookLog/mybooklog DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuNDEuNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049Y2MwNzM0YWM3MQ==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NTlhYTU4NGZkZg==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMS41 DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=/home/charlie/Repositories/MyBookLog/mybooklog/.dart_tool/package_config.json FLUTTER_TARGET=/home/charlie/Repositories/MyBookLog/mybooklog/lib/main.dart /home/charlie/snap/flutter/common/flutter/packages/flutter_tools/bin/tool_backend.sh linux-x64 Debug
   DESC = Generating /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/libflutter_linux_gtk.so, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_basic_message_channel.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_binary_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_binary_messenger.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_dart_project.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_engine.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_json_message_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_json_method_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_message_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_call.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_channel.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_method_response.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_plugin_registrar.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_plugin_registry.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_standard_message_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_standard_method_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_string_codec.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_value.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/fl_view.h, /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony_
   restat = 1
 
@@ -529,146 +529,6 @@ build plugins/url_launcher_linux/liburl_launcher_linux_plugin.so: CXX_SHARED_LIB
   TARGET_PDB = url_launcher_linux_plugin.so.dbg
 
 # =============================================================================
-# Write statements declared in CMakeLists.txt:
-# /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/generated_plugins.cmake
-# =============================================================================
-
-
-#############################################
-# Utility command for install/strip
-
-build plugins/jni/CMakeFiles/install/strip.util: CUSTOM_COMMAND plugins/jni/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni && /snap/flutter/149/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-  DESC = Installing the project stripped...
-  pool = console
-  restat = 1
-
-build plugins/jni/install/strip: phony plugins/jni/CMakeFiles/install/strip.util
-
-
-#############################################
-# Utility command for install/local
-
-build plugins/jni/CMakeFiles/install/local.util: CUSTOM_COMMAND plugins/jni/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni && /snap/flutter/149/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-  DESC = Installing only the local directory...
-  pool = console
-  restat = 1
-
-build plugins/jni/install/local: phony plugins/jni/CMakeFiles/install/local.util
-
-
-#############################################
-# Utility command for install
-
-build plugins/jni/CMakeFiles/install.util: CUSTOM_COMMAND plugins/jni/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni && /snap/flutter/149/usr/bin/cmake -P cmake_install.cmake
-  DESC = Install the project...
-  pool = console
-  restat = 1
-
-build plugins/jni/install: phony plugins/jni/CMakeFiles/install.util
-
-
-#############################################
-# Utility command for list_install_components
-
-build plugins/jni/list_install_components: phony
-
-
-#############################################
-# Utility command for rebuild_cache
-
-build plugins/jni/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni && /snap/flutter/149/usr/bin/cmake -S/home/charlie/Repositories/MyBookLog/mybooklog/linux -B/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug
-  DESC = Running CMake to regenerate build system...
-  pool = console
-  restat = 1
-
-build plugins/jni/rebuild_cache: phony plugins/jni/CMakeFiles/rebuild_cache.util
-
-
-#############################################
-# Utility command for edit_cache
-
-build plugins/jni/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni && /snap/flutter/149/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-  DESC = No interactive CMake dialog available...
-  restat = 1
-
-build plugins/jni/edit_cache: phony plugins/jni/CMakeFiles/edit_cache.util
-
-# =============================================================================
-# Write statements declared in CMakeLists.txt:
-# /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/jni/linux/CMakeLists.txt
-# =============================================================================
-
-
-#############################################
-# Utility command for install/strip
-
-build plugins/jni/shared/CMakeFiles/install/strip.util: CUSTOM_COMMAND plugins/jni/shared/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared && /snap/flutter/149/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-  DESC = Installing the project stripped...
-  pool = console
-  restat = 1
-
-build plugins/jni/shared/install/strip: phony plugins/jni/shared/CMakeFiles/install/strip.util
-
-
-#############################################
-# Utility command for install/local
-
-build plugins/jni/shared/CMakeFiles/install/local.util: CUSTOM_COMMAND plugins/jni/shared/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared && /snap/flutter/149/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-  DESC = Installing only the local directory...
-  pool = console
-  restat = 1
-
-build plugins/jni/shared/install/local: phony plugins/jni/shared/CMakeFiles/install/local.util
-
-
-#############################################
-# Utility command for install
-
-build plugins/jni/shared/CMakeFiles/install.util: CUSTOM_COMMAND plugins/jni/shared/all
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared && /snap/flutter/149/usr/bin/cmake -P cmake_install.cmake
-  DESC = Install the project...
-  pool = console
-  restat = 1
-
-build plugins/jni/shared/install: phony plugins/jni/shared/CMakeFiles/install.util
-
-
-#############################################
-# Utility command for list_install_components
-
-build plugins/jni/shared/list_install_components: phony
-
-
-#############################################
-# Utility command for rebuild_cache
-
-build plugins/jni/shared/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared && /snap/flutter/149/usr/bin/cmake -S/home/charlie/Repositories/MyBookLog/mybooklog/linux -B/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug
-  DESC = Running CMake to regenerate build system...
-  pool = console
-  restat = 1
-
-build plugins/jni/shared/rebuild_cache: phony plugins/jni/shared/CMakeFiles/rebuild_cache.util
-
-
-#############################################
-# Utility command for edit_cache
-
-build plugins/jni/shared/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared && /snap/flutter/149/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-  DESC = No interactive CMake dialog available...
-  restat = 1
-
-build plugins/jni/shared/edit_cache: phony plugins/jni/shared/CMakeFiles/edit_cache.util
-
-# =============================================================================
 # Target aliases.
 
 build flutter_assemble: phony flutter/flutter_assemble
@@ -691,7 +551,7 @@ build url_launcher_linux_plugin: phony plugins/url_launcher_linux/liburl_launche
 #############################################
 # Folder: /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug
 
-build all: phony flutter/all runner/all plugins/gtk/all plugins/url_launcher_linux/all plugins/jni/all
+build all: phony flutter/all runner/all plugins/gtk/all plugins/url_launcher_linux/all
 
 # =============================================================================
 
@@ -706,20 +566,6 @@ build flutter/all: phony
 # Folder: /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/gtk
 
 build plugins/gtk/all: phony plugins/gtk/libgtk_plugin.so
-
-# =============================================================================
-
-#############################################
-# Folder: /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni
-
-build plugins/jni/all: phony plugins/jni/shared/all
-
-# =============================================================================
-
-#############################################
-# Folder: /home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/shared
-
-build plugins/jni/shared/all: phony
 
 # =============================================================================
 
@@ -747,14 +593,14 @@ default all
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/charlie/Repositories/MyBookLog/mybooklog/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/gtk/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/jni/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/generated_config.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/generated_plugins.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/runner/CMakeLists.txt /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCXXInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCommonLanguageInclude.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeFindJavaCommon.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeGenericSystem.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeInitializeConfigs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeLanguageInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInitialize.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindJNI.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageMessage.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPkgConfig.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Internal/CMakeCheckCompilerFlag.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.16.3/CMakeCCompiler.cmake CMakeFiles/3.16.3/CMakeCXXCompiler.cmake CMakeFiles/3.16.3/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /home/charlie/Repositories/MyBookLog/mybooklog/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/gtk/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/generated_config.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/generated_plugins.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/runner/CMakeLists.txt /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCXXInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCommonLanguageInclude.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeGenericSystem.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeInitializeConfigs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeLanguageInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInitialize.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageMessage.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPkgConfig.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Internal/CMakeCheckCompilerFlag.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.16.3/CMakeCXXCompiler.cmake CMakeFiles/3.16.3/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/charlie/Repositories/MyBookLog/mybooklog/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/gtk/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/jni/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/generated_config.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/generated_plugins.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/runner/CMakeLists.txt /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCXXInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCommonLanguageInclude.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeFindJavaCommon.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeGenericSystem.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeInitializeConfigs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeLanguageInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInitialize.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindJNI.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageMessage.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPkgConfig.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Internal/CMakeCheckCompilerFlag.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-C.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.16.3/CMakeCCompiler.cmake CMakeFiles/3.16.3/CMakeCXXCompiler.cmake CMakeFiles/3.16.3/CMakeSystem.cmake: phony
+build /home/charlie/Repositories/MyBookLog/mybooklog/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/gtk/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux/linux/CMakeLists.txt /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/ephemeral/generated_config.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/flutter/generated_plugins.cmake /home/charlie/Repositories/MyBookLog/mybooklog/linux/runner/CMakeLists.txt /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCXXInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeCommonLanguageInclude.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeGenericSystem.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeInitializeConfigs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeLanguageInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInformation.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/CMakeSystemSpecificInitialize.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/CMakeCommonCompilerMacros.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/Clang.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Compiler/GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPackageMessage.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/FindPkgConfig.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Internal/CMakeCheckCompilerFlag.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-Clang-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU-CXX.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux-GNU.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/Linux.cmake /snap/flutter/149/usr/share/cmake-3.16/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.16.3/CMakeCXXCompiler.cmake CMakeFiles/3.16.3/CMakeSystem.cmake: phony
 
 
 #############################################

@@ -155,7 +155,6 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/runner/cmake_install.cmake")
   include("/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/gtk/cmake_install.cmake")
   include("/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/url_launcher_linux/cmake_install.cmake")
-  include("/home/charlie/Repositories/MyBookLog/mybooklog/build/linux/x64/debug/plugins/jni/cmake_install.cmake")
 
 endif()
 
