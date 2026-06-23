@@ -858,8 +858,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       );
     }
   }
-//TODO: Pagination in search results and bookshelf grid to scale beyond 15 items and reduce load times.
-  /// Builds the bookshelf UI
+ /// Builds the bookshelf UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
