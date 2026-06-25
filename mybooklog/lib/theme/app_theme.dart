@@ -106,7 +106,7 @@ class AppTheme {
     return TextStyle(
       fontFamily: _bodyFont,
       fontSize: 17,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w500,
       color: scheme.brightness == Brightness.dark
           ? Colors.white
           : AppColors.textPrimary,
