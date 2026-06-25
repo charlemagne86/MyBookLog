@@ -901,7 +901,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                                   },
                                   decoration: InputDecoration(
                                     hintText: 'Search title or author',
-                                    helperText: _searchQuery.trim().length < 3 ? 'Filtering starts after 3 characters' : null,
+                                    helperText: _searchQuery.trim().length < 3 ? 'Enter at least 3 characters!' : null,
                                     prefixIcon: const Icon(Icons.search),
                                     suffixIcon: _searchQuery.trim().isEmpty
                                         ? null
