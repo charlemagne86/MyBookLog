@@ -640,8 +640,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       final response = await Supabase.instance.client
           .from('bookshelf_items')
           .select()
-          .eq('bookshelf_user_id', user.id)
-          .limit(15);
+          .eq('bookshelf_user_id', user.id);
+          //.limit(15);
 
         final bookshelfItems = List<Map<String, dynamic>>.from(response);
         // bookshelf_items stores shelf membership, not the full display metadata.
