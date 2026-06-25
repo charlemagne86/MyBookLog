@@ -20,21 +20,85 @@ class AppTheme {
       fontFamilyFallback: const <String>['Roboto', 'Arial', 'sans-serif'],
     );
     return TextTheme(
-      displayLarge: serif.copyWith(fontSize: 36, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-      displayMedium: serif.copyWith(fontSize: 30, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-      displaySmall: serif.copyWith(fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      headlineLarge: serif.copyWith(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-      headlineMedium: serif.copyWith(fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      headlineSmall: serif.copyWith(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      titleLarge: sans.copyWith(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      titleMedium: sans.copyWith(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      titleSmall: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-      bodyLarge: sans.copyWith(fontSize: 18, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
-      bodyMedium: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
-      bodySmall: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+      displayLarge: serif.copyWith(
+        fontSize: 36,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+      displayMedium: serif.copyWith(
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+      displaySmall: serif.copyWith(
+        fontSize: 26,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      headlineLarge: serif.copyWith(
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+      headlineMedium: serif.copyWith(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      headlineSmall: serif.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      titleLarge: sans.copyWith(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      titleMedium: sans.copyWith(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      titleSmall: sans.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      bodyLarge: sans.copyWith(
+        fontSize: 18,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
+      bodyMedium: sans.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
+      bodySmall: sans.copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textSecondary,
+      ),
       labelLarge: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
       labelMedium: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
       labelSmall: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+    );
+  }
+
+  static TextStyle _pageTitleStyle({
+    required TextStyle baseStyle,
+    required Color color,
+  }) {
+    return baseStyle.copyWith(
+      color: color,
+      shadows: [
+        Shadow(
+          color: color.withAlpha(72),
+          blurRadius: 2.5,
+          offset: const Offset(0, 1),
+        ),
+      ],
     );
   }
 
@@ -46,10 +110,28 @@ class AppTheme {
     return InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surface,
-      hintStyle: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontFamily: _bodyFont),
-      labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, fontFamily: _bodyFont),
-      helperStyle: const TextStyle(fontSize: 16, color: AppColors.textSecondary, fontFamily: _bodyFont),
-      errorStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.errorRed, fontFamily: _bodyFont),
+      hintStyle: const TextStyle(
+        fontSize: 16,
+        color: AppColors.textSecondary,
+        fontFamily: _bodyFont,
+      ),
+      labelStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textPrimary,
+        fontFamily: _bodyFont,
+      ),
+      helperStyle: const TextStyle(
+        fontSize: 16,
+        color: AppColors.textSecondary,
+        fontFamily: _bodyFont,
+      ),
+      errorStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: AppColors.errorRed,
+        fontFamily: _bodyFont,
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       border: rounded,
       enabledBorder: rounded,
@@ -72,13 +154,19 @@ class AppTheme {
   }) {
     return ButtonStyle(
       minimumSize: const WidgetStatePropertyAll(Size(64, 54)),
-      padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 24, vertical: 14)),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      ),
       shape: const WidgetStatePropertyAll(StadiumBorder()),
       backgroundColor: WidgetStatePropertyAll(background),
       foregroundColor: WidgetStatePropertyAll(foreground),
       side: side == null ? null : WidgetStatePropertyAll(side),
       textStyle: const WidgetStatePropertyAll(
-        TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: _bodyFont),
+        TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: _bodyFont,
+        ),
       ),
     );
   }
@@ -101,7 +189,10 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: _textTheme(colorScheme).headlineSmall,
+        titleTextStyle: _pageTitleStyle(
+          baseStyle: _textTheme(colorScheme).headlineSmall!,
+          color: AppColors.textPrimary,
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
@@ -115,9 +206,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         shadowColor: AppColors.textPrimary.withAlpha((0.08 * 255).round()),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       inputDecorationTheme: _inputTheme(colorScheme),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -174,10 +263,10 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.textPrimary,
-        contentTextStyle: _textTheme(colorScheme).bodyMedium?.copyWith(color: Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        contentTextStyle: _textTheme(
+          colorScheme,
+        ).bodyMedium?.copyWith(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -193,20 +282,22 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: const Color(0xFF1E1E1E),
-      textTheme: _textTheme(colorScheme).apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
+      textTheme: _textTheme(
+        colorScheme,
+      ).apply(bodyColor: Colors.white, displayColor: Colors.white),
       appBarTheme: AppBarTheme(
         backgroundColor: const Color(0xFF1E1E1E),
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
-        titleTextStyle: _textTheme(colorScheme).headlineSmall?.copyWith(color: Colors.white),
+        titleTextStyle: _pageTitleStyle(
+          baseStyle: _textTheme(colorScheme).headlineSmall!,
+          color: Colors.white,
+        ),
       ),
-      inputDecorationTheme: _inputTheme(colorScheme).copyWith(
-        fillColor: const Color(0xFF2A2A2A),
-      ),
+      inputDecorationTheme: _inputTheme(
+        colorScheme,
+      ).copyWith(fillColor: const Color(0xFF2A2A2A)),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: _pillButtonStyle(
           background: colorScheme.primary,
