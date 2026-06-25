@@ -13,7 +13,6 @@ import 'theme/app_theme.dart'; // App light/dark theme definitions
 import 'theme/theme_provider.dart'; // Theme mode state management
 
 const String _googleBooksApiKey = 'AIzaSyB4bO6BYBHZgNbV-cTTRTRAeKZV4di5KqI';
-const Color parchmentBackground = AppColors.background;
 
 /// Entry point of the Flutter application
 Future<void> main() async {
@@ -98,7 +97,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: parchmentBackground,
       body: Center(
         child: _showSplash
             // Splash screen content: app name, subtitle, and spinner
@@ -832,7 +830,6 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: parchmentBackground,
       appBar: AppBar(
         title: const Text('My Bookshelf'),
         leading: IconButton(
@@ -872,7 +869,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                             elevation: 1,
                             shadowColor: AppColors.textPrimary.withAlpha((0.08 * 255).round()),
                             borderRadius: BorderRadius.circular(12),
-                            color: AppColors.surface,
+                            color: Theme.of(context).colorScheme.surface,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -906,7 +903,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                                       borderSide: BorderSide.none,
                                     ),
                                     filled: true,
-                                    fillColor: AppColors.surface,
+                                    fillColor: Theme.of(context).colorScheme.surface,
                                   ),
                                 ),
                                 if (_searchQuery.trim().length >= 3)
@@ -1065,7 +1062,6 @@ class _AddBookPageState extends State<AddBookPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Book')),
-      backgroundColor: parchmentBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -1409,7 +1405,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Search Results')),
-      backgroundColor: parchmentBackground,
       // Use a Stack to layer the ListView with the floating action button
       body: Stack(
         children: [
@@ -1449,7 +1444,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           child: Container(
                             decoration: BoxDecoration(
                               // Selected state uses a subtle semantic tint to preserve readability.
-                              color: isSelected ? AppColors.selectionFill : AppColors.surface,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  : Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(12),
                               border: isSelected ? Border.all(color: AppColors.accentSage, width: 2) : null,
                               boxShadow: [
@@ -1602,7 +1599,7 @@ class _BookOnShelf extends StatelessWidget {
               // Base layer: thumbnail (or fallback icon) with styling.
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
