@@ -70,7 +70,6 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-
 /// Splash screen widget that transitions to login after a delay
 /// SplashScreen widget: shows a splash for 2 seconds, then transitions to login
 class SplashScreen extends StatefulWidget {
@@ -94,35 +93,6 @@ class _SplashScreenState extends State<SplashScreen> {
       });
     });
   }
-
-
-
-  
-
-  // Attempts to connect to Supabase and updates the UI with the result
-  // Future<void> _checkConnection() async {
-  //   setState(() {
-  //     _checking = true;
-  //     _statusMessage = null;
-  //   });
-  //   try {
-  //     // Try to select one row from the 'books' table
-  //     final response = await Supabase.instance.client
-  //         .from('users')
-  //         .select()
-  //         .limit(1);
-  //     setState(() {
-  //       _statusMessage = 'Connection successful!';
-  //       _checking = false;
-  //     });
-  //   } catch (e, stack) {
-  //     // If an error occurs, show failure message
-  //     setState(() {
-  //       _statusMessage = 'Connection failed.';
-  //       _checking = false;
-  //     });
-  //   }
-  // }
 
   /// Builds the splash screen or login UI
   @override
@@ -887,6 +857,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         top: false,
         child: Column(
           children: [
+            const SizedBox(height: 12),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
               child: _showSearchBar
@@ -972,7 +943,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                           ),
                         )
                       : GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
                             mainAxisSpacing: 32,
@@ -1340,6 +1311,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         final thumbnail = item['thumbnail'] as String? ?? '';
                         // Check if this item is currently selected
                         final isSelected = _selectedIndex == index;
+                        final textTheme = Theme.of(context).textTheme;
 
                         return GestureDetector(
                           onTap: () {
@@ -1362,34 +1334,80 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                 ),
                               ],
                             ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(12),
-                              leading: thumbnail.isNotEmpty
-                                  ? SizedBox(
-                                      width: 45,
-                                      child: AspectRatio(
-                                        aspectRatio: 0.625,
-                                        child: ClipRRect(
-                                          //borderRadius: BorderRadius.circular(6),
-                                          child: Image.network(thumbnail, fit: BoxFit.contain),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Keep the cover art in a fixed frame so every row lines up
+                                  // consistently even when the image aspect ratios vary.
+                                  if (thumbnail.isNotEmpty)
+                                    SizedBox(
+                                      width: 120,
+                                      height: 180,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          thumbnail,
+                                          fit: BoxFit.contain,
+                                          alignment: Alignment.center,
                                         ),
                                       ),
                                     )
-                                  : const Icon(Icons.menu_book, size: 46, color: AppColors.accentSage),
-                              title: Text(title),
-                              subtitle: Text(
-                                authors.isNotEmpty ? authors.join(', ') : 'Unknown author',
-                                style: const TextStyle(color: AppColors.textPrimary),
+                                  else
+                                    SizedBox(
+                                      width: 120,
+                                      height: 180,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.menu_book,
+                                          size: 90,
+                                          color: AppColors.accentSage,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 18),
+                                  // Let the title/author text expand into the remaining space
+                                  // so the larger thumbnail still feels balanced.
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          title,
+                                          style: textTheme.titleMedium?.copyWith(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          authors.isNotEmpty ? authors.join(', ') : 'Unknown author',
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            fontSize: 15,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Keep the selected-state icon aligned to the same right edge
+                                  // regardless of whether the row is selected.
+                                  if (isSelected)
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 12),
+                                      child: Icon(Icons.check_circle, color: AppColors.accentSage, size: 32),
+                                    ),
+                                ],
                               ),
-                              // Show a checkmark when selected
-                              trailing: isSelected
-                                  ? const Icon(Icons.check_circle, color: AppColors.accentSage, size: 28)
-                                  : null,
                             ),
                           ),
                         );
                       },
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      // Add a little extra breathing room between the taller result cards.
+                      separatorBuilder: (context, index) => const SizedBox(height: 18),
                       itemCount: widget.results.length,
                     ),
             ),
@@ -1410,11 +1428,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   label: Text(
                     _isAdding ? 'Adding...' : 'Add to Bookshelf',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: AppColors.accentSage,
-                    foregroundColor: AppColors.white,
                   ),
                 ),
               ),
