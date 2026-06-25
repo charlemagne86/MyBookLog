@@ -1031,41 +1031,19 @@ class _AddBookPageState extends State<AddBookPage> {
       final results = <Map<String, dynamic>>[];
 
       if (items != null) {
-        for (final item in items) {
-          final volumeInfo = (item as Map<String, dynamic>)['volumeInfo'] as Map<String, dynamic>?;
-          if (volumeInfo == null) continue;
-
-          // Normalize the external API shape into the smaller structure this app
-          // passes between screens.
-          final thumbnails = volumeInfo['imageLinks'] as Map<String, dynamic>?;
-          final thumbnail = thumbnails != null ? thumbnails['thumbnail'] as String? : null;
-          final title = volumeInfo['title'] as String? ?? 'No Title';
-          final authors = (volumeInfo['authors'] as List<dynamic>?)?.cast<String>() ?? <String>[];
-          final isbnList = volumeInfo['industryIdentifiers'] as List<dynamic>?;
-          // Search through the ISBN list, preferring ISBN_13 over ISBN_10
-          final isbnMap = isbnList != null && isbnList.isNotEmpty
-              ? isbnList.firstWhere(
-                  (item) => item['type'] == 'ISBN_13',
-                  orElse: () => isbnList.firstWhere(
-                    (item) => item['type'] == 'ISBN_10',
-                    orElse: () => null,
-                  ),
-                )
-              : null;
-          final isbn = isbnMap != null ? isbnMap['identifier'] as String? : null;
-
-          results.add({
-            'title': title,
-            'authors': authors,
-            'thumbnail': thumbnail ?? '',
-            'isbn': isbn,
-          });
-        }
+        results.addAll(_normalizeGoogleBooksItems(items));
       }
 
       if (!mounted) return;
+      final totalItems = payload['totalItems'] as int?;
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => SearchResultsPage(results: results)),
+        MaterialPageRoute(
+          builder: (context) => SearchResultsPage(
+            results: results,
+            searchQuery: query,
+            totalItems: totalItems,
+          ),
+        ),
       );
     } catch (e) {
       if (mounted) {
@@ -1139,28 +1117,175 @@ class _AddBookPageState extends State<AddBookPage> {
   }
 }
 
+// Maps Google Books API items into a shape used by the search results list.
+List<Map<String, dynamic>> _normalizeGoogleBooksItems(List<dynamic> items) {
+  final results = <Map<String, dynamic>>[];
+  for (final item in items) {
+    final volumeInfo = (item as Map<String, dynamic>)['volumeInfo'] as Map<String, dynamic>?;
+    if (volumeInfo == null) continue;
+
+    final thumbnails = volumeInfo['imageLinks'] as Map<String, dynamic>?;
+    final thumbnail = thumbnails != null ? thumbnails['thumbnail'] as String? : null;
+    final title = volumeInfo['title'] as String? ?? 'No Title';
+    final authors = (volumeInfo['authors'] as List<dynamic>?)?.cast<String>() ?? <String>[];
+    final isbnList = volumeInfo['industryIdentifiers'] as List<dynamic>?;
+    // Search through the ISBN list, preferring ISBN_13 over ISBN_10.
+    final isbnMap = isbnList != null && isbnList.isNotEmpty
+        ? isbnList.firstWhere(
+            (item) => item['type'] == 'ISBN_13',
+            orElse: () => isbnList.firstWhere(
+              (item) => item['type'] == 'ISBN_10',
+              orElse: () => null,
+            ),
+          )
+        : null;
+    final isbn = isbnMap != null ? isbnMap['identifier'] as String? : null;
+
+    results.add({
+      'title': title,
+      'authors': authors,
+      'thumbnail': thumbnail ?? '',
+      'isbn': isbn,
+    });
+  }
+  return results;
+}
+
 /// SearchResultsPage displays a list of books returned by GoogleBooks API
 /// Allows users to select and add books to their bookshelf
 class SearchResultsPage extends StatefulWidget {
   final List<Map<String, dynamic>> results;
-  const SearchResultsPage({super.key, required this.results});
+  final String searchQuery;
+  final int? totalItems;
+
+  const SearchResultsPage({
+    super.key,
+    required this.results,
+    required this.searchQuery,
+    this.totalItems,
+  });
 
   @override
   State<SearchResultsPage> createState() => _SearchResultsPageState();
 }
 
 class _SearchResultsPageState extends State<SearchResultsPage> {
+  static const int _googlePageSize = 20;
+
   // Track the index of the currently selected book
   int? _selectedIndex;
   // Track whether an add operation is in progress
   bool _isAdding = false;
+  bool _isLoadingMore = false;
+  bool _hasMoreResults = true;
+  List<Map<String, dynamic>> _results = [];
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _results = List<Map<String, dynamic>>.from(widget.results);
+    _hasMoreResults = _hasExpectedMoreResults;
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  int get _nextStartIndex => _results.length;
+
+  bool get _hasExpectedMoreResults {
+    if (widget.totalItems != null) {
+      return _results.length < widget.totalItems!;
+    }
+    return _results.length >= _googlePageSize;
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoadingMore || !_hasMoreResults) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 500) {
+      _loadMoreResults();
+    }
+  }
+
+  Future<void> _loadMoreResults() async {
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final url = Uri.parse(
+        'https://www.googleapis.com/books/v1/volumes?q=${widget.searchQuery}&startIndex=$_nextStartIndex&maxResults=$_googlePageSize&key=$_googleBooksApiKey',
+      );
+      final response = await http.get(url);
+      if (response.statusCode != 200) {
+        throw Exception('Google Books API returned status ${response.statusCode}');
+      }
+
+      final payload = response.body.isNotEmpty
+          ? jsonDecode(response.body) as Map<String, dynamic>
+          : <String, dynamic>{};
+      final items = payload['items'] as List<dynamic>?;
+      final fetchedResults =
+          items == null ? <Map<String, dynamic>>[] : _normalizeGoogleBooksItems(items);
+
+      if (!mounted) return;
+      setState(() {
+        if (fetchedResults.isNotEmpty) {
+          // De-duplicate results across pages by ISBN (or title+authors fallback).
+          final existingKeys = _results.map(_bookIdentityKey).toSet();
+          for (final result in fetchedResults) {
+            final key = _bookIdentityKey(result);
+            if (existingKeys.add(key)) {
+              _results.add(result);
+            }
+          }
+        }
+
+        final totalItems = payload['totalItems'] as int?;
+        final reachedKnownEnd = totalItems != null && _results.length >= totalItems;
+        final pageReturnedNothing = fetchedResults.isEmpty;
+        final pageNotFull = fetchedResults.length < _googlePageSize;
+        _hasMoreResults = !(reachedKnownEnd || pageReturnedNothing || pageNotFull);
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingMore = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load more results: $e')),
+      );
+    }
+  }
+
+  String _bookIdentityKey(Map<String, dynamic> book) {
+    final isbn = (book['isbn'] as String?)?.trim();
+    if (isbn != null && isbn.isNotEmpty) {
+      return 'isbn:$isbn';
+    }
+
+    final title = ((book['title'] as String?) ?? '').trim().toLowerCase();
+    final authors = (book['authors'] as List<String>? ?? <String>[])
+        .map((author) => author.trim().toLowerCase())
+        .where((author) => author.isNotEmpty)
+        .join('|');
+    return 'fallback:$title::$authors';
+  }
 
   /// Adds the selected book to the user's bookshelf in Supabase
   Future<void> _addSelectedBook() async {
     if (_selectedIndex == null) return;
 
     // Resolve the selected search result into a data record we can validate and save.
-    final selectedBook = widget.results[_selectedIndex!];
+    final selectedBook = _results[_selectedIndex!];
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) {
@@ -1289,7 +1414,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       body: Stack(
         children: [
           SafeArea(
-            child: widget.results.isEmpty
+            child: _results.isEmpty
                   ? const Center(
                       child: Text(
                         'No results found. Try a different search.',
@@ -1298,14 +1423,15 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       ),
                     )
                   : ListView.separated(
+                      controller: _scrollController,
                       padding: EdgeInsets.only(
                         left: 16.0,
                         right: 16.0,
                         top: 16.0,
-                        bottom: _selectedIndex != null ? 80.0 : 16.0,
+                        bottom: _selectedIndex != null ? 96.0 : 28.0,
                       ),
                       itemBuilder: (context, index) {
-                        final item = widget.results[index];
+                        final item = _results[index];
                         final title = item['title'] as String? ?? 'No Title';
                         final authors = item['authors'] as List<String>? ?? <String>[];
                         final thumbnail = item['thumbnail'] as String? ?? '';
@@ -1408,8 +1534,21 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       },
                       // Add a little extra breathing room between the taller result cards.
                       separatorBuilder: (context, index) => const SizedBox(height: 18),
-                      itemCount: widget.results.length,
+                      itemCount: _results.length,
                     ),
+            ),
+          if (_isLoadingMore)
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 12,
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              ),
             ),
           // Floating "Add" button that appears when a book is selected
           if (_selectedIndex != null)
