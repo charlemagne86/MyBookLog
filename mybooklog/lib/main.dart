@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart'; // Supabase client for 
 import 'package:flutter/material.dart'; // Flutter UI framework
 import 'package:flutter/services.dart'; // Haptic feedback for long-press interactions
 import 'package:http/http.dart' as http; // HTTP client for Google Books API requests
-import 'theme/app_colors.dart'; // Centralized color constants
 import 'theme/app_theme.dart'; // App light/dark theme definitions
 import 'theme/theme_provider.dart'; // Theme mode state management
 
@@ -96,24 +95,25 @@ class _SplashScreenState extends State<SplashScreen> {
   /// Builds the splash screen or login UI
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Center(
         child: _showSplash
             // Splash screen content: app name, subtitle, and spinner
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
                     'My Book Log',
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     'crafted with love',
-                    style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 18, color: colorScheme.onSurfaceVariant),
                   ),
-                  SizedBox(height: 32),
-                  CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentSage),
+                  const SizedBox(height: 32),
+                  CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
                 ],
               )
             // After splash, show login screen
@@ -204,6 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Builds the login form UI
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0),
       child: SingleChildScrollView(
@@ -250,7 +251,14 @@ class _LoginScreenState extends State<LoginScreen> {
             if (_errorText != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: Text(_errorText!, style: const TextStyle(color: AppColors.errorRed, fontSize: 16, fontWeight: FontWeight.w500)),
+                child: Text(
+                  _errorText!,
+                  style: TextStyle(
+                    color: colorScheme.error,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             // Forgot password link (not implemented)
             Align(
@@ -273,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentSage),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
@@ -442,6 +450,7 @@ class _SignUpPageState extends State<SignUpPage> {
   /// Builds the sign up form UI
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up')),
       body: Padding(
@@ -526,7 +535,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 if (_errorText !=   null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Text(_errorText!, style: const TextStyle(color: AppColors.errorRed, fontSize: 16, fontWeight: FontWeight.w500)),
+                    child: Text(
+                      _errorText!,
+                      style: TextStyle(
+                        color: colorScheme.error,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 // Sign up button
                 SizedBox(
@@ -537,7 +553,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentSage),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
@@ -829,6 +845,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   /// Builds the bookshelf UI
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookshelf'),
@@ -867,7 +884,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                           constraints: const BoxConstraints(maxWidth: 320),
                           child: Material(
                             elevation: 1,
-                            shadowColor: AppColors.textPrimary.withAlpha((0.08 * 255).round()),
+                            shadowColor: colorScheme.shadow.withAlpha((0.08 * 255).round()),
                             borderRadius: BorderRadius.circular(12),
                             color: Theme.of(context).colorScheme.surface,
                             child: Column(
@@ -911,10 +928,10 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                                     padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
                                     child: Text(
                                       '${_visibleBooks.length} matching ${_visibleBooks.length == 1 ? 'book' : 'books'}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color: AppColors.accentSage,
+                                        color: colorScheme.primary,
                                       ),
                                     ),
                                   ),
@@ -930,12 +947,12 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _visibleBooks.isEmpty
-                      ? const Center(
+                    ? Center(
                           child: Text(
                             'No books match your search.',
                             style: TextStyle(
                               fontSize: 16,
-                              color: AppColors.accentSage,
+                              color: colorScheme.primary,
                             ),
                           ),
                         )
@@ -1060,6 +1077,7 @@ class _AddBookPageState extends State<AddBookPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Add Book')),
       body: SafeArea(
@@ -1070,7 +1088,7 @@ class _AddBookPageState extends State<AddBookPage> {
               children: [
                 const Text(
                   'Search for a book...',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.accentSage),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -1090,7 +1108,14 @@ class _AddBookPageState extends State<AddBookPage> {
                 if (_errorText != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Text(_errorText!, style: const TextStyle(color: AppColors.errorRed, fontSize: 16, fontWeight: FontWeight.w500)),
+                    child: Text(
+                      _errorText!,
+                      style: TextStyle(
+                        color: colorScheme.error,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 // Constrain button width so it's not full-width and centered
                 Center(
@@ -1403,6 +1428,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Search Results')),
       // Use a Stack to layer the ListView with the floating action button
@@ -1410,10 +1436,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         children: [
           SafeArea(
             child: _results.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'No results found. Try a different search.',
-                        style: TextStyle(fontSize: 16, color: AppColors.accentSage),
+                        style: TextStyle(fontSize: 16, color: colorScheme.primary),
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -1448,10 +1474,12 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                   ? Theme.of(context).colorScheme.primaryContainer
                                   : Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: isSelected ? Border.all(color: AppColors.accentSage, width: 2) : null,
+                              border: isSelected
+                                  ? Border.all(color: colorScheme.primary, width: 2)
+                                  : null,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.textPrimary.withAlpha(30),
+                                  color: colorScheme.shadow.withAlpha(30),
                                   blurRadius: 6,
                                   offset: const Offset(2, 2),
                                 ),
@@ -1485,7 +1513,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                         child: Icon(
                                           Icons.menu_book,
                                           size: 90,
-                                          color: AppColors.accentSage,
+                                          color: colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -1502,7 +1530,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                           style: textTheme.titleMedium?.copyWith(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.textPrimary,
+                                            color: colorScheme.onSurface,
                                           ),
                                         ),
                                         const SizedBox(height: 8),
@@ -1510,7 +1538,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                           authors.isNotEmpty ? authors.join(', ') : 'Unknown author',
                                           style: textTheme.bodyMedium?.copyWith(
                                             fontSize: 15,
-                                            color: AppColors.textSecondary,
+                                            color: colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -1519,9 +1547,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                   // Keep the selected-state icon aligned to the same right edge
                                   // regardless of whether the row is selected.
                                   if (isSelected)
-                                    const Padding(
+                                    Padding(
                                       padding: EdgeInsets.only(left: 12),
-                                      child: Icon(Icons.check_circle, color: AppColors.accentSage, size: 32),
+                                      child: Icon(Icons.check_circle, color: colorScheme.primary, size: 32),
                                     ),
                                 ],
                               ),
@@ -1587,6 +1615,7 @@ class _BookOnShelf extends StatelessWidget {
   /// Builds the book tile UI
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1603,7 +1632,7 @@ class _BookOnShelf extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.textPrimary.withAlpha((0.10 * 255).round()),
+                      color: colorScheme.shadow.withAlpha((0.10 * 255).round()),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1617,7 +1646,13 @@ class _BookOnShelf extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),
                       )
-                    : const Center(child: Icon(Icons.menu_book, size: 48, color: AppColors.textPrimary)),
+                    : Center(
+                        child: Icon(
+                          Icons.menu_book,
+                          size: 48,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
               ),
               // Overlay layer: only render the read badge when this shelf item
               // is marked as read for the current user. Unread items intentionally
@@ -1631,14 +1666,14 @@ class _BookOnShelf extends StatelessWidget {
                     width: 22,
                     height: 22,
                     decoration: BoxDecoration(
-                      color: AppColors.success,
+                      color: colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white, width: 1.5),
+                      border: Border.all(color: colorScheme.onPrimary, width: 1.5),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.check,
                       size: 14,
-                      color: AppColors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ),
@@ -1652,14 +1687,10 @@ class _BookOnShelf extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            //fontWeight: FontWeight.w600,
-            //fontSize: 18,
-            //color: AppColors.accentSage,
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-            //shadows: [Shadow(blurRadius: 2, color: AppColors.textSecondary, offset: Offset(1,1))],
+            color: colorScheme.onSurface,
           ),
         ),
       ],
