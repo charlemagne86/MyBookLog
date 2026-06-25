@@ -16,6 +16,8 @@ class AppColors {
 
   // Accents
   static const Color accentSage = Color(0xFF6E8A78); // Primary Accent
+  static const Color headerBackground = accentSage;
+  static const Color headerForeground = white;
 
    // Utility colors
    static const Color white = Color(0xFFFFFFFF);

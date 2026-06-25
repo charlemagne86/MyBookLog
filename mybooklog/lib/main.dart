@@ -858,188 +858,150 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
       );
     }
   }
- /// Builds the bookshelf UI
+  /// Builds the bookshelf UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: parchmentBackground,
+      appBar: AppBar(
+        title: const Text('My Bookshelf'),
+        leading: IconButton(
+          icon: const Icon(Icons.logout, size: 32),
+          tooltip: 'Logout',
+          onPressed: _onLogout,
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, size: 32),
+            tooltip: 'Search Books',
+            onPressed: _onSearchBook,
+          ),
+          IconButton(
+            icon: const Icon(Icons.add, size: 32),
+            tooltip: 'Add Book',
+            onPressed: _onAddBook,
+          ),
+        ],
+      ),
       body: SafeArea(
-          child: Column(
-            children: [
-              // Top bar with title locked to the true center of the page,
-              // regardless of how many icons are shown on each side.
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                child: SizedBox(
-                  height: 56,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const Text(
-                        'My Bookshelf',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.accentSage,
-                          shadows: [Shadow(blurRadius: 4, color: AppColors.textSecondary, offset: Offset(2,2))],
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.logout, size: 32, color: AppColors.accentSage),
-                          tooltip: 'Logout',
-                          onPressed: _onLogout,
-                        ),
-                      ),
-                      Align(
+        top: false,
+        child: Column(
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: _showSearchBar
+                  ? Padding(
+                      key: const ValueKey('bookshelf-search-bar'),
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
+                      child: Align(
                         alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Search button to filter bookshelf.
-                            IconButton(
-                              icon: const Icon(Icons.search, size: 32, color: AppColors.accentSage),
-                              tooltip: 'Search Books',
-                              onPressed: _onSearchBook,
-                            ),
-                            // Add book button to search for new books.
-                            IconButton(
-                              icon: const Icon(Icons.add, size: 32, color: AppColors.accentSage),
-                              tooltip: 'Add Book',
-                              onPressed: _onAddBook,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: _showSearchBar
-                    ? Padding(
-                        key: const ValueKey('bookshelf-search-bar'),
-                        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 320),
-                            child: Material(
-                              elevation: 1,
-                              shadowColor: AppColors.textPrimary.withAlpha((0.08 * 255).round()),
-                              borderRadius: BorderRadius.circular(12),
-                              color: AppColors.surface,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  TextField(
-                                    controller: _searchController,
-                                    autofocus: true,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _searchQuery = value;
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: 'Search title or author',
-                                      helperText: _searchQuery.trim().length < 3 ? 'Filtering starts after 3 characters' : null,
-                                      prefixIcon: const Icon(Icons.search),
-                                      // Clear action keeps search interactions one-tap and accessible.
-                                      suffixIcon: _searchQuery.trim().isEmpty
-                                          ? null
-                                          : IconButton(
-                                              icon: const Icon(Icons.close),
-                                              tooltip: 'Clear search',
-                                              onPressed: () {
-                                                setState(() {
-                                                  _searchController.clear();
-                                                  _searchQuery = '';
-                                                });
-                                              },
-                                            ),
-                                      border: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                                        borderSide: BorderSide.none,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 320),
+                          child: Material(
+                            elevation: 1,
+                            shadowColor: AppColors.textPrimary.withAlpha((0.08 * 255).round()),
+                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.surface,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextField(
+                                  controller: _searchController,
+                                  autofocus: true,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _searchQuery = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Search title or author',
+                                    helperText: _searchQuery.trim().length < 3 ? 'Filtering starts after 3 characters' : null,
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: _searchQuery.trim().isEmpty
+                                        ? null
+                                        : IconButton(
+                                            icon: const Icon(Icons.close),
+                                            tooltip: 'Clear search',
+                                            onPressed: () {
+                                              setState(() {
+                                                _searchController.clear();
+                                                _searchQuery = '';
+                                              });
+                                            },
+                                          ),
+                                    border: const OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    filled: true,
+                                    fillColor: AppColors.surface,
+                                  ),
+                                ),
+                                if (_searchQuery.trim().length >= 3)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+                                    child: Text(
+                                      '${_visibleBooks.length} matching ${_visibleBooks.length == 1 ? 'book' : 'books'}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.accentSage,
                                       ),
-                                      filled: true,
-                                      fillColor: AppColors.surface,
                                     ),
                                   ),
-                                  // Once the user has typed enough characters,
-                                  // show how many shelf items currently match.
-                                  if (_searchQuery.trim().length >= 3)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                                      child: Text(
-                                        '${_visibleBooks.length} matching ${_visibleBooks.length == 1 ? 'book' : 'books'}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.accentSage,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ),
-                      )
-                    : const SizedBox.shrink(key: ValueKey('bookshelf-search-hidden')),
-              ),
-              // Books grid
-              Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _visibleBooks.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No books match your search.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.accentSage,
-                              ),
+                      ),
+                    )
+                  : const SizedBox.shrink(key: ValueKey('bookshelf-search-hidden')),
+            ),
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _visibleBooks.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No books match your search.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppColors.accentSage,
                             ),
-                          )
-                        : GridView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 32,
-                              crossAxisSpacing: 32,
-                              childAspectRatio: 0.48,
-                            ),
-                            itemCount: _visibleBooks.length,
-                            itemBuilder: (context, index) {
-                              final book = _visibleBooks[index];
-                              // Normalize database values for is_read into a
-                              // plain Dart bool. Depending on schema/migrations,
-                              // this field may arrive as bool, int, or string.
-                              final rawIsRead = book['is_read'];
-                              // Any truthy representation marks this tile as
-                              // read and enables the corner status indicator.
-                              final isRead = _isBookReadValue(rawIsRead);
-                              return GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onLongPressStart: (details) {
-                                  _onBookLongPress(book, details.globalPosition);
-                                },
-                                child: _BookOnShelf(
-                                  imageUrl: book['thumbnail_uri'] as String?,
-                                  title: book['title'] as String? ?? '',
-                                  isRead: isRead,
-                                ),
-                              );
-                            },
                           ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 32,
+                            crossAxisSpacing: 32,
+                            childAspectRatio: 0.48,
+                          ),
+                          itemCount: _visibleBooks.length,
+                          itemBuilder: (context, index) {
+                            final book = _visibleBooks[index];
+                            final rawIsRead = book['is_read'];
+                            final isRead = _isBookReadValue(rawIsRead);
+                            return GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onLongPressStart: (details) {
+                                _onBookLongPress(book, details.globalPosition);
+                              },
+                              child: _BookOnShelf(
+                                imageUrl: book['thumbnail_uri'] as String?,
+                                title: book['title'] as String? ?? '',
+                                isRead: isRead,
+                              ),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1414,7 +1376,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                                       ),
                                     )
                                   : const Icon(Icons.menu_book, size: 46, color: AppColors.accentSage),
-                              title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              title: Text(title),
                               subtitle: Text(
                                 authors.isNotEmpty ? authors.join(', ') : 'Unknown author',
                                 style: const TextStyle(color: AppColors.textPrimary),

@@ -102,6 +102,17 @@ class AppTheme {
     );
   }
 
+  static TextStyle _bookNameStyle(ColorScheme scheme) {
+    return TextStyle(
+      fontFamily: _bodyFont,
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      color: scheme.brightness == Brightness.dark
+          ? Colors.white
+          : AppColors.textPrimary,
+    );
+  }
+
   static InputDecorationTheme _inputTheme(ColorScheme scheme) {
     final rounded = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -185,13 +196,16 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       textTheme: _textTheme(colorScheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.headerBackground,
+        foregroundColor: AppColors.headerForeground,
+        iconTheme: const IconThemeData(color: AppColors.headerForeground),
+        actionsIconTheme: const IconThemeData(color: AppColors.headerForeground),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: _pageTitleStyle(
           baseStyle: _textTheme(colorScheme).headlineSmall!,
-          color: AppColors.textPrimary,
+          color: AppColors.headerForeground,
         ),
       ),
       cardTheme: CardThemeData(
@@ -209,6 +223,14 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       inputDecorationTheme: _inputTheme(colorScheme),
+      listTileTheme: ListTileThemeData(
+        titleTextStyle: _bookNameStyle(colorScheme),
+        subtitleTextStyle: _textTheme(colorScheme).bodyMedium?.copyWith(
+          color: colorScheme.brightness == Brightness.dark
+          ? Colors.white70
+          : AppColors.textPrimary,
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: _pillButtonStyle(
           background: colorScheme.primary,
@@ -286,18 +308,27 @@ class AppTheme {
         colorScheme,
       ).apply(bodyColor: Colors.white, displayColor: Colors.white),
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.headerBackground,
+        foregroundColor: AppColors.headerForeground,
+        iconTheme: const IconThemeData(color: AppColors.headerForeground),
+        actionsIconTheme: const IconThemeData(color: AppColors.headerForeground),
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
         titleTextStyle: _pageTitleStyle(
           baseStyle: _textTheme(colorScheme).headlineSmall!,
-          color: Colors.white,
+          color: AppColors.headerForeground,
         ),
       ),
       inputDecorationTheme: _inputTheme(
         colorScheme,
       ).copyWith(fillColor: const Color(0xFF2A2A2A)),
+      listTileTheme: ListTileThemeData(
+        titleTextStyle: _bookNameStyle(colorScheme),
+        subtitleTextStyle: _textTheme(colorScheme).bodyMedium?.copyWith(
+          color: Colors.white70,
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: _pillButtonStyle(
           background: colorScheme.primary,
