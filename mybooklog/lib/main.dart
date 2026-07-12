@@ -619,6 +619,9 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   String _searchQuery = '';
   // Controller for the floating bookshelf search field.
   final TextEditingController _searchController = TextEditingController();
+  // Tracks which shelf tile should render as visually selected while its
+  // context menu is active.
+  String? _contextMenuBookSelectionKey;
 
   // Popup actions available from the long-press context menu on a shelf item.
   static const String _menuActionRemove = 'remove';
@@ -734,42 +737,71 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     return false;
   }
 
+  // Builds a stable per-book key for temporary UI state (context-menu
+  // highlight). Prefer persistent ids; fallback to visible metadata.
+  String _bookshelfBookSelectionKey(Map<String, dynamic> book) {
+    final bookId = book['book_id'];
+    if (bookId != null) return 'id:$bookId';
+
+    final title = (book['title'] as String? ?? '').trim().toLowerCase();
+    final author = (book['author'] as String? ?? '').trim().toLowerCase();
+    return 'fallback:$title::$author';
+  }
+
   // Handles long-press on a shelf tile by giving tactile confirmation and then
   // opening a context menu anchored near the pressed position.
   Future<void> _onBookLongPress(
     Map<String, dynamic> book,
     Offset globalPosition,
   ) async {
-    await HapticFeedback.mediumImpact();
+    final selectionKey = _bookshelfBookSelectionKey(book);
+    setState(() {
+      _contextMenuBookSelectionKey = selectionKey;
+    });
+
+    // First tactile cue: long-press was recognized on this tile.
+    await HapticFeedback.selectionClick();
+    // Second tactile cue: menu presentation is about to start.
+    await HapticFeedback.lightImpact();
+
     if (!mounted) return;
 
-    final selectedAction = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        globalPosition.dx,
-        globalPosition.dy,
-        globalPosition.dx,
-        globalPosition.dy,
-      ),
-      items: [
-        const PopupMenuItem<String>(
-          value: _menuActionRemove,
-          child: Text(
-            'Remove Book',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
+    String? selectedAction;
+    try {
+      selectedAction = await showMenu<String>(
+        context: context,
+        position: RelativeRect.fromLTRB(
+          globalPosition.dx,
+          globalPosition.dy,
+          globalPosition.dx,
+          globalPosition.dy,
         ),
-        PopupMenuItem<String>(
-          value: _menuActionToggleRead,
-          child: Text(
-            _isBookReadValue(book['is_read'])
-                ? 'Mark as Unread'
-                : 'Mark as Read',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        items: [
+          const PopupMenuItem<String>(
+            value: _menuActionRemove,
+            child: Text(
+              'Remove Book',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
           ),
-        ),
-      ],
-    );
+          PopupMenuItem<String>(
+            value: _menuActionToggleRead,
+            child: Text(
+              _isBookReadValue(book['is_read'])
+                  ? 'Mark as Unread'
+                  : 'Mark as Read',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _contextMenuBookSelectionKey = null;
+        });
+      }
+    }
 
     if (selectedAction == null) return;
     if (selectedAction == _menuActionRemove) {
@@ -1035,6 +1067,9 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                         final book = _visibleBooks[index];
                         final rawIsRead = book['is_read'];
                         final isRead = _isBookReadValue(rawIsRead);
+                        final isContextMenuTarget =
+                            _contextMenuBookSelectionKey ==
+                            _bookshelfBookSelectionKey(book);
                         return GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onLongPressStart: (details) {
@@ -1044,6 +1079,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
                             imageUrl: book['thumbnail_uri'] as String?,
                             title: book['title'] as String? ?? '',
                             isRead: isRead,
+                            isContextMenuTarget: isContextMenuTarget,
                           ),
                         );
                       },
@@ -1877,7 +1913,16 @@ class _BookOnShelf extends StatelessWidget {
 
   /// Whether this book is marked as read for the current user.
   final bool isRead;
-  const _BookOnShelf({this.imageUrl, required this.title, this.isRead = false});
+
+  /// Whether this tile is the active long-press target with menu open.
+  final bool isContextMenuTarget;
+
+  const _BookOnShelf({
+    this.imageUrl,
+    required this.title,
+    this.isRead = false,
+    this.isContextMenuTarget = false,
+  });
 
   /// Builds the book tile UI
   @override
@@ -1893,30 +1938,69 @@ class _BookOnShelf extends StatelessWidget {
           child: Stack(
             children: [
               // Base layer: thumbnail (or fallback icon) with styling.
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withAlpha((0.10 * 255).round()),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: imageUrl != null && imageUrl!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.network(imageUrl!, fit: BoxFit.contain),
-                      )
-                    : Center(
-                        child: Icon(
-                          Icons.menu_book,
-                          size: 48,
-                          color: colorScheme.onSurfaceVariant,
+              AnimatedSlide(
+                duration: const Duration(milliseconds: 140),
+                curve: Curves.easeOut,
+                offset: isContextMenuTarget
+                    ? const Offset(0.012, -0.04)
+                    : Offset.zero,
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 140),
+                  curve: Curves.easeOut,
+                  scale: isContextMenuTarget ? 1.04 : 1.0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    curve: Curves.easeOut,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      border: isContextMenuTarget
+                          ? Border.all(
+                              color: colorScheme.primary.withAlpha(
+                                (0.92 * 255).round(),
+                              ),
+                              width: 2.6,
+                            )
+                          : null,
+                      boxShadow: [
+                        // Always keep a subtle neutral-grey shelf shadow under
+                        // every book so covers feel grounded on the bookshelf.
+                        BoxShadow(
+                          color: Colors.grey.withAlpha((0.34 * 255).round()),
+                          blurRadius: 16,
+                          spreadRadius: 0.4,
+                          offset: const Offset(0, 7),
                         ),
-                      ),
+                        // When long-pressed, add a colored lift shadow on top
+                        // of the neutral base shadow to emphasize elevation.
+                        BoxShadow(
+                          color: isContextMenuTarget
+                              ? colorScheme.primary.withAlpha(
+                                  (0.44 * 255).round(),
+                                )
+                              : Colors.transparent,
+                          blurRadius: isContextMenuTarget ? 24 : 8,
+                          spreadRadius: isContextMenuTarget ? 1.9 : 0,
+                          offset: isContextMenuTarget
+                              ? const Offset(2, 12)
+                              : const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: imageUrl != null && imageUrl!.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.network(imageUrl!, fit: BoxFit.contain),
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.menu_book,
+                              size: 48,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                  ),
+                ),
               ),
               // Overlay layer: only render the read badge when this shelf item
               // is marked as read for the current user. Unread items intentionally
@@ -1956,7 +2040,7 @@ class _BookOnShelf extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w400,
             color: colorScheme.onSurface,
           ),
         ),
