@@ -91,6 +91,9 @@ class AppTheme {
     required Color color,
   }) {
     return baseStyle.copyWith(
+      fontFamily: _bodyFont,
+      fontSize: 22,
+      fontWeight: FontWeight.w700,
       color: color,
       shadows: [
         Shadow(
@@ -196,16 +199,18 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       textTheme: _textTheme(colorScheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.headerBackground,
-        foregroundColor: AppColors.headerForeground,
-        iconTheme: const IconThemeData(color: AppColors.headerForeground),
-        actionsIconTheme: const IconThemeData(color: AppColors.headerForeground),
+        // Keep page headers visually aligned with button styling by using the
+        // same primary container color and onPrimary foreground.
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        actionsIconTheme: IconThemeData(color: colorScheme.onPrimary),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: _pageTitleStyle(
-          baseStyle: _textTheme(colorScheme).headlineSmall!,
-          color: AppColors.headerForeground,
+          baseStyle: _textTheme(colorScheme).labelLarge!,
+          color: colorScheme.onPrimary,
         ),
       ),
       cardTheme: CardThemeData(
@@ -308,16 +313,17 @@ class AppTheme {
         colorScheme,
       ).apply(bodyColor: Colors.white, displayColor: Colors.white),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.headerBackground,
-        foregroundColor: AppColors.headerForeground,
-        iconTheme: const IconThemeData(color: AppColors.headerForeground),
-        actionsIconTheme: const IconThemeData(color: AppColors.headerForeground),
+        // Match header treatment to button palette in dark mode too.
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        actionsIconTheme: IconThemeData(color: colorScheme.onPrimary),
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
         titleTextStyle: _pageTitleStyle(
-          baseStyle: _textTheme(colorScheme).headlineSmall!,
-          color: AppColors.headerForeground,
+          baseStyle: _textTheme(colorScheme).labelLarge!,
+          color: colorScheme.onPrimary,
         ),
       ),
       inputDecorationTheme: _inputTheme(

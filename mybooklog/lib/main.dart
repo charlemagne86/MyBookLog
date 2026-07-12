@@ -201,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Guard setState with mounted check after async failure
       if (mounted) {
         setState(() {
-          _errorText = 'Login failed: $e';
+          //_errorText = 'Login failed: $e';
           _isSubmitting = false;
         });
       }
@@ -252,20 +252,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Error message display if login fails
-            if (_errorText != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: Text(
-                  _errorText!,
-                  style: TextStyle(
-                    color: colorScheme.error,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            // Forgot password link (not implemented)
+            //Uncomment to debug if login fails 
+            //Error message display if login fails
+            //if (_errorText != null)
+            //  Padding(
+            //    padding: const EdgeInsets.only(bottom: 12.0),
+            //    child: Text(
+            //      _errorText!,
+            //     style: TextStyle(
+            //        color: colorScheme.error,
+            //        fontSize: 16,
+            //        fontWeight: FontWeight.w500,
+            //      ),
+            //   ),
+            //  ),
+
+            // TODOS: Forgot password link (not implemented)
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
