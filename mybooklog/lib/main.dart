@@ -367,7 +367,6 @@ class _SignUpPageState extends State<SignUpPage> {
     final hasNumber = RegExp(r'[0-9]').hasMatch(value);
     final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>\_]').hasMatch(value);
     if (!hasLetter || !hasNumber || !hasSpecial) {
-      //print("Password validation failed: hasLetter=$hasLetter, hasNumber=$hasNumber, hasSpecial=$hasSpecial");
       return 'Password must have at least 1 letter, 1 number, and 1 special character.';
     }
     if (value.length < 8) {
@@ -1076,10 +1075,12 @@ class _AddBookPageState extends State<AddBookPage> {
     final author = _authorController.text.trim();
     final queryParts = <String>[];
     // Only include search clauses for fields the user actually entered.
-    if (title.isNotEmpty)
+    if (title.isNotEmpty) {
       queryParts.add('intitle:${Uri.encodeQueryComponent(title)}');
-    if (author.isNotEmpty)
+    }
+    if (author.isNotEmpty) {
       queryParts.add('inauthor:${Uri.encodeQueryComponent(author)}');
+    }
     return queryParts.isEmpty ? '' : queryParts.join('+');
   }
 
@@ -1220,13 +1221,51 @@ class _AddBookPageState extends State<AddBookPage> {
 }
 
 // Maps Google Books API items into a shape used by the search results list.
+// Extracts the preferred ISBN from Google Books `industryIdentifiers`.
+//
+// Selection rule:
+// 1) Prefer ISBN_13 when available.
+// 2) Otherwise use ISBN_10.
+// 3) Return null only when neither exists or both are empty/invalid.
+//
+// This helper is intentionally defensive because Google payloads are dynamic
+// and may contain entries with missing fields or unexpected shapes.
+String? _extractPreferredIsbnFromIndustryIdentifiers(dynamic rawIdentifiers) {
+  final isbnList = rawIdentifiers as List<dynamic>?;
+  String? isbn13;
+  String? isbn10;
+
+  if (isbnList != null) {
+    for (final rawIdentifier in isbnList) {
+      if (rawIdentifier is! Map) continue;
+
+      final type = rawIdentifier['type']?.toString().trim().toUpperCase();
+      final identifierValue = rawIdentifier['identifier']?.toString().trim();
+      if (identifierValue == null || identifierValue.isEmpty) continue;
+
+      if (type == 'ISBN_13') {
+        isbn13 ??= identifierValue;
+      } else if (type == 'ISBN_10') {
+        isbn10 ??= identifierValue;
+      }
+
+      if (isbn13 != null && isbn10 != null) break;
+    }
+  }
+
+  return isbn13 ?? isbn10;
+}
+
 List<Map<String, dynamic>> _normalizeGoogleBooksItems(List<dynamic> items) {
   final results = <Map<String, dynamic>>[];
   for (final item in items) {
-    final volumeInfo =
-        (item as Map<String, dynamic>)['volumeInfo'] as Map<String, dynamic>?;
+    final itemMap = item as Map<String, dynamic>;
+    final volumeInfo = itemMap['volumeInfo'] as Map<String, dynamic>?;
     if (volumeInfo == null) continue;
 
+    // Keep Google volume id so later logic can re-query this exact volume when
+    // a selected search row is missing ISBN data.
+    final volumeId = itemMap['id'] as String?;
     final thumbnails = volumeInfo['imageLinks'] as Map<String, dynamic>?;
     final thumbnail = thumbnails != null
         ? thumbnails['thumbnail'] as String?
@@ -1234,20 +1273,12 @@ List<Map<String, dynamic>> _normalizeGoogleBooksItems(List<dynamic> items) {
     final title = volumeInfo['title'] as String? ?? 'No Title';
     final authors =
         (volumeInfo['authors'] as List<dynamic>?)?.cast<String>() ?? <String>[];
-    final isbnList = volumeInfo['industryIdentifiers'] as List<dynamic>?;
-    // Search through the ISBN list, preferring ISBN_13 over ISBN_10.
-    final isbnMap = isbnList != null && isbnList.isNotEmpty
-        ? isbnList.firstWhere(
-            (item) => item['type'] == 'ISBN_13',
-            orElse: () => isbnList.firstWhere(
-              (item) => item['type'] == 'ISBN_10',
-              orElse: () => null,
-            ),
-          )
-        : null;
-    final isbn = isbnMap != null ? isbnMap['identifier'] as String? : null;
+    final isbn = _extractPreferredIsbnFromIndustryIdentifiers(
+      volumeInfo['industryIdentifiers'],
+    );
 
     results.add({
+      'volume_id': volumeId,
       'title': title,
       'authors': authors,
       'thumbnail': thumbnail ?? '',
@@ -1313,8 +1344,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients || _isLoadingMore || !_hasMoreResults)
+    if (!_scrollController.hasClients || _isLoadingMore || !_hasMoreResults) {
       return;
+    }
     final position = _scrollController.position;
     if (position.pixels >= position.maxScrollExtent - 500) {
       _loadMoreResults();
@@ -1392,12 +1424,112 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     return 'fallback:$title::$authors';
   }
 
+  // Builds a normalized key for title+authors so different rows that likely
+  // represent the same logical volume can be grouped together.
+  //
+  // This is a fallback heuristic used only when exact identifier data is
+  // missing from the tapped row.
+  String _bookVolumeKey(Map<String, dynamic> book) {
+    final title = ((book['title'] as String?) ?? '').trim().toLowerCase();
+    final authors = (book['authors'] as List<String>? ?? <String>[])
+        .map((author) => author.trim().toLowerCase())
+        .where((author) => author.isNotEmpty)
+        .join('|');
+    return '$title::$authors';
+  }
+
+  // Lightweight ISBN format check used only for preference ordering.
+  // It does not validate checksum; it simply helps choose ISBN_13 over ISBN_10
+  // when both candidates are available.
+  bool _isLikelyIsbn13(String isbn) {
+    final normalized = isbn.replaceAll(RegExp(r'[^0-9Xx]'), '');
+    return normalized.length == 13;
+  }
+
+  // Fetches the exact Google volume details and extracts ISBN_13/10 directly
+  // from that record, avoiding ambiguity across similarly titled search rows.
+  Future<String?> _fetchPreferredIsbnForVolumeId(String volumeId) async {
+    final encodedVolumeId = Uri.encodeComponent(volumeId);
+    final url = Uri.parse(
+      'https://www.googleapis.com/books/v1/volumes/$encodedVolumeId?key=$_googleBooksApiKey',
+    );
+
+    final response = await http.get(url);
+    if (response.statusCode != 200) {
+      // If the exact-volume lookup fails, caller will continue existing
+      // validation and surface a user-facing failure message.
+      return null;
+    }
+
+    final payload = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    final volumeInfo = payload['volumeInfo'] as Map<String, dynamic>?;
+    if (volumeInfo == null) return null;
+
+    final resolvedIsbn = _extractPreferredIsbnFromIndustryIdentifiers(
+      volumeInfo['industryIdentifiers'],
+    );
+    return resolvedIsbn;
+  }
+
+  // Chooses the best candidate to add when the tapped row has incomplete data.
+  //
+  // Behavior:
+  // 1) If tapped row already has ISBN, use it directly.
+  // 2) Otherwise search same-volume siblings (title+authors match).
+  // 3) Prefer a sibling with likely ISBN_13; fallback to ISBN_10 sibling.
+  // 4) If no sibling has ISBN, return original tapped row.
+  //
+  // Note: exact volume-id lookup still runs later in _addSelectedBook when
+  // ISBN remains missing after this heuristic step.
+  Map<String, dynamic> _resolveBestBookRecord(Map<String, dynamic> selectedBook) {
+    final selectedIsbn = (selectedBook['isbn'] as String?)?.trim();
+    if (selectedIsbn != null && selectedIsbn.isNotEmpty) {
+      return selectedBook;
+    }
+
+    final targetVolumeKey = _bookVolumeKey(selectedBook);
+    Map<String, dynamic>? best;
+    for (final candidate in _results) {
+      if (_bookVolumeKey(candidate) != targetVolumeKey) continue;
+
+      final candidateIsbn = (candidate['isbn'] as String?)?.trim();
+      if (candidateIsbn == null || candidateIsbn.isEmpty) continue;
+
+      if (best == null) {
+        best = candidate;
+        if (_isLikelyIsbn13(candidateIsbn)) {
+          break;
+        }
+        continue;
+      }
+
+      final bestIsbn = (best['isbn'] as String?)?.trim();
+      if (bestIsbn == null || bestIsbn.isEmpty) {
+        best = candidate;
+        continue;
+      }
+
+      if (!_isLikelyIsbn13(bestIsbn) && _isLikelyIsbn13(candidateIsbn)) {
+        best = candidate;
+        break;
+      }
+    }
+
+    if (best != null) return best;
+
+    return selectedBook;
+  }
+
   /// Adds the selected book to the user's bookshelf in Supabase
   Future<void> _addSelectedBook() async {
     if (_selectedIndex == null) return;
 
-    // Resolve the selected search result into a data record we can validate and save.
+    // Step 1: capture the exact tapped row, then attempt heuristic promotion
+    // to a sibling row with ISBN if the tapped one is missing identifiers.
     final selectedBook = _results[_selectedIndex!];
+    final bookToAdd = _resolveBestBookRecord(selectedBook);
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) {
@@ -1416,10 +1548,21 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     });
 
     try {
-      // Extract the fields needed by both duplicate detection and database writes.
-      final title = selectedBook['title'] as String?;
-      final authors = selectedBook['authors'] as List<String>?;
-      final isbn = selectedBook['isbn'] as String?;
+      // Step 2: read canonical fields from the chosen candidate row.
+      final title = bookToAdd['title'] as String?;
+      final authors = bookToAdd['authors'] as List<String>?;
+      String? isbn = bookToAdd['isbn'] as String?;
+      final volumeId =
+          (bookToAdd['volume_id'] as String?) ??
+          (selectedBook['volume_id'] as String?);
+
+      // Step 3: if ISBN is still absent, query the exact Google volume by id
+      // and extract ISBN_13/10 directly from that authoritative payload.
+      if ((isbn == null || isbn.isEmpty) &&
+          volumeId != null &&
+          volumeId.isNotEmpty) {
+        isbn = await _fetchPreferredIsbnForVolumeId(volumeId);
+      }
 
       // Refuse to persist incomplete catalog rows. ISBN is also the business key
       // used to determine whether a book already exists on a shelf.
@@ -1430,6 +1573,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         throw Exception('Failed to add to bookshelf due to missing Author');
       }
       if (isbn == null || isbn.isEmpty) {
+        // Validation intentionally blocks insert when no ISBN_13/10 could be
+        // established, preserving data integrity for duplicate checks.
         throw Exception('Failed to add to bookshelf due to missing ISBN');
       }
 
@@ -1469,7 +1614,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       }
 
       final author = authors.join(', ');
-      final thumbnail = selectedBook['thumbnail'] as String?;
+      final thumbnail = bookToAdd['thumbnail'] as String?;
 
       // Persist the canonical book metadata first. bookshelf_items will point at
       // this catalog row through book_id.
