@@ -232,8 +232,8 @@ class AppTheme {
         titleTextStyle: _bookNameStyle(colorScheme),
         subtitleTextStyle: _textTheme(colorScheme).bodyMedium?.copyWith(
           color: colorScheme.brightness == Brightness.dark
-          ? Colors.white70
-          : AppColors.textPrimary,
+              ? Colors.white70
+              : AppColors.textPrimary,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -331,9 +331,9 @@ class AppTheme {
       ).copyWith(fillColor: const Color(0xFF2A2A2A)),
       listTileTheme: ListTileThemeData(
         titleTextStyle: _bookNameStyle(colorScheme),
-        subtitleTextStyle: _textTheme(colorScheme).bodyMedium?.copyWith(
-          color: Colors.white70,
-        ),
+        subtitleTextStyle: _textTheme(
+          colorScheme,
+        ).bodyMedium?.copyWith(color: Colors.white70),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: _pillButtonStyle(

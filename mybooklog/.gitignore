@@ -1,3 +1,6 @@
+# Build-time secrets injected via --dart-define-from-file (see env.example.json)
+env.json
+
 # Miscellaneous
 *.class
 *.log
