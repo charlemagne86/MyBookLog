@@ -1,3 +1,9 @@
+-- PLAIN ENGLISH: The database has internal helper routines that are meant to
+-- run only automatically (for example, when a new account is created). By
+-- default they were also reachable directly over the internet as web
+-- endpoints. This switches off that direct access; the automatic behavior
+-- is unaffected.
+--
 -- Trigger functions must never be callable as PostgREST RPCs. The baseline
 -- handle_new_user_bookshelf() was already locked to the trigger owner
 -- (service_role only), but handle_new_user_profile() (added in the SEC-7

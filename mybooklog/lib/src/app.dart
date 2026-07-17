@@ -10,8 +10,16 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/bookshelf_repository.dart';
 import 'data/services/google_books_service.dart';
 
-/// Root widget: wires repositories/services and theme into the tree via
-/// Provider, and drives navigation with an auth-aware GoRouter.
+/// Root widget: the top of the entire user interface.
+///
+/// Think of this as the app's "wiring closet". It creates the three helpers
+/// the rest of the app relies on —
+///   * AuthRepository        (logging in and out),
+///   * BookshelfRepository   (reading and saving the user's books),
+///   * GoogleBooksService    (searching the internet for books),
+/// — and makes them available to every screen. It also sets up the color
+/// theme (light/dark) and the "router", which decides which screen the user
+/// sees and keeps logged-out users away from the bookshelf.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -29,6 +37,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    // Runs exactly once when the app starts: create each shared helper and
+    // the navigation router. They live for the whole lifetime of the app.
     final client = Supabase.instance.client;
     _authRepository = AuthRepository(client);
     _bookshelfRepository = BookshelfRepository(client);
@@ -44,6 +54,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // MultiProvider "publishes" the shared helpers so any screen, no matter
+    // how deep, can reach them without passing them along by hand.
     return MultiProvider(
       providers: [
         Provider<AuthRepository>.value(value: _authRepository),
@@ -51,6 +63,8 @@ class _MyAppState extends State<MyApp> {
         Provider<GoogleBooksService>.value(value: _googleBooksService),
         ChangeNotifierProvider<ThemeProvider>.value(value: _themeProvider),
       ],
+      // Consumer re-draws the app whenever the theme changes (for example if
+      // the user switches between light and dark mode).
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp.router(

@@ -1,8 +1,12 @@
 /// Centralized, compile-time application configuration.
 ///
-/// Values are injected at build time via `--dart-define` (or
-/// `--dart-define-from-file=env.json`) so that secrets never live in source
-/// control. See `env.example.json` for the expected keys.
+/// In plain terms: the app needs a few "addresses and keys" to talk to
+/// outside services (the Supabase database and the Google Books search).
+/// Rather than writing secret keys directly into the source code — where
+/// anyone reading the code could steal them — they are handed to the app at
+/// the moment it is built, via `--dart-define` (or
+/// `--dart-define-from-file=env.json`). See `env.example.json` for the
+/// expected keys.
 ///
 /// Example:
 /// ```

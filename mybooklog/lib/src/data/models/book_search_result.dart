@@ -1,7 +1,11 @@
 import '../../core/utils.dart';
 
-/// A single candidate book returned by the Google Books API, normalized into a
-/// typed shape the UI and add-to-shelf flow can consume.
+/// One book found by an internet search (via Google's book database),
+/// tidied up into a predictable shape the app's screens can display.
+///
+/// A note on ISBNs: an ISBN is the unique product number printed on the back
+/// of every published book. This app uses it as the fingerprint that tells
+/// two books apart — it is how the app knows "you already have this one".
 class BookSearchResult {
   final String? volumeId;
   final String title;
@@ -21,14 +25,20 @@ class BookSearchResult {
     required this.isbn,
   });
 
+  /// The author names as one readable line ("Jane Smith, John Doe"), or
+  /// "Unknown author" when the search result had none.
   String get authorsLabel =>
       authors.isNotEmpty ? authors.join(', ') : 'Unknown author';
 
+  /// Whether this result carries a usable ISBN (see the class note above).
   bool get hasIsbn => (isbn != null && isbn!.trim().isNotEmpty);
 
-  /// Extracts the preferred ISBN from Google Books `industryIdentifiers`.
-  /// Prefers ISBN_13, then ISBN_10; null if neither exists. Defensive against
-  /// the dynamic, sometimes-malformed shapes Google returns.
+  /// Picks the best ISBN out of the identifiers Google sends back.
+  ///
+  /// Books often have two: a modern 13-digit one and an older 10-digit one.
+  /// We prefer the 13-digit form, fall back to the 10-digit form, and answer
+  /// "none" if neither exists. Written defensively because Google's data is
+  /// sometimes incomplete or oddly shaped — bad entries are simply skipped.
   static String? extractPreferredIsbn(dynamic rawIdentifiers) {
     final list = rawIdentifiers as List<dynamic>?;
     String? isbn13;
@@ -50,13 +60,15 @@ class BookSearchResult {
     return isbn13 ?? isbn10;
   }
 
-  /// Builds a result from a single Google Books `items[]` entry, or null when
-  /// the entry has no usable `volumeInfo`.
+  /// Converts one raw entry from Google's search response into our tidy
+  /// format. If the entry is missing its core details entirely, we return
+  /// nothing and the entry is dropped from the results list.
   static BookSearchResult? fromGoogleVolume(dynamic item) {
     if (item is! Map<String, dynamic>) return null;
     final volumeInfo = item['volumeInfo'] as Map<String, dynamic>?;
     if (volumeInfo == null) return null;
 
+    // Dig out the cover picture's web address, if one was provided.
     final imageLinks = volumeInfo['imageLinks'] as Map<String, dynamic>?;
     final thumb = imageLinks != null
         ? imageLinks['thumbnail'] as String?
@@ -73,8 +85,8 @@ class BookSearchResult {
     );
   }
 
-  /// Maps a Google Books `items` array to normalized results, skipping unusable
-  /// entries.
+  /// Converts a whole page of Google search results at once, quietly
+  /// skipping any entries too broken to use.
   static List<BookSearchResult> listFromGoogleItems(List<dynamic> items) {
     final out = <BookSearchResult>[];
     for (final item in items) {
@@ -84,7 +96,10 @@ class BookSearchResult {
     return out;
   }
 
-  /// Cross-page de-duplication key: ISBN when present, else title+authors.
+  /// A "fingerprint" used to spot duplicate search results (the same book
+  /// often appears again when loading more pages of results). The ISBN is the
+  /// fingerprint when we have one; otherwise the title-plus-authors combo
+  /// stands in for it.
   String identityKey() {
     final trimmedIsbn = isbn?.trim();
     if (trimmedIsbn != null && trimmedIsbn.isNotEmpty) {
@@ -93,7 +108,9 @@ class BookSearchResult {
     return 'fallback:${volumeKey()}';
   }
 
-  /// Title+authors grouping key for same-logical-volume heuristics.
+  /// A looser grouping key — just title plus authors — used to recognize
+  /// different editions of the SAME book (e.g. hardcover vs. paperback) among
+  /// the search results.
   String volumeKey() {
     final t = title.trim().toLowerCase();
     final a = authors
@@ -103,8 +120,9 @@ class BookSearchResult {
     return '$t::$a';
   }
 
-  /// True when the normalized ISBN looks like an ISBN-13 (digit-count only, not
-  /// a checksum). Used to prefer ISBN-13 siblings.
+  /// A quick check: does this ISBN look like the modern 13-digit kind?
+  /// We only count the digits (ignoring dashes and spaces); we don't verify
+  /// the number mathematically. Used to prefer 13-digit editions.
   static bool isLikelyIsbn13(String candidate) {
     return candidate.replaceAll(RegExp(r'[^0-9Xx]'), '').length == 13;
   }

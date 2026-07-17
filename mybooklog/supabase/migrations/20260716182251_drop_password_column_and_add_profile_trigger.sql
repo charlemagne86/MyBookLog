@@ -1,3 +1,10 @@
+-- PLAIN ENGLISH: Two fixes. First, delete a leftover column that stored a
+-- second, weaker copy of users' passwords — Supabase's login system already
+-- stores them properly, so this copy was pure risk. Second, teach the
+-- database to create each new user's profile row automatically at the moment
+-- their account is created (copying their name from the signup form), so the
+-- app never has to write to the profile table itself.
+--
 -- SEC-4: remove the redundant SHA-256 password store.
 alter table public.users drop column if exists encrypted_password;
 

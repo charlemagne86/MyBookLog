@@ -4,10 +4,18 @@ import 'package:provider/provider.dart';
 
 import '../../data/repositories/auth_repository.dart';
 
+/// The create-an-account screen: name, email, and password fields, with the
+/// checks that keep bad input out (empty fields, weak passwords, mismatched
+/// password confirmation).
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
-  /// Client-side password policy. Pure and unit-testable.
+  /// Checks whether a chosen password is strong enough.
+  ///
+  /// The rules: at least 8 characters, containing at least one letter, one
+  /// number, and one special character (like ! or ?). If a rule is broken,
+  /// this returns the message to show under the password box; if the password
+  /// is fine, it returns nothing.
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) return 'Password is required';
     final hasLetter = RegExp(r'[A-Za-z]').hasMatch(value);
@@ -46,16 +54,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  /// Runs when the Sign Up button is tapped.
+  ///
+  /// The order of events: first re-check every field's rules (names present,
+  /// password strong enough); then make sure the two password boxes match;
+  /// only then send the new account to the server. On success a confirmation
+  /// message appears briefly and the user is returned to the login screen.
   Future<void> _submit() async {
     setState(() {
       _errorText = null;
       _isSubmitting = true;
     });
 
+    // Step 1: run each field's own checks. Any failure shows its message
+    // under the offending field and we stop here.
     if (_formKey.currentState?.validate() != true) {
       setState(() => _isSubmitting = false);
       return;
     }
+    // Step 2: the "confirm password" box must match the password exactly.
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorText = 'Passwords do not match';
@@ -64,6 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
+    // Step 3: everything looks good — create the account on the server.
     try {
       await context.read<AuthRepository>().signUp(
         email: _usernameController.text,

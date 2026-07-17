@@ -8,6 +8,13 @@ import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/bookshelf_repository.dart';
 import 'widgets/book_on_shelf.dart';
 
+/// The app's home screen: the user's bookshelf.
+///
+/// Books are shown as a grid of covers, three per row. From here the user can:
+///   * tap + to search for and add a new book,
+///   * tap the magnifying glass to filter the shelf by title or author,
+///   * press and hold a book to remove it or mark it read/unread,
+///   * tap the door icon to log out.
 class BookshelfScreen extends StatefulWidget {
   const BookshelfScreen({super.key});
 
@@ -16,11 +23,16 @@ class BookshelfScreen extends StatefulWidget {
 }
 
 class _BookshelfScreenState extends State<BookshelfScreen> {
+  // The full list of the user's books, as last loaded from the database.
   List<ShelfBook> _books = [];
+  // True while the first load is in flight (shows the spinner).
   bool _loading = true;
+  // Whether the filter box is currently open, and what's typed into it.
   bool _showSearchBar = false;
   String _searchQuery = '';
   final _searchController = TextEditingController();
+  // Which book (if any) is currently "lifted" because its press-and-hold
+  // menu is open — used purely for the visual highlight effect.
   String? _contextMenuBookSelectionKey;
 
   static const String _menuActionRemove = 'remove';
@@ -40,12 +52,17 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     super.dispose();
   }
 
+  /// The books to actually show on screen. If the filter box has fewer than
+  /// three characters typed, we show everything (filtering on one or two
+  /// letters would flicker uselessly while the user is still typing).
   List<ShelfBook> get _visibleBooks {
     final query = _searchQuery.trim();
     if (query.length < 3) return _books;
     return _books.where((b) => b.matchesQuery(query)).toList();
   }
 
+  /// Loads (or reloads) the user's books from the database. Shows a spinner
+  /// while waiting; on failure, shows an error banner and an empty shelf.
   Future<void> _fetchBooks() async {
     setState(() => _loading = true);
     try {
@@ -67,6 +84,12 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
   }
 
+  /// Runs when the user presses and holds a book.
+  ///
+  /// The sequence: visually "lift" the pressed book, give a small vibration
+  /// so the user feels the press registered, then open a little menu right
+  /// where their finger is with two choices — Remove Book, or Mark as
+  /// Read/Unread. Whatever they pick (or dismiss) is handled at the end.
   Future<void> _onBookLongPress(ShelfBook book, Offset globalPosition) async {
     setState(() => _contextMenuBookSelectionKey = book.bookId);
     await HapticFeedback.selectionClick();
@@ -101,6 +124,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         ],
       );
     } finally {
+      // The menu has closed (chosen or dismissed) — un-lift the book.
       if (mounted) setState(() => _contextMenuBookSelectionKey = null);
     }
 
@@ -111,11 +135,15 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
   }
 
+  /// Deletes a book from the shelf: first in the database, and only if that
+  /// succeeds, from the grid on screen. A brief confirmation (or error)
+  /// message appears at the bottom either way.
   Future<void> _removeBook(ShelfBook book) async {
     try {
       await _repo.removeBook(book.bookId);
       if (!mounted) return;
       setState(() {
+        // Rebuild the on-screen list without the removed book.
         _books = _books
             .where((b) => b.bookId != book.bookId)
             .toList(growable: false);
@@ -131,12 +159,15 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
   }
 
+  /// Flips a book between read and unread: saves the change to the database
+  /// first, then updates the checkmark badge on screen to match.
   Future<void> _toggleReadStatus(ShelfBook book) async {
     final newValue = !book.isRead;
     try {
       await _repo.setReadStatus(book.bookId, isRead: newValue);
       if (!mounted) return;
       setState(() {
+        // Swap the one changed book for an updated copy; leave the rest as-is.
         _books = _books
             .map(
               (b) => b.bookId == book.bookId ? b.copyWith(isRead: newValue) : b,
@@ -158,12 +189,16 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
   }
 
+  /// Opens the "Add Book" flow, and when the user comes back, reloads the
+  /// shelf so any newly added book appears immediately.
   Future<void> _onAddBook() async {
     await context.push('/shelf/add');
     if (!mounted) return;
     await _fetchBooks();
   }
 
+  /// Opens or closes the shelf's filter box. Closing it also erases the
+  /// typed text so the full shelf is visible again.
   void _onSearchBook() {
     setState(() {
       _showSearchBar = !_showSearchBar;
@@ -174,6 +209,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     });
   }
 
+  /// Signs the user out. The router notices and returns them to the login
+  /// screen automatically.
   Future<void> _onLogout() async {
     try {
       await context.read<AuthRepository>().signOut();
@@ -223,6 +260,9 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     );
   }
 
+  /// The filter box that slides in under the title bar. Its helper line
+  /// coaches the user ("Enter at least 3 characters!") and then reports how
+  /// many books match. The small × button clears the text in one tap.
   Widget _buildSearchBar(ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
@@ -258,6 +298,11 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     );
   }
 
+  /// The main body of the screen. It shows one of three things:
+  ///   1. a spinner while the shelf is still loading,
+  ///   2. a helpful message when there is nothing to show (shelf empty, or
+  ///      no books match the filter),
+  ///   3. otherwise, the grid of book covers itself.
   Widget _buildGrid(ColorScheme colorScheme) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
@@ -273,6 +318,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         ),
       );
     }
+    // Three covers per row; each cell is taller than wide, like a real book.
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Defines light and dark ThemeData configurations for the app.
+/// The app's complete "style guide", in code form.
+///
+/// This file decides, in one place, how every screen looks: which fonts and
+/// sizes headings and body text use, how text boxes and buttons are shaped,
+/// how cards and menus are shadowed, and so on. Individual screens then
+/// simply say "give me a button" and automatically get one styled this way.
+/// There is one full definition for light mode and one for dark mode.
 class AppTheme {
   AppTheme._();
 
+  // Two typefaces: a bookish serif (Merriweather) for large headings, and a
+  // clean, highly readable sans-serif (Inter) for everything else.
   static const String _headlineFont = 'Merriweather';
   static const String _bodyFont = 'Inter';
 
+  /// The full menu of text styles (from big page headings down to small
+  /// labels). Note the sizes run larger than typical apps — a deliberate
+  /// choice for the 60+ audience: body text starts at 16-18pt.
   static TextTheme _textTheme(ColorScheme scheme) {
     // `final` (not `const`) avoids a CFE crash in certain Dart versions
     // where const-propagation into List<String> parameters is mishandled.
@@ -86,6 +97,8 @@ class AppTheme {
     );
   }
 
+  /// The style for the title in each screen's top bar, with a whisper of
+  /// shadow for legibility against the colored bar.
   static TextStyle _pageTitleStyle({
     required TextStyle baseStyle,
     required Color color,
@@ -105,6 +118,7 @@ class AppTheme {
     );
   }
 
+  /// The style used for book titles in lists, adjusted for light/dark mode.
   static TextStyle _bookNameStyle(ColorScheme scheme) {
     return TextStyle(
       fontFamily: _bodyFont,
@@ -116,6 +130,9 @@ class AppTheme {
     );
   }
 
+  /// How every text box in the app looks: softly rounded corners, a faint
+  /// border that turns green when tapped into and red when its content is
+  /// invalid, and generous inner padding for easier tapping and reading.
   static InputDecorationTheme _inputTheme(ColorScheme scheme) {
     final rounded = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -161,6 +178,9 @@ class AppTheme {
     );
   }
 
+  /// The shared shape for all buttons: a rounded "pill" at least 54 pixels
+  /// tall — comfortably above the recommended minimum touch-target size, so
+  /// buttons are easy to hit even with less steady hands.
   static ButtonStyle _pillButtonStyle({
     required Color background,
     required Color foreground,
@@ -185,6 +205,8 @@ class AppTheme {
     );
   }
 
+  /// The complete light-mode look, assembled from the helpers above.
+  /// All colors are derived from the single sage-green accent color.
   static ThemeData get lightTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.accentSage,
@@ -298,7 +320,10 @@ class AppTheme {
     );
   }
 
-  // Ready for future dark mode support; can be expanded incrementally.
+  /// The dark-mode look: same fonts and shapes on near-black backgrounds
+  /// with white text. Less fully specified than light mode (e.g. cards,
+  /// menus, and message banners still use framework defaults here); it can
+  /// be expanded incrementally.
   static ThemeData get darkTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.accentSage,

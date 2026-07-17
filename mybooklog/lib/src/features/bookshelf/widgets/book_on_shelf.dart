@@ -1,8 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-/// A single book cover on the shelf grid, with an optional "read" badge and a
-/// long-press lift animation.
+/// Draws one book in the shelf grid: the cover picture with a soft shadow
+/// (so it appears to sit on a shelf), the title underneath, a green
+/// checkmark badge when the book has been read, and a subtle "lift" animation
+/// while the user is holding their finger on it.
+///
+/// If the cover picture is missing or fails to download, a generic open-book
+/// icon is shown in its place. Downloaded covers are cached on the device so
+/// they appear instantly (and offline) on later visits.
 class BookOnShelf extends StatelessWidget {
   const BookOnShelf({
     super.key,
@@ -24,10 +30,14 @@ class BookOnShelf extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // The cover keeps a real book's proportions (2 wide : 3 tall).
         AspectRatio(
           aspectRatio: 0.67,
           child: Stack(
             children: [
+              // The three "Animated..." layers below create the lift effect
+              // during a press-and-hold: the cover slides up a touch, grows
+              // slightly, and gains a green outline and glow.
               AnimatedSlide(
                 duration: const Duration(milliseconds: 140),
                 curve: Curves.easeOut,
@@ -98,6 +108,8 @@ class BookOnShelf extends StatelessWidget {
                   ),
                 ),
               ),
+              // The small round checkmark badge in the top-left corner,
+              // shown only on books marked as read.
               if (isRead)
                 Positioned(
                   top: 6,
@@ -124,6 +136,7 @@ class BookOnShelf extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        // The title below the cover: at most two lines, with "…" when longer.
         Text(
           title,
           maxLines: 2,

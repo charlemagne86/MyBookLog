@@ -8,7 +8,9 @@ import '../../core/config/app_config.dart';
 import '../../data/services/google_books_service.dart';
 import 'search_results_page.dart';
 
-/// Lets the user search Google Books by title and/or author.
+/// The "Add Book" screen: two text boxes (Title and Author) and a Search
+/// button. Filling in either box (or both) and tapping Search looks the book
+/// up on the internet and moves to the results screen to pick the right one.
 class AddBookPage extends StatefulWidget {
   const AddBookPage({super.key});
 
@@ -29,6 +31,12 @@ class _AddBookPageState extends State<AddBookPage> {
     super.dispose();
   }
 
+  /// Runs when the Search button is tapped.
+  ///
+  /// Before actually searching, two quick checks: (1) this build of the app
+  /// must have a search access key configured at all, and (2) the user must
+  /// have typed something. Then the search runs, the button shows
+  /// "Searching...", and on success we move to the results screen.
   Future<void> _searchBooks() async {
     if (!AppConfig.hasGoogleBooksApiKey) {
       setState(() {
@@ -38,6 +46,7 @@ class _AddBookPageState extends State<AddBookPage> {
       });
       return;
     }
+    // Turn the typed title/author into the search phrase Google expects.
     final query = GoogleBooksService.buildQuery(
       title: _titleController.text,
       author: _authorController.text,
@@ -56,6 +65,8 @@ class _AddBookPageState extends State<AddBookPage> {
     try {
       final page = await context.read<GoogleBooksService>().search(query);
       if (!mounted) return;
+      // Hand the first page of results (and the search phrase, so the next
+      // screen can fetch more pages) over to the results screen.
       unawaited(
         context.push(
           '/shelf/results',

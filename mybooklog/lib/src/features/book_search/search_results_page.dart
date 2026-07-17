@@ -7,7 +7,9 @@ import '../../data/models/book_search_result.dart';
 import '../../data/repositories/bookshelf_repository.dart';
 import '../../data/services/google_books_service.dart';
 
-/// Navigation payload for the results screen.
+/// The bundle of information the Add Book screen hands to the results screen:
+/// the first page of found books, the search phrase (needed to fetch further
+/// pages), and how many matches exist in total.
 class SearchResultsArgs {
   const SearchResultsArgs({
     required this.results,
@@ -19,6 +21,13 @@ class SearchResultsArgs {
   final int? totalItems;
 }
 
+/// The search results screen: a scrolling list of found books, each showing
+/// its cover, title, and author.
+///
+/// The user taps a book to select it (tap again to un-select), then taps the
+/// big "Add to Bookshelf" button that appears at the bottom. Scrolling near
+/// the end of the list quietly fetches the next page of results, so the list
+/// feels endless.
 class SearchResultsPage extends StatefulWidget {
   const SearchResultsPage({super.key, required this.args});
   final SearchResultsArgs args;
@@ -28,11 +37,17 @@ class SearchResultsPage extends StatefulWidget {
 }
 
 class _SearchResultsPageState extends State<SearchResultsPage> {
+  // Which list entry is currently selected (highlighted), if any.
   int? _selectedIndex;
+  // True while the chosen book is being saved to the shelf.
   bool _isAdding = false;
+  // True while the next page of results is being fetched.
   bool _isLoadingMore = false;
+  // False once we know we've seen everything the search can offer.
   bool _hasMoreResults = true;
+  // Every result gathered so far (first page plus any extra pages).
   late List<BookSearchResult> _results;
+  // Watches the list's scroll position to know when to fetch more.
   final _scrollController = ScrollController();
 
   GoogleBooksService get _service => context.read<GoogleBooksService>();
@@ -53,12 +68,18 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     super.dispose();
   }
 
+  /// A first guess at whether more results exist beyond the first page:
+  /// trust Google's reported total when we have it; otherwise assume "yes"
+  /// whenever the first page came back full.
   bool get _hasExpectedMoreResults {
     final total = widget.args.totalItems;
     if (total != null) return _results.length < total;
     return _results.length >= GoogleBooksService.pageSize;
   }
 
+  /// Runs on every scroll movement. When the user is within about one
+  /// screen-height of the bottom, start fetching the next page — unless a
+  /// fetch is already running or there is nothing more to fetch.
   void _onScroll() {
     if (!_scrollController.hasClients || _isLoadingMore || !_hasMoreResults) {
       return;
@@ -69,6 +90,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     }
   }
 
+  /// Fetches the next page of results and stitches it onto the list.
   Future<void> _loadMoreResults() async {
     setState(() => _isLoadingMore = true);
     try {
@@ -78,10 +100,14 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       );
       if (!mounted) return;
       setState(() {
+        // Google sometimes repeats books across pages; compare fingerprints
+        // and keep only the ones we haven't already got.
         final existingKeys = _results.map((r) => r.identityKey()).toSet();
         for (final result in page.results) {
           if (existingKeys.add(result.identityKey())) _results.add(result);
         }
+        // Decide whether it is worth fetching again later: stop once we've
+        // reached the reported total, or once a page comes back empty/short.
         final reachedKnownEnd =
             page.totalItems != null && _results.length >= page.totalItems!;
         _hasMoreResults =
@@ -99,8 +125,14 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     }
   }
 
-  /// Promotes a selection with no ISBN to a same-volume sibling that has one
-  /// (preferring ISBN-13), else returns the original.
+  /// Quietly improves the user's pick when it lacks an ISBN (the product
+  /// number the app uses to tell books apart — see BookSearchResult).
+  ///
+  /// The same book often appears in the results several times as different
+  /// editions. If the tapped edition has no ISBN, this looks through the
+  /// other editions of the same title/author for one that does (preferring
+  /// the modern 13-digit kind) and uses that instead. If none is found, the
+  /// original pick is kept and a later fallback lookup will try the internet.
   BookSearchResult _resolveBestRecord(BookSearchResult selected) {
     if (selected.hasIsbn) return selected;
     final targetKey = selected.volumeKey();
@@ -121,6 +153,14 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     return best ?? selected;
   }
 
+  /// Runs when "Add to Bookshelf" is tapped: saves the selected book.
+  ///
+  /// Step by step: pick the best edition of the selection; if it still has
+  /// no ISBN, ask the internet for one; refuse to save a book missing its
+  /// title, author, or ISBN (a record that incomplete could not be reliably
+  /// recognized later); then save it. If it turns out the book was already
+  /// on the shelf, tell the user so and stay on this screen; otherwise
+  /// confirm and return to the shelf.
   Future<void> _addSelectedBook() async {
     if (_selectedIndex == null) return;
     final selected = _results[_selectedIndex!];
@@ -130,6 +170,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
     setState(() => _isAdding = true);
     try {
+      // Last-resort ISBN lookup: fetch the book's full record by its
+      // Google ID, which usually includes the ISBN the search result lacked.
       var isbn = book.isbn;
       final volumeId = book.volumeId ?? selected.volumeId;
       if ((isbn == null || isbn.isEmpty) &&
@@ -138,6 +180,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         isbn = await _service.fetchPreferredIsbnForVolume(volumeId);
       }
 
+      // A book we can't identify later is worse than no book: refuse to
+      // save anything missing these three essentials.
       if (book.title.isEmpty) {
         throw Exception('Failed to add to bookshelf due to missing Title');
       }
@@ -256,12 +300,16 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     );
   }
 
+  /// Draws one book in the results list: cover on the left, title and author
+  /// on the right. When selected, the card turns green-tinted, gains a border,
+  /// and shows a checkmark on its right edge.
   Widget _buildResultTile(int index, ColorScheme colorScheme) {
     final item = _results[index];
     final isSelected = _selectedIndex == index;
     final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
+      // Tapping selects this book; tapping it again deselects it.
       onTap: () => setState(() => _selectedIndex = isSelected ? null : index),
       child: Container(
         decoration: BoxDecoration(

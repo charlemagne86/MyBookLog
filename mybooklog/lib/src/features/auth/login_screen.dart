@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 
 import '../../data/repositories/auth_repository.dart';
 
-/// Email/password login. Navigation on success is handled by the router's
-/// auth redirect (reacting to the sign-in), so this screen only signs in and
-/// surfaces errors.
+/// The login screen: an email box, a password box, and a Login button.
+///
+/// When login succeeds, this screen does not navigate anywhere itself — the
+/// app's router notices the successful sign-in and moves the user to their
+/// bookshelf automatically. This screen's only jobs are to send the login
+/// request and to show a friendly message if it fails.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,10 +18,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // These two "controllers" hold whatever the user has typed into the email
+  // and password boxes.
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  // Whether the password is currently hidden as dots (the eye icon flips it).
   bool _obscurePassword = true;
+  // True while we are waiting for the server, so the button can show a
+  // spinner and ignore repeat taps.
   bool _isSubmitting = false;
+  // The error message currently on display, or null when there is none.
   String? _errorText;
 
   @override
@@ -28,6 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Runs when the Login button is tapped: clear any old error, show the
+  /// waiting spinner, and ask the server to check the email and password.
   Future<void> _login() async {
     setState(() {
       _errorText = null;

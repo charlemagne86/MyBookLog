@@ -1,3 +1,12 @@
+-- PLAIN ENGLISH: This teaches the database a single safe procedure for
+-- adding a book to a shelf, called `add_book_to_shelf`. In one all-or-nothing
+-- step it: (1) checks the caller is logged in and provided an ISBN and title,
+-- (2) files the book into the shared catalog — or updates the existing entry
+-- if the ISBN is already known, (3) links it to the caller's shelf, and
+-- (4) reports back whether it was already there. Because both writes happen
+-- together, a failure can never leave a half-added book. Finally, it turns on
+-- the privacy enforcement for the catalog that was accidentally left off.
+--
 -- SEC-3 + BUG-1: atomic add-book RPC, then lock down books_catalog with RLS.
 create or replace function public.add_book_to_shelf(
   p_isbn text, p_title text, p_author text, p_thumbnail_uri text

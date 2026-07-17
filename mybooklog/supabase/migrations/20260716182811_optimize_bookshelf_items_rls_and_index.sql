@@ -1,3 +1,9 @@
+-- PLAIN ENGLISH: Two speed improvements, no behavior change. First, the
+-- privacy rules on shelf entries used to re-ask "who is the current user?"
+-- for every single row they checked; now they ask once per query. Second, we
+-- add an index — like a book's alphabetical index — so finding which shelves
+-- contain a given book no longer requires reading the whole table.
+--
 -- PERF-3: evaluate auth.uid() once per statement via scalar subquery.
 drop policy if exists bookshelf_items_select_own on public.bookshelf_items;
 create policy bookshelf_items_select_own on public.bookshelf_items

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 /// App-wide color constants (raw palette values).
+///
+/// Every color the app uses is named and defined in this one place, so the
+/// whole app can be re-colored by editing this file only. The palette is a
+/// warm, calm "library" feel: an oatmeal background, deep charcoal text, and
+/// a muted sage green as the single accent color.
 class AppColors {
   AppColors._();
 

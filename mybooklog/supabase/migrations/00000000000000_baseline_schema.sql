@@ -1,3 +1,15 @@
+-- PLAIN ENGLISH: This file describes the database's original layout — the
+-- four filing cabinets the app stores everything in:
+--   * users           — one row per person: their name and email.
+--   * bookshelf       — one row per person: "this person has a shelf".
+--   * books_catalog   — one row per unique book anyone has ever added
+--                       (title, author, ISBN, cover picture). Shared by all.
+--   * bookshelf_items — the links: "this person's shelf contains this book",
+--                       plus whether they've read it and when.
+-- It also sets up automatic behaviors (e.g. "when a new account is created,
+-- give it an empty shelf") and the privacy rules ("Row Level Security") that
+-- make the database itself refuse to show anyone another person's shelf.
+--
 -- Baseline schema as it existed BEFORE the Phase 0-3 remediation.
 -- Reconstructed from the live database (the schema was originally built via the
 -- Supabase dashboard, so no prior migrations existed). The remediation

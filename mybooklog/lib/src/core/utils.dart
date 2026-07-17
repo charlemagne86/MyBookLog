@@ -1,8 +1,12 @@
 // Small, dependency-free helpers shared across the app.
 
-/// Rewrites a `http://` URL to `https://` so images are not blocked by
-/// cleartext-traffic policies on Android/iOS release builds. Returns an empty
-/// string for null/empty input.
+/// Rewrites a web address that starts with the insecure `http://` prefix so
+/// it starts with the secure `https://` prefix instead.
+///
+/// Why this matters: modern phones refuse to download pictures over insecure
+/// connections, so without this fix some book covers would silently fail to
+/// appear. If there is no address at all, we return an empty piece of text so
+/// the caller can show a placeholder icon instead of crashing.
 String toHttpsUrl(String? url) {
   if (url == null || url.isEmpty) return '';
   if (url.startsWith('http://')) {
