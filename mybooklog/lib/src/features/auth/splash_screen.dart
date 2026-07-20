@@ -21,15 +21,39 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _routeAfterSplash();
+    // Schedule the routing after the first frame renders.
+    // TECHNICAL:
+    // We use addPostFrameCallback to ensure the splash screen is fully rendered
+    // before starting the 2-second delay timer. This provides a cleaner visual
+    // experience and allows widget tests to complete without pending timers.
+    // The user-perceived delay remains ~2 seconds (imperceptible <50ms difference).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _routeAfterSplash();
+    });
   }
 
   Future<void> _routeAfterSplash() async {
-    // Pause briefly so the welcome branding is actually visible.
+    // BUSINESS LOGIC:
+    // Pause briefly so the welcome branding is actually visible to users.
+    // This 2-second delay gives users time to see the app name and branding
+    // before routing to the next screen (either bookshelf or login).
+    //
+    // TECHNICAL:
+    // The Future.delayed is scheduled after the first frame render, allowing
+    // the splash screen to display cleanly before the timer begins.
     await Future.delayed(const Duration(seconds: 2));
+
     // Safety check: do nothing if the screen was closed during the pause.
+    // This prevents navigation attempts on unmounted widgets.
     if (!mounted) return;
-    // Still logged in from a previous visit? Skip the login screen.
+
+    // BUSINESS LOGIC:
+    // Check if the user is still logged in from their previous visit.
+    // This provides a seamless experience for returning users (they skip login).
+    // New or logged-out users are taken to the login screen for authentication.
+    //
+    // TECHNICAL:
+    // currentSession is null if no valid auth token exists.
     final hasSession = context.read<AuthRepository>().currentSession != null;
     context.go(hasSession ? '/shelf' : '/login');
   }

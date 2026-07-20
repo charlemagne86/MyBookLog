@@ -44,11 +44,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  # Testing & Mocking
+  mocktail: ^1.0.5              # Mocking framework for Dart
+  integration_test:
+    sdk: flutter
+
+  # Coverage & CI
+  coverage: ^1.7.0              # Coverage data collection
+
+  # Code quality
   flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
