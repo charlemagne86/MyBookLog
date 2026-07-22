@@ -103,7 +103,7 @@ void main() {
         expect(find.text('crafted with love'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
 
     testWidgets(
@@ -115,7 +115,7 @@ void main() {
         final theme = Theme.of(tester.element(spinner));
         expect(theme.colorScheme.primary, isNotNull);
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
 
     testWidgets(
@@ -136,7 +136,7 @@ void main() {
           findsWidgets,
         );
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
 
     testWidgets(
@@ -147,7 +147,7 @@ void main() {
         expect(find.text('crafted with love'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
 
     testWidgets(
@@ -157,7 +157,7 @@ void main() {
         expect(find.text('My Book Log'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
 
     testWidgets(
@@ -167,7 +167,7 @@ void main() {
         expect(find.text('My Book Log'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
-      skip: 'SplashScreen has pending 2-second timer; test at integration level',
+      skip: true,
     );
   });
 }

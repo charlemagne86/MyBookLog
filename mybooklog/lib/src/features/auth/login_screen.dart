@@ -148,7 +148,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account? "),
+                    const Flexible(
+                      child: Text(
+                        "Don't have an account? ",
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => context.push('/signup'),
                       child: const Text('Sign up'),
