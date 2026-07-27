@@ -34,110 +34,14 @@ class MockPostgrestFilterBuilder extends Mock
 class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 
 // ============================================================================
-// Mock Authentication Results
+// Mock Session & User (use Mock directly to avoid SDK interface changes)
 // ============================================================================
 
-/// Mock [Session] representing an authenticated user.
-class MockSession implements Session {
-  MockSession({
-    this.accessToken = 'test-access-token',
-    this.tokenType = 'Bearer',
-    this.expiresIn = 3600,
-    this.expiresAt,
-    this.refreshToken,
-    this.user,
-  });
+/// Mock [Session] using mocktail's Mock (handles interface changes automatically)
+class MockSession extends Mock implements Session {}
 
-  @override
-  final String accessToken;
-
-  @override
-  final String tokenType;
-
-  @override
-  final int expiresIn;
-
-  @override
-  final int? expiresAt;
-
-  @override
-  final String? refreshToken;
-
-  @override
-  final User? user;
-
-  @override
-  bool get isExpired => false;
-
-  @override
-  DateTime? get persistSessionString => null;
-
-  // Unused in tests
-  @override
-  set persistSessionString(DateTime? value) {}
-}
-
-/// Mock [User] representing an authenticated user account.
-class MockUser implements User {
-  MockUser({
-    this.id = 'user-123',
-    this.appMetadata = const {},
-    this.userMetadata = const {},
-    this.aud = 'authenticated',
-    this.confirmationSentAt,
-    this.confirmedAt = DateTime(2026, 1, 1),
-    this.email = 'test@example.com',
-    this.emailConfirmedAt,
-    this.phone,
-    this.phoneConfirmedAt,
-    this.lastSignInAt,
-    this.createdAt = DateTime(2026, 1, 1),
-    this.updatedAt = DateTime(2026, 1, 1),
-    this.identities,
-  });
-
-  @override
-  final String id;
-
-  @override
-  final Map<String, dynamic> appMetadata;
-
-  @override
-  final Map<String, dynamic> userMetadata;
-
-  @override
-  final String aud;
-
-  @override
-  final DateTime? confirmationSentAt;
-
-  @override
-  final DateTime? confirmedAt;
-
-  @override
-  final String? email;
-
-  @override
-  final DateTime? emailConfirmedAt;
-
-  @override
-  final String? phone;
-
-  @override
-  final DateTime? phoneConfirmedAt;
-
-  @override
-  final DateTime? lastSignInAt;
-
-  @override
-  final DateTime createdAt;
-
-  @override
-  final DateTime updatedAt;
-
-  @override
-  final List<UserIdentity>? identities;
-}
+/// Mock [User] using mocktail's Mock (handles interface changes automatically)
+class MockUser extends Mock implements User {}
 
 // ============================================================================
 // Setup Helpers
@@ -149,8 +53,13 @@ void setupMockAuthSuccess(
   String userId = 'user-123',
   String email = 'test@example.com',
 }) {
-  final mockUser = MockUser(id: userId, email: email);
-  final mockSession = MockSession(user: mockUser);
+  final mockUser = MockUser();
+  when(() => mockUser.id).thenReturn(userId);
+  when(() => mockUser.email).thenReturn(email);
+
+  final mockSession = MockSession();
+  when(() => mockSession.user).thenReturn(mockUser);
+  when(() => mockSession.accessToken).thenReturn('test-token');
 
   when(() => mockClient.auth.currentUser).thenReturn(mockUser);
   when(() => mockClient.auth.currentSession).thenReturn(mockSession);
