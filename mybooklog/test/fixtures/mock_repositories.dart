@@ -31,11 +31,10 @@ class MockGoTrustClient extends Mock implements GoTrustClient {}
 
 /// Mock [PostgrestFilterBuilder] for query builder testing.
 class MockPostgrestFilterBuilder extends Mock
-    implements PostgrestFilterBuilder {}
+    implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {}
 
-/// Mock [PostgrestQueryBuilder] for starting queries.
-class MockPostgrestQueryBuilder extends Mock
-    implements PostgrestQueryBuilder {}
+/// Mock [SupabaseQueryBuilder] for starting queries.
+class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 
 // ============================================================================
 // Mock Authentication Results
@@ -160,10 +159,7 @@ void setupMockAuthSuccess(
   when(() => mockClient.auth.currentSession).thenReturn(mockSession);
   when(() => mockClient.auth.onAuthStateChange).thenAnswer(
     (_) => Stream.value(
-      AuthState(
-        event: AuthChangeEvent.signedIn,
-        session: mockSession,
-      ),
+      AuthState(AuthChangeEvent.signedIn, mockSession),
     ),
   );
 }
@@ -174,7 +170,7 @@ void setupMockAuthFailure(MockSupabaseClient mockClient) {
   when(() => mockClient.auth.currentSession).thenReturn(null);
   when(() => mockClient.auth.onAuthStateChange).thenAnswer(
     (_) => Stream.value(
-      AuthState(event: AuthChangeEvent.signedOut, session: null),
+      AuthState(AuthChangeEvent.signedOut, null),
     ),
   );
 }
@@ -184,12 +180,13 @@ void setupMockShelfFetch(
   MockSupabaseClient mockClient, {
   required List<Map<String, dynamic>> books,
 }) {
-  // Build the chain: client.from('table').select(...).eq(...)
+  // Build the chain: client.from('table').select(...).eq(...).maybeSingle/toList
   final mockFilterBuilder = MockPostgrestFilterBuilder();
-  when(() => mockFilterBuilder.eq(any(), any()))
-      .thenAnswer((_) async => books);
+  // Mock both sync returns and async getters for different query patterns
+  when(() => mockFilterBuilder.maybeSingle())
+      .thenAnswer((_) async => books.isNotEmpty ? books.first : null);
 
-  final mockQueryBuilder = MockPostgrestQueryBuilder();
+  final mockQueryBuilder = MockSupabaseQueryBuilder();
   when(() => mockQueryBuilder.select(any()))
       .thenReturn(mockFilterBuilder);
 
