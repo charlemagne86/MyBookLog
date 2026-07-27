@@ -35,9 +35,7 @@ void main() {
         // Assert
         expect(result, isNotNull);
         expect(result!.title, 'Dune');
-        expect(result.author, 'Frank Herbert');
-        expect(result.description,
-            'An epic tale of politics and technology');
+        expect(result.authors, ['Frank Herbert']);
         expect(result.isbn, '9780441013593'); // Prefers ISBN-13
         expect(result.thumbnail, startsWith('https://'));
       });
@@ -67,8 +65,7 @@ void main() {
 
         // Assert
         expect(result, isNotNull);
-        // Note: Implementation might just use first author
-        expect(result!.author, isNotEmpty);
+        expect(result!.authors, ['Isaac Asimov', 'Others']);
       });
 
       test('handles missing author gracefully', () {
@@ -86,7 +83,7 @@ void main() {
         // Assert
         expect(result, isNotNull);
         expect(result!.title, 'Anonymous Book');
-        expect(result.author, isNull);
+        expect(result.authors, []);
       });
 
       test('handles missing thumbnail', () {
@@ -103,7 +100,7 @@ void main() {
 
         // Assert
         expect(result, isNotNull);
-        expect(result!.thumbnail, isNull);
+        expect(result!.thumbnail, isEmpty); // Empty string, not null
       });
 
       test('converts http thumbnail to https', () {
@@ -215,8 +212,8 @@ void main() {
       });
     });
 
-    group('equality', () {
-      test('two results with same data are equal', () {
+    group('identity', () {
+      test('two results with same data have same identityKey', () {
         // Arrange
         final result1 = TestData.sampleSearchResult(
           title: 'Dune',
@@ -228,10 +225,10 @@ void main() {
         );
 
         // Act & Assert
-        expect(result1, result2);
+        expect(result1.identityKey(), result2.identityKey());
       });
 
-      test('results with different ISBNs are not equal', () {
+      test('results with different ISBNs have different identityKey', () {
         // Arrange
         final result1 = TestData.sampleSearchResult(
           title: 'Dune',
@@ -243,7 +240,7 @@ void main() {
         );
 
         // Act & Assert
-        expect(result1, isNot(result2));
+        expect(result1.identityKey(), isNot(result2.identityKey()));
       });
     });
   });

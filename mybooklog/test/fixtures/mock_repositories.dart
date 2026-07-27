@@ -26,9 +26,6 @@ class MockBookshelfRepository extends Mock implements BookshelfRepository {}
 /// Mock [SupabaseClient] to replace the real database client.
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
-/// Mock [GoTrustClient] (Supabase Auth) for auth testing.
-class MockGoTrustClient extends Mock implements GoTrustClient {}
-
 /// Mock [PostgrestFilterBuilder] for query builder testing.
 class MockPostgrestFilterBuilder extends Mock
     implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {}
