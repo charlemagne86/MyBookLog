@@ -67,11 +67,12 @@ class IntegrationTestHelper {
   /// Creates or gets the mock repositories used in tests
   /// Sets up with REAL books from Google Books API for realistic testing
   Future<(MockAuthRepository, MockBookshelfRepository)> setupMocks() async {
+    if (_mockAuth != null && _mockBookshelf != null) {
+      return (_mockAuth!, _mockBookshelf!);
+    }
+
     _mockAuth = MockAuthRepository();
     _mockBookshelf = MockBookshelfRepository();
-
-    // Default setup: user not logged in
-    when(() => _mockAuth!.currentSession).thenReturn(null);
 
     // Mock the auth state change stream (required by router)
     when(() => _mockAuth!.onAuthStateChange).thenAnswer(
@@ -80,10 +81,10 @@ class IntegrationTestHelper {
       ),
     );
 
-    // Default shelf: REAL books from Google Books API
-    // This simulates a new user with populated bookshelf
-    final testBooks = await RealBookFixtures.getTestBooks();
-    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => testBooks);
+    // Default setup: user logged out, empty shelf
+    // These will be overridden by setLoggedInState() if needed
+    when(() => _mockAuth!.currentSession).thenReturn(null);
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
 
     return (_mockAuth!, _mockBookshelf!);
   }
@@ -152,10 +153,6 @@ class IntegrationTestHelper {
     // Store for later use
     _mockAuth = auth;
     _mockBookshelf = shelf;
-
-    // Default mocks if not provided
-    when(() => auth.currentSession).thenReturn(null);
-    when(() => shelf.fetchShelf()).thenAnswer((_) async => []);
 
     await tester.pumpWidget(
       MultiProvider(
