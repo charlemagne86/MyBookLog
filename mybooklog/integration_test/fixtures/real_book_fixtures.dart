@@ -32,7 +32,8 @@ class RealBookFixtures {
     try {
       // Fetch real books from Google Books API
       // Search for "classic novels" to get diverse, well-known books
-      final results = await _googleBooks.search('classic novels');
+      final page = await _googleBooks.search('classic novels');
+      final results = page.results;
 
       // Convert BookSearchResult to ShelfBook for bookshelf testing
       // Take first 5 results for a diverse test set
@@ -40,8 +41,8 @@ class RealBookFixtures {
         return ShelfBook(
           bookId: book.isbn ?? 'test-${results.indexOf(book)}',
           title: book.title,
-          author: book.author ?? 'Unknown Author',
-          thumbnailUri: book.thumbnailUri?.toString() ?? '',
+          author: book.authorsLabel,
+          thumbnailUri: book.thumbnail,
           isRead: false,
         );
       }).toList();
@@ -61,7 +62,8 @@ class RealBookFixtures {
     }
 
     try {
-      _cachedSearchResults = await _googleBooks.search('science fiction');
+      final page = await _googleBooks.search('science fiction');
+      _cachedSearchResults = page.results;
       return _cachedSearchResults!.take(5).toList();
     } catch (e) {
       return _getFallbackSearchResults();
@@ -120,44 +122,44 @@ class RealBookFixtures {
   static List<BookSearchResult> _getFallbackSearchResults() {
     return [
       BookSearchResult(
+        volumeId: 'dune-1',
         isbn: '9780553293357',
         title: 'Dune',
-        author: 'Frank Herbert',
-        description: 'Epic science fiction classic',
-        thumbnailUri: Uri.parse(
-            'https://books.google.com/books/content?id=B1hSG45JCX4C&printsec=frontcover&img=1'),
+        authors: ['Frank Herbert'],
+        thumbnail:
+            'https://books.google.com/books/content?id=B1hSG45JCX4C&printsec=frontcover&img=1',
       ),
       BookSearchResult(
+        volumeId: 'foundation-1',
         isbn: '9780451450524',
         title: 'Foundation',
-        author: 'Isaac Asimov',
-        description: 'Landmark science fiction',
-        thumbnailUri: Uri.parse(
-            'https://books.google.com/books/content?id=L1DhqwAACAAJ&printsec=frontcover&img=1'),
+        authors: ['Isaac Asimov'],
+        thumbnail:
+            'https://books.google.com/books/content?id=L1DhqwAACAAJ&printsec=frontcover&img=1',
       ),
       BookSearchResult(
+        volumeId: 'neuromancer-1',
         isbn: '9780316902778',
         title: 'Neuromancer',
-        author: 'William Gibson',
-        description: 'Cyberpunk classic',
-        thumbnailUri: Uri.parse(
-            'https://books.google.com/books/content?id=eYnBzSJtcPEC&printsec=frontcover&img=1'),
+        authors: ['William Gibson'],
+        thumbnail:
+            'https://books.google.com/books/content?id=eYnBzSJtcPEC&printsec=frontcover&img=1',
       ),
       BookSearchResult(
+        volumeId: 'lefthand-1',
         isbn: '9780375507258',
         title: 'The Left Hand of Darkness',
-        author: 'Ursula K. Le Guin',
-        description: 'Science fiction masterpiece',
-        thumbnailUri: Uri.parse(
-            'https://books.google.com/books/content?id=pEGlmPg3C2EC&printsec=frontcover&img=1'),
+        authors: ['Ursula K. Le Guin'],
+        thumbnail:
+            'https://books.google.com/books/content?id=pEGlmPg3C2EC&printsec=frontcover&img=1',
       ),
       BookSearchResult(
+        volumeId: 'endersgame-1',
         isbn: '9780441017683',
         title: 'Ender\'s Game',
-        author: 'Orson Scott Card',
-        description: 'Award-winning science fiction',
-        thumbnailUri: Uri.parse(
-            'https://books.google.com/books/content?id=yDH2zFEKheYC&printsec=frontcover&img=1'),
+        authors: ['Orson Scott Card'],
+        thumbnail:
+            'https://books.google.com/books/content?id=yDH2zFEKheYC&printsec=frontcover&img=1',
       ),
     ];
   }
