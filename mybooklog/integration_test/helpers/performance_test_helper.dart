@@ -173,11 +173,13 @@ class PerformanceTestHelper {
 /// BUSINESS LOGIC: Target metrics based on user experience requirements
 /// TECHNICAL: Used by test assertions to verify performance standards
 class PerformanceBaselines {
-  static const Duration appStartup = Duration(seconds: 2);
+  // NOTE: Baselines increased to account for real books API latency (~2-3s on cold start)
+  // After first run, results are cached and subsequent runs should be faster
+  static const Duration appStartup = Duration(seconds: 5);
   static const Duration navigationLatency = Duration(milliseconds: 500);
   static const Duration searchLatency = Duration(milliseconds: 200);
   static const Duration scrollFPS = Duration(milliseconds: 16); // ~60fps
-  static const Duration apiLatency = Duration(seconds: 1);
+  static const Duration apiLatency = Duration(seconds: 3); // Real Google Books API latency
   static const double memoryBaseline = 150.0; // MB
   static const double memoryPeak = 250.0; // MB
 }
