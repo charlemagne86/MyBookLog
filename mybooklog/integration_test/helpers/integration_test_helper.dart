@@ -140,6 +140,17 @@ class IntegrationTestHelper {
   }) async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
+
+    // Update auth state stream to trigger router redirect to bookshelf
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        AuthState(AuthChangeEvent.signedIn, MockSession()),
+      ),
+    );
+
+    // Provide real books for the bookshelf
+    final testBooks = await RealBookFixtures.getTestBooks();
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => testBooks);
   }
 
   /// Mocks a failed login (no session)
@@ -149,6 +160,13 @@ class IntegrationTestHelper {
   }) async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
+
+    // Update auth state stream to emit signed out event
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        AuthState(AuthChangeEvent.signedOut, null),
+      ),
+    );
   }
 
   /// Cleanup after tests
