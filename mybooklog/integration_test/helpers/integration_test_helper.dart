@@ -140,7 +140,11 @@ class IntegrationTestHelper {
           Provider<AuthRepository>.value(value: auth),
           Provider<BookshelfRepository>.value(value: shelf),
         ],
-        child: MyApp(),
+        // Pass repositories directly to MyApp constructor for testing
+        child: MyApp(
+          authRepository: auth,
+          bookshelfRepository: shelf,
+        ),
       ),
     );
 

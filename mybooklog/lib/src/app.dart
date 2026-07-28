@@ -20,8 +20,20 @@ import 'data/services/google_books_service.dart';
 /// — and makes them available to every screen. It also sets up the color
 /// theme (light/dark) and the "router", which decides which screen the user
 /// sees and keeps logged-out users away from the bookshelf.
+///
+/// TESTING: For integration tests, pass mock repositories via constructor
+/// parameters. If not provided, real instances are created.
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  /// Optional mock repositories for testing. If provided, these are used
+  /// instead of creating real instances from Supabase.
+  final AuthRepository? authRepository;
+  final BookshelfRepository? bookshelfRepository;
+
+  const MyApp({
+    super.key,
+    this.authRepository,
+    this.bookshelfRepository,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -39,9 +51,12 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     // Runs exactly once when the app starts: create each shared helper and
     // the navigation router. They live for the whole lifetime of the app.
+
+    // TESTING: Use injected repositories if provided (for integration tests),
+    // otherwise create real instances from Supabase.
     final client = Supabase.instance.client;
-    _authRepository = AuthRepository(client);
-    _bookshelfRepository = BookshelfRepository(client);
+    _authRepository = widget.authRepository ?? AuthRepository(client);
+    _bookshelfRepository = widget.bookshelfRepository ?? BookshelfRepository(client);
     _googleBooksService = GoogleBooksService();
     _router = buildRouter(_authRepository);
   }
