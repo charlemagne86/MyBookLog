@@ -325,7 +325,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         crossAxisCount: 3,
         mainAxisSpacing: 32,
         crossAxisSpacing: 32,
-        childAspectRatio: 0.48,
+        childAspectRatio: 0.44,
       ),
       itemCount: _visibleBooks.length,
       itemBuilder: (context, index) {
