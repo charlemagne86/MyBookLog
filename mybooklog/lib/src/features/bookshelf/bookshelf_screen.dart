@@ -320,7 +320,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
     }
     // Three covers per row; each cell is taller than wide, like a real book.
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisSpacing: 32,
