@@ -100,6 +100,14 @@ class IntegrationTestHelper {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
 
+    // Update auth state stream to emit "signed in" event
+    // This triggers the router to redirect to the bookshelf screen
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        AuthState(AuthChangeEvent.signedIn, MockSession()),
+      ),
+    );
+
     // Fetch REAL books from Google Books API (or fallback if unavailable)
     final testBooks = await RealBookFixtures.getTestBooks();
 
@@ -111,6 +119,14 @@ class IntegrationTestHelper {
   Future<void> setLoggedOutState() async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
+
+    // Update auth state stream to emit "signed out" event
+    // This triggers the router to redirect to the login screen
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        AuthState(AuthChangeEvent.signedOut, null),
+      ),
+    );
 
     // Empty bookshelf for logged-out state
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
