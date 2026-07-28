@@ -12,15 +12,8 @@ void main() {
   group('Performance: Navigation Latency', () {
     final testHelper = IntegrationTestHelper();
 
-    setUp(() async {
-      await testHelper.initializeApp();
-      await testHelper.setLoggedInState();
-      await testHelper.pumpApp(this as WidgetTester);
-    });
-
-    tearDown(() async {
-      await testHelper.cleanup();
-    });
+    // Note: setUp/tearDown don't have access to WidgetTester
+    // Instead, setup/cleanup is done per test inside testWidgets() callback
 
     testWidgets('login_to_bookshelf_navigation', (WidgetTester tester) async {
       /// Measures time for login → bookshelf transition.
