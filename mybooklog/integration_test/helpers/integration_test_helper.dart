@@ -4,10 +4,13 @@ import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/app.dart' show MyApp;
 import 'package:mybooklog/src/core/config/app_config.dart';
+import 'package:mybooklog/src/data/models/shelf_book.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../fixtures/real_book_fixtures.dart';
 
 // ============================================================================
 // Mock Repositories for Integration Testing
@@ -62,6 +65,7 @@ class IntegrationTestHelper {
   MockBookshelfRepository? _mockBookshelf;
 
   /// Creates or gets the mock repositories used in tests
+  /// Sets up with REAL books from Google Books API for realistic testing
   Future<(MockAuthRepository, MockBookshelfRepository)> setupMocks() async {
     _mockAuth = MockAuthRepository();
     _mockBookshelf = MockBookshelfRepository();
@@ -76,8 +80,10 @@ class IntegrationTestHelper {
       ),
     );
 
-    // Default shelf: empty
-    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
+    // Default shelf: REAL books from Google Books API
+    // This simulates a new user with populated bookshelf
+    final testBooks = await RealBookFixtures.getTestBooks();
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => testBooks);
 
     return (_mockAuth!, _mockBookshelf!);
   }
@@ -87,16 +93,26 @@ class IntegrationTestHelper {
     await setupMocks();
   }
 
-  /// Sets up logged-in state with a mock session
+  /// Sets up logged-in state with a mock session and REAL test books
+  /// Fetches real books from Google Books API to simulate new-user experience
   Future<void> setLoggedInState() async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
+
+    // Fetch REAL books from Google Books API (or fallback if unavailable)
+    final testBooks = await RealBookFixtures.getTestBooks();
+
+    // Mock bookshelf repository to return real books
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => testBooks);
   }
 
-  /// Sets up logged-out state (no session)
+  /// Sets up logged-out state (no session, empty bookshelf)
   Future<void> setLoggedOutState() async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
+
+    // Empty bookshelf for logged-out state
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
   }
 
   /// Mocks a successful login
