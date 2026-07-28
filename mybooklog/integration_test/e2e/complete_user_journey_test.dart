@@ -310,7 +310,7 @@ void main() {
       expect(find.byType(TextField), findsWidgets); // Search field
 
       // Step 6: Close search
-      await tester.tap(find.byIcon(Icons.close), skipOffstage: false);
+      await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 
       // Step 7: Verify logged in and back to grid

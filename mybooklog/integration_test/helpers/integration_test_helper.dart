@@ -95,10 +95,20 @@ class IntegrationTestHelper {
   /// Mocks a successful login
   Future<void> mockSuccessfulLogin({
     String? email,
+    String? password,
     String? userId,
   }) async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
+  }
+
+  /// Mocks a failed login (no session)
+  Future<void> mockFailedLogin({
+    String? email,
+    String? password,
+  }) async {
+    if (_mockAuth == null) await setupMocks();
+    when(() => _mockAuth!.currentSession).thenReturn(null);
   }
 
   /// Cleanup after tests
