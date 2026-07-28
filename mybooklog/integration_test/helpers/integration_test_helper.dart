@@ -69,6 +69,13 @@ class IntegrationTestHelper {
     // Default setup: user not logged in
     when(() => _mockAuth!.currentSession).thenReturn(null);
 
+    // Mock the auth state change stream (required by router)
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        AuthState(AuthChangeEvent.signedOut, null),
+      ),
+    );
+
     // Default shelf: empty
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
 
