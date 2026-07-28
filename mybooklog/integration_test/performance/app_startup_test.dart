@@ -6,7 +6,9 @@ import '../helpers/integration_test_helper.dart';
 import '../helpers/performance_test_helper.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    await initializeSupabaseForTests();
+  });
 
   group('Performance: App Startup', () {
     final testHelper = IntegrationTestHelper();

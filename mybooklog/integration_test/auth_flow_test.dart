@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:provider/provider.dart';
 
 import 'helpers/integration_test_helper.dart';
 
@@ -11,7 +14,9 @@ import 'helpers/integration_test_helper.dart';
 // ============================================================================
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    await initializeSupabaseForTests();
+  });
 
   group('Authentication Flow', () {
     final helper = IntegrationTestHelper();
@@ -176,20 +181,3 @@ void main() {
     });
   });
 }
-
-// ============================================================================
-// Mock Session for Testing
-// ============================================================================
-
-class MockSession {
-  // Mock session object for testing
-  // In real app, this would be a Supabase Session with auth tokens
-}
-
-// ============================================================================
-// Imports
-// ============================================================================
-
-import 'package:flutter/material.dart';
-import 'package:mybooklog/src/app.dart';
-import 'package:provider/provider.dart';

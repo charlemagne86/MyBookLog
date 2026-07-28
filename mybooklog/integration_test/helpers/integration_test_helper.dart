@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/app.dart';
+import 'package:mybooklog/src/app.dart' show MyApp;
+import 'package:mybooklog/src/core/config/app_config.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ============================================================================
 // Mock Repositories for Integration Testing
@@ -13,6 +16,31 @@ import 'package:provider/provider.dart';
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockBookshelfRepository extends Mock implements BookshelfRepository {}
+
+// ============================================================================
+// Test Initialization
+// ============================================================================
+
+/// Initialize Supabase for integration tests.
+/// Call this in setUpAll() before running any tests.
+Future<void> initializeSupabaseForTests() async {
+  // Ensure Flutter bindings are initialized
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase with credentials from AppConfig
+  // These are publishable (anon) keys - safe to use in tests
+  try {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      publishableKey: AppConfig.supabasePublishableKey,
+    );
+  } catch (e) {
+    // Supabase already initialized, which is fine
+    if (!e.toString().contains('already initialized')) {
+      rethrow;
+    }
+  }
+}
 
 // ============================================================================
 // Integration Test Helper
@@ -30,18 +58,53 @@ class MockBookshelfRepository extends Mock implements BookshelfRepository {}
 /// - Provides helpers for common test patterns (wait for text, tap, etc.)
 /// - Handles auth state setup (login/logout for test scenarios)
 class IntegrationTestHelper {
+  MockAuthRepository? _mockAuth;
+  MockBookshelfRepository? _mockBookshelf;
+
   /// Creates or gets the mock repositories used in tests
   Future<(MockAuthRepository, MockBookshelfRepository)> setupMocks() async {
-    final mockAuth = MockAuthRepository();
-    final mockBookshelf = MockBookshelfRepository();
+    _mockAuth = MockAuthRepository();
+    _mockBookshelf = MockBookshelfRepository();
 
     // Default setup: user not logged in
-    when(() => mockAuth.currentSession).thenReturn(null);
+    when(() => _mockAuth!.currentSession).thenReturn(null);
 
     // Default shelf: empty
-    when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => []);
+    when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
 
-    return (mockAuth, mockBookshelf);
+    return (_mockAuth!, _mockBookshelf!);
+  }
+
+  /// Initializes the app (alias for setupMocks)
+  Future<void> initializeApp() async {
+    await setupMocks();
+  }
+
+  /// Sets up logged-in state with a mock session
+  Future<void> setLoggedInState() async {
+    if (_mockAuth == null) await setupMocks();
+    when(() => _mockAuth!.currentSession).thenReturn(MockSession());
+  }
+
+  /// Sets up logged-out state (no session)
+  Future<void> setLoggedOutState() async {
+    if (_mockAuth == null) await setupMocks();
+    when(() => _mockAuth!.currentSession).thenReturn(null);
+  }
+
+  /// Mocks a successful login
+  Future<void> mockSuccessfulLogin({
+    String? email,
+    String? userId,
+  }) async {
+    if (_mockAuth == null) await setupMocks();
+    when(() => _mockAuth!.currentSession).thenReturn(MockSession());
+  }
+
+  /// Cleanup after tests
+  Future<void> cleanup() async {
+    _mockAuth = null;
+    _mockBookshelf = null;
   }
 
   /// Launches the app with mocked repositories
@@ -50,8 +113,12 @@ class IntegrationTestHelper {
     MockAuthRepository? mockAuth,
     MockBookshelfRepository? mockBookshelf,
   }) async {
-    final auth = mockAuth ?? MockAuthRepository();
-    final shelf = mockBookshelf ?? MockBookshelfRepository();
+    final auth = mockAuth ?? _mockAuth ?? MockAuthRepository();
+    final shelf = mockBookshelf ?? _mockBookshelf ?? MockBookshelfRepository();
+
+    // Store for later use
+    _mockAuth = auth;
+    _mockBookshelf = shelf;
 
     // Default mocks if not provided
     when(() => auth.currentSession).thenReturn(null);
@@ -63,12 +130,21 @@ class IntegrationTestHelper {
           Provider<AuthRepository>.value(value: auth),
           Provider<BookshelfRepository>.value(value: shelf),
         ],
-        child: const MyBookLogApp(),
+        child: MyApp(),
       ),
     );
 
     // Wait for initial frame and navigation
     await tester.pumpAndSettle();
+  }
+
+  /// Pumps the app widget (used in test sequences)
+  Future<void> pumpApp(WidgetTester tester) async {
+    await launchApp(
+      tester,
+      mockAuth: _mockAuth,
+      mockBookshelf: _mockBookshelf,
+    );
   }
 
   /// Waits for text to appear on screen
@@ -115,3 +191,10 @@ class IntegrationTestHelper {
     await tester.pumpAndSettle();
   }
 }
+
+// ============================================================================
+// Mock Session for Testing
+// ============================================================================
+
+/// Mock [Session] using mocktail's Mock (handles SDK interface changes automatically)
+class MockSession extends Mock implements Session {}

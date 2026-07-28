@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:provider/provider.dart';
 
 import 'helpers/integration_test_helper.dart';
 
@@ -12,7 +15,10 @@ import 'helpers/integration_test_helper.dart';
 // ============================================================================
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    // Initialize Supabase for tests (must run before any tests)
+    await initializeSupabaseForTests();
+  });
 
   group('Bookshelf Operations', () {
     final helper = IntegrationTestHelper();
@@ -248,20 +254,4 @@ void main() {
           .called(greaterThan(0));
     });
   });
-}
-
-// ============================================================================
-// Imports
-// ============================================================================
-
-import 'package:flutter/material.dart';
-import 'package:mybooklog/src/app.dart';
-import 'package:provider/provider.dart';
-
-// ============================================================================
-// Mock Session
-// ============================================================================
-
-class MockSession {
-  // Mock session object for testing
 }

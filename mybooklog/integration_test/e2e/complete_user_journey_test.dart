@@ -4,7 +4,9 @@ import 'package:integration_test/integration_test.dart';
 import '../helpers/integration_test_helper.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    await initializeSupabaseForTests();
+  });
 
   group('E2E: Complete User Journeys', () {
     final testHelper = IntegrationTestHelper();
