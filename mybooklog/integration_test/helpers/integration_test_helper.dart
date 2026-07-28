@@ -74,15 +74,10 @@ class IntegrationTestHelper {
     _mockAuth = MockAuthRepository();
     _mockBookshelf = MockBookshelfRepository();
 
-    // Mock the auth state change stream (required by router)
-    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
-        AuthState(AuthChangeEvent.signedOut, null),
-      ),
-    );
+    // NOTE: Auth stream setup is done in specific methods (setLoggedInState, etc.)
+    // This allows tests to manually configure mocks without stream interference
 
     // Default setup: user logged out, empty shelf
-    // These will be overridden by setLoggedInState() if needed
     when(() => _mockAuth!.currentSession).thenReturn(null);
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
 
@@ -187,6 +182,18 @@ class IntegrationTestHelper {
     // Store for later use
     _mockAuth = auth;
     _mockBookshelf = shelf;
+
+    // Ensure auth stream is set up to match current session state
+    // This allows manual test setup (like in bookshelf_operations_test)
+    // to work correctly with the router without explicit stream setup
+    final isLoggedIn = auth.currentSession != null;
+    when(() => auth.onAuthStateChange).thenAnswer(
+      (_) => Stream.value(
+        isLoggedIn
+            ? AuthState(AuthChangeEvent.signedIn, auth.currentSession)
+            : AuthState(AuthChangeEvent.signedOut, null),
+      ),
+    );
 
     await tester.pumpWidget(
       MultiProvider(
