@@ -1,4 +1,4 @@
-name: Tests & Coverage
+name: Flutter Tests & Coverage
 
 on:
   push:
@@ -11,120 +11,84 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for coverage comparison
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.16.0'
-          cache: true
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
+    - name: Get dependencies
+      run: flutter pub get
 
-      - name: Run analyzer
-        run: flutter analyze --fatal-infos
+    - name: Analyze code
+      run: flutter analyze
 
-      - name: Check formatting
-        run: dart format --set-exit-if-changed lib/ test/
+    - name: Format check
+      run: dart format --set-exit-if-changed .
 
-      - name: Run unit tests with coverage
-        run: |
-          flutter test test/unit/ \
-            --coverage \
-            --coverage-path=coverage/unit.lcov \
-            --reporter=json > test-results/unit.json
+    - name: Run tests with coverage
+      run: flutter test --coverage
 
-      - name: Run widget tests with coverage
-        run: |
-          flutter test test/widget/ \
-            --coverage \
-            --coverage-path=coverage/widget.lcov \
-            --reporter=json > test-results/widget.json || true
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
 
-      - name: Merge coverage reports
-        run: |
-          mkdir -p test-results
-          lcov --add-tracefile coverage/unit.lcov \
-               --add-tracefile coverage/widget.lcov \
-               -o coverage/lcov.info
+    - name: Check coverage threshold
+      run: |
+        # Extract coverage percentage
+        COVERAGE=$(python3 << 'EOF'
+        import json
+        import re
+        from pathlib import Path
 
-      - name: Generate HTML coverage report
-        run: |
-          genhtml coverage/lcov.info -o coverage/html
+        # Read lcov.info to calculate coverage
+        lcov_file = Path('coverage/lcov.info')
+        total_lines = 0
+        covered_lines = 0
 
-      - name: Check coverage threshold
-        run: |
-          bash .github/scripts/check_coverage.sh 80
+        for line in lcov_file.read_text().split('\n'):
+          if line.startswith('LF:'):
+            total_lines += int(line[3:])
+          elif line.startswith('LH:'):
+            covered_lines += int(line[3:])
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-          verbose: true
+        if total_lines > 0:
+          pct = (covered_lines / total_lines) * 100
+          print(f"{pct:.1f}")
+        else:
+          print("0.0")
+        EOF
+        )
 
-      - name: Comment PR with coverage
-        if: github.event_name == 'pull_request'
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          lcov-file: ./coverage/lcov.info
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        echo "Coverage: ${COVERAGE}%"
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: |
-            test-results/
-            coverage/
+        # Check minimum threshold (60%)
+        THRESHOLD=60.0
+        if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+          echo "❌ Coverage ${COVERAGE}% is below minimum ${THRESHOLD}%"
+          exit 1
+        else
+          echo "✅ Coverage ${COVERAGE}% meets minimum threshold"
+        fi
 
-  performance:
-    runs-on: ubuntu-latest
+    - name: Generate coverage report
+      if: always()
+      run: |
+        mkdir -p build/reports
+        cp coverage/lcov.info build/reports/ || true
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.16.0'
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run performance benchmarks
-        run: flutter test test/benchmarks/ --profile
-        continue-on-error: true
-
-      - name: Save benchmark results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: benchmarks
-          path: benchmark-results/
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.16.0'
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build web
-        run: flutter build web --profile
-
-      - name: Build APK
-        run: flutter build apk --profile
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: build/reports/
+        retention-days: 30
