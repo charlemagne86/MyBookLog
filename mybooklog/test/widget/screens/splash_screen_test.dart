@@ -39,6 +39,9 @@ void main() {
       await tester.pump();
 
       expect(find.byType(SplashScreen), findsOneWidget);
+
+      // Cleanup: wait for timers to complete
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
     testWidgets('shows loading spinner during splash', (WidgetTester tester) async {
@@ -55,6 +58,9 @@ void main() {
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Cleanup: wait for timers to complete
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
     testWidgets('displays text on splash', (WidgetTester tester) async {
@@ -72,6 +78,9 @@ void main() {
 
       expect(find.byType(Text), findsWidgets);
       expect(find.byType(SplashScreen), findsOneWidget);
+
+      // Cleanup: wait for timers to complete
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
     testWidgets('navigates away from splash eventually', (WidgetTester tester) async {
@@ -134,6 +143,9 @@ void main() {
 
       expect(find.byType(SplashScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      // Cleanup: wait for timers to complete
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
   });
 }
