@@ -47,7 +47,8 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       await tester.enterText(searchField.first, 'flutter');
-      await tester.pumpAndSettle(Duration(milliseconds: 100));
+      // Wait for search filtering (increased to 2s for GridView rendering)
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
@@ -88,7 +89,8 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       await tester.enterText(searchField.first, 'science');
-      await tester.pumpAndSettle(Duration(milliseconds: 100));
+      // Wait for search filtering (increased to 2s for GridView rendering)
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
@@ -170,17 +172,19 @@ void main() {
 
       // Open search and type
       await tester.tap(find.byIcon(Icons.search).first);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       final searchField = find.byType(TextField);
       await tester.enterText(searchField.first, 'book');
-      await tester.pumpAndSettle(Duration(milliseconds: 50));
+      // Wait for search results before measuring clear
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Measure clear time
       final stopwatch = Stopwatch()..start();
 
       await tester.enterText(searchField.first, '');
-      await tester.pumpAndSettle(Duration(milliseconds: 50));
+      // Wait for grid to clear and return to full list
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
