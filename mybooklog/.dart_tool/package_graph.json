@@ -25,7 +25,7 @@
     },
     {
       "name": "flutter_lints",
-      "version": "4.0.0",
+      "version": "6.0.0",
       "dependencies": [
         "lints"
       ]
@@ -120,11 +120,6 @@
         "sky_engine",
         "vector_math"
       ]
-    },
-    {
-      "name": "lints",
-      "version": "4.0.0",
-      "dependencies": []
     },
     {
       "name": "path",
@@ -293,6 +288,11 @@
     {
       "name": "cupertino_icons",
       "version": "1.0.9",
+      "dependencies": []
+    },
+    {
+      "name": "lints",
+      "version": "6.1.0",
       "dependencies": []
     },
     {
