@@ -139,7 +139,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'test');
+      await tester.enterText(searchField, 'Great');
       // Wait for search filtering to complete
       await tester.pumpAndSettle(Duration(seconds: 2));
 
@@ -232,9 +232,9 @@ void main() {
       // Step 4: Verify still logged in (search visible)
       expect(find.byType(TextField), findsWidgets);
 
-      // Step 5: Search for something
+      // Step 5: Search for something (must match actual book data)
       final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'fiction');
+      await tester.enterText(searchField, 'Gatsby');
       // Wait for search results (increased to 3s for filtering)
       await tester.pumpAndSettle(Duration(seconds: 3));
 

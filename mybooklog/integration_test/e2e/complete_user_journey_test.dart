@@ -218,7 +218,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'mystery');
+      await tester.enterText(searchField, 'Gatsby');
       await tester.pumpAndSettle();
 
       // Step 4: Verify still logged in and can search
