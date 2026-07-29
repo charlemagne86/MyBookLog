@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 
 // BUSINESS LOGIC:
@@ -12,13 +14,17 @@ import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 //
 // All errors should propagate cleanly to UI for proper error handling.
 
+class MockSupabaseClient extends Mock implements SupabaseClient {}
+
 void main() {
   group('BookshelfRepository - Error Handling', () {
     late BookshelfRepository repository;
+    late MockSupabaseClient mockClient;
 
     setUp(() {
       // Initialize with test doubles/mocks
-      repository = BookshelfRepository();
+      mockClient = MockSupabaseClient();
+      repository = BookshelfRepository(mockClient);
     });
 
     group('fetchShelf Operations', () {

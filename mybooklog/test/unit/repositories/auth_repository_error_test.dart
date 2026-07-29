@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 
 // BUSINESS LOGIC:
@@ -12,12 +14,16 @@ import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 //
 // Every error must be clear and actionable for users.
 
+class MockSupabaseClient extends Mock implements SupabaseClient {}
+
 void main() {
   group('AuthRepository - Error Handling', () {
     late AuthRepository repository;
+    late MockSupabaseClient mockClient;
 
     setUp(() {
-      repository = AuthRepository();
+      mockClient = MockSupabaseClient();
+      repository = AuthRepository(mockClient);
     });
 
     group('Sign In Errors', () {

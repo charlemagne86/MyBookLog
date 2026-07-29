@@ -97,7 +97,7 @@ void main() {
           bookId: '1',
           title: 'The Great Gatsby',
           author: 'F. Scott Fitzgerald',
-          thumbnailUri: null,
+          thumbnailUri: '',
           isRead: false,
         ),
       ];
@@ -133,7 +133,7 @@ void main() {
           bookId: 'book-$i',
           title: 'Book $i',
           author: 'Author $i',
-          thumbnailUri: null,
+          thumbnailUri: '',
           isRead: false,
         ),
       );
@@ -165,7 +165,7 @@ void main() {
           bookId: '1',
           title: 'The Great Gatsby',
           author: 'F. Scott Fitzgerald',
-          thumbnailUri: null,
+          thumbnailUri: '',
           isRead: false,
         ),
       ];
@@ -197,7 +197,7 @@ void main() {
         bookId: '1',
         title: 'A' * 300,
         author: 'Author',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
 
@@ -226,7 +226,7 @@ void main() {
         bookId: '1',
         title: 'Test™ 中文 🎉',
         author: 'Author',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
 

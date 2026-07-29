@@ -18,7 +18,7 @@ void main() {
         bookId: 'test-1',
         title: 'A' * 300, // Very long title
         author: 'Test Author',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -32,7 +32,7 @@ void main() {
         bookId: 'test-2',
         title: 'Test Book',
         author: 'A' * 200,
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -45,7 +45,7 @@ void main() {
         bookId: 'test-3',
         title: 'Test Book™ 中文 العربية 🎉',
         author: 'Test',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -60,7 +60,7 @@ void main() {
         bookId: 'test-4',
         title: 'Anonymous Book',
         author: null,
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -74,7 +74,7 @@ void main() {
         bookId: 'no-isbn-fallback',
         title: 'Rare Book',
         author: 'Rare Author',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -86,7 +86,7 @@ void main() {
         bookId: 'test-search',
         title: 'The Great Gatsby',
         author: 'F. Scott Fitzgerald',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
 
@@ -126,7 +126,7 @@ void main() {
         bookId: 'test-copy',
         title: 'Original',
         author: 'Author',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -143,7 +143,7 @@ void main() {
         bookId: 'same-id',
         title: 'Title 1',
         author: 'Author 1',
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: false,
       );
       
@@ -151,7 +151,7 @@ void main() {
         bookId: 'same-id',
         title: 'Title 2', // Different
         author: 'Author 2', // Different
-        thumbnailUri: null,
+        thumbnailUri: '',
         isRead: true, // Different
       );
       
