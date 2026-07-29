@@ -6,8 +6,10 @@ import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'helpers/integration_test_helper.dart';
+import 'fixtures/real_book_fixtures.dart';
 
 // ============================================================================
 // Auth Flow Integration Tests
@@ -44,11 +46,17 @@ void main() {
           password: any(named: 'password'),
         ),
       ).thenAnswer((_) async {
-        // Simulate successful login by updating session
-        when(() => mockAuth.currentSession).thenReturn(
-          // Mock session object (just needs to be non-null)
-          MockSession(),
+        // Simulate successful login by updating session AND auth stream
+        when(() => mockAuth.currentSession).thenReturn(MockSession());
+        // Update auth stream to trigger router navigation to bookshelf
+        when(() => mockAuth.onAuthStateChange).thenAnswer(
+          (_) => Stream.value(
+            AuthState(AuthChangeEvent.signedIn, MockSession()),
+          ),
         );
+        // Provide real books for bookshelf
+        final testBooks = await RealBookFixtures.getTestBooks();
+        when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => testBooks);
       });
 
       // TECHNICAL:
@@ -60,8 +68,9 @@ void main() {
       );
 
       // TECHNICAL:
-      // Verify we're on login screen
-      await helper.waitForText(tester, 'Login');
+      // Verify we're on login screen by checking for unique login screen elements
+      expect(find.text('Username (email)'), findsOneWidget, reason: 'Should show email field label');
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form fields');
 
       // TECHNICAL:
       // Enter credentials
@@ -111,8 +120,9 @@ void main() {
       );
 
       // TECHNICAL:
-      // Verify we're on login screen
-      await helper.waitForText(tester, 'Login');
+      // Verify we're on login screen by checking for unique elements
+      expect(find.text('Username (email)'), findsOneWidget, reason: 'Should show email field label');
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form');
 
       // TECHNICAL:
       // Enter invalid credentials
