@@ -12,17 +12,16 @@ void main() {
   group('Performance: Search & Filter', () {
     final testHelper = IntegrationTestHelper();
 
-    setUp(() async {
-      await testHelper.initializeApp();
-      await testHelper.setLoggedInState();
-      await testHelper.pumpApp(this as WidgetTester);
-    });
-
-    tearDown(() async {
-      await testHelper.cleanup();
-    });
+    // Note: setUp/tearDown cannot access WidgetTester
+    // Setup is done inside each testWidgets() callback
 
     testWidgets('search_filter_small_dataset', (WidgetTester tester) async {
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+
+
       /// Measures search latency with small dataset (< 20 books).
       ///
       /// BUSINESS LOGIC: Search should feel instant for small collections
@@ -70,6 +69,11 @@ void main() {
       /// BUSINESS LOGIC: Search should remain responsive even with large
       /// personal libraries (target < 200ms for 50+ books).
       /// TECHNICAL: Simulates 50-book shelf, then measures search filter.
+
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
 
       await tester.pumpAndSettle();
 
