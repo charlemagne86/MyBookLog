@@ -140,7 +140,8 @@ void main() {
 
       final searchField = find.byType(TextField).first;
       await tester.enterText(searchField, 'test');
-      await tester.pumpAndSettle();
+      // Wait for search filtering to complete
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Verify grid updated (search works)
       expect(find.byType(GridView), findsWidgets);
@@ -218,7 +219,8 @@ void main() {
       // Step 1: Login
       await testHelper.setLoggedInState();
       await testHelper.pumpApp(tester);
-      await tester.pumpAndSettle();
+      // Wait for bookshelf to load books
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Step 2: Verify logged in
       expect(find.byType(GridView), findsWidgets);
@@ -233,7 +235,8 @@ void main() {
       // Step 5: Search for something
       final searchField = find.byType(TextField).first;
       await tester.enterText(searchField, 'fiction');
-      await tester.pumpAndSettle();
+      // Wait for search results
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Step 6: Verify still logged in (grid updated)
       expect(find.byType(GridView), findsWidgets);

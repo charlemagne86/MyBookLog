@@ -96,7 +96,8 @@ void main() {
       // Step 1: Set up logged-in state
       await testHelper.setLoggedInState();
       await testHelper.pumpApp(tester);
-      await tester.pumpAndSettle();
+      // Wait for bookshelf to load books from mock
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Step 2: Verify bookshelf
       expect(find.byType(GridView), findsWidgets);
