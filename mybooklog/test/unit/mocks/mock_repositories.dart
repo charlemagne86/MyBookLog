@@ -53,8 +53,8 @@ class RepositorySetupHelpers {
           isbn: any(named: 'isbn'),
           title: any(named: 'title'),
           author: any(named: 'author'),
-          imageUrl: any(named: 'imageUrl'),
-        )).thenAnswer((_) async {});
+          thumbnail: any(named: 'thumbnail'),
+        )).thenAnswer((_) async => false);
   }
 
   // BUSINESS LOGIC:
@@ -65,17 +65,15 @@ class RepositorySetupHelpers {
           isbn: any(named: 'isbn'),
           title: any(named: 'title'),
           author: any(named: 'author'),
-          imageUrl: any(named: 'imageUrl'),
-        )).thenThrow(
-      Exception('Book already on shelf'),
-    );
+          thumbnail: any(named: 'thumbnail'),
+        )).thenReturn(Future.value(true));
   }
 
   // BUSINESS LOGIC:
   // Successful book removal from shelf
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulRemoveBook(MockBookshelfRepository repo) {
-    when(() => repo.removeBook(bookId: any(named: 'bookId')))
+    when(() => repo.removeBook(any()))
         .thenAnswer((_) async {});
   }
 
@@ -83,10 +81,8 @@ class RepositorySetupHelpers {
   // Successful read status update
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulSetReadStatus(MockBookshelfRepository repo) {
-    when(() => repo.setReadStatus(
-          bookId: any(named: 'bookId'),
-          isRead: any(named: 'isRead'),
-        )).thenAnswer((_) async {});
+    when(() => repo.setReadStatus(any(), isRead: any(named: 'isRead')))
+        .thenAnswer((_) async {});
   }
 
   // BUSINESS LOGIC:
@@ -125,12 +121,14 @@ class RepositorySetupHelpers {
 
   // BUSINESS LOGIC:
   // Auth: Successful signup (new account created)
-  // TECHNICAL: Returns session token
+  // TECHNICAL: Completes without throwing
   static void setupSuccessfulSignup(MockAuthRepository repo) {
     when(() => repo.signUp(
           email: any(named: 'email'),
           password: any(named: 'password'),
-        )).thenAnswer((_) async => 'session-token-456');
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+        )).thenAnswer((_) async {});
   }
 
   // BUSINESS LOGIC:
@@ -140,6 +138,8 @@ class RepositorySetupHelpers {
     when(() => repo.signUp(
           email: any(named: 'email'),
           password: any(named: 'password'),
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
         )).thenThrow(
       Exception('Email already registered'),
     );
@@ -183,23 +183,18 @@ class TestBookFactory {
   // Create a realistic book for testing shelf operations
   // TECHNICAL: Returns a complete ShelfBook with all required fields
   static ShelfBook createTestBook({
-    String? id,
+    String? bookId,
     String title = 'Test Book',
-    String author = 'Test Author',
-    String? isbn,
-    String? imageUrl,
+    String? author = 'Test Author',
+    String? thumbnailUri,
     bool isRead = false,
-    DateTime? markedReadOn,
   }) {
     return ShelfBook(
-      id: id ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
+      bookId: bookId ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       author: author,
-      isbn: isbn ?? '9780123456789',
-      imageUrl: imageUrl ?? 'https://books.google.com/books/content?id=test',
+      thumbnailUri: thumbnailUri ?? 'https://books.google.com/books/content?id=test',
       isRead: isRead,
-      markedReadOn: markedReadOn,
-      addedAt: DateTime.now(),
     );
   }
 
@@ -210,27 +205,24 @@ class TestBookFactory {
     return List.generate(
       count,
       (i) => createTestBook(
-        id: 'book-$i',
+        bookId: 'book-$i',
         title: 'Test Book $i',
         author: 'Author $i',
-        isbn: '978000000000$i',
       ),
     );
   }
 
   // BUSINESS LOGIC:
   // Create a book already marked as read
-  // TECHNICAL: Sets isRead=true and markedReadOn to a past date
+  // TECHNICAL: Sets isRead=true
   static ShelfBook createReadBook({
     String title = 'Read Book',
     String author = 'Test Author',
   }) {
-    final readDate = DateTime.now().subtract(Duration(days: 7));
     return createTestBook(
       title: title,
       author: author,
       isRead: true,
-      markedReadOn: readDate,
     );
   }
 

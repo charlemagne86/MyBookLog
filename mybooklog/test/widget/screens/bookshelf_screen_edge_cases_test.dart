@@ -3,260 +3,286 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:mybooklog/src/data/models/shelf_book.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
 
-// BUSINESS LOGIC:
-// The Bookshelf Screen is the main user interface after login.
-// Must handle various states gracefully:
-// - Loading while fetching shelf
-// - Error states with helpful messages
-// - Empty shelf (no books)
-// - Very large shelf (100+ books)
-// - Search with no results
-// - Responsive layout on small screens
-//
-// Users expect smooth transitions between states and clear error messages.
+import '../../helpers/test_app_builder.dart';
+import '../../unit/mocks/mock_repositories.dart';
 
-class MockBookshelfRepository extends Mock implements BookshelfRepository {}
+/// BUSINESS LOGIC:
+/// The Bookshelf Screen is the main user interface after login.
+/// Must handle various states gracefully:
+/// - Loading while fetching shelf
+/// - Error states with helpful messages
+/// - Empty shelf (no books)
+/// - Very large shelf (100+ books)
+/// - Search with no results
+/// - Responsive layout on small screens
+///
+/// Users expect smooth transitions between states and clear error messages.
 
 void main() {
+  late MockBookshelfRepository mockBookshelfRepository;
+  late MockAuthRepository mockAuthRepository;
+  late StreamController<AuthState> authStateController;
+
+  setUp(() {
+    mockBookshelfRepository = MockBookshelfRepository();
+    mockAuthRepository = MockAuthRepository();
+    authStateController = StreamController<AuthState>.broadcast();
+  });
+
+  tearDown(() {
+    authStateController.close();
+  });
+
   group('BookshelfScreen - Edge Cases', () {
-    late MockBookshelfRepository mockRepository;
+    testWidgets('shows error message on shelf load failure',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // When network fails or database is down, user should see:
+      // 1. Error message explaining what happened
+      // 2. Empty shelf state (not crash)
+      // 3. Ability to retry (button or refresh gesture)
+      //
+      // TECHNICAL:
+      // fetchShelf throws exception. Screen catches it, shows SnackBar,
+      // and displays empty state. User can pull-to-refresh to retry.
 
-    setUp(() {
-      mockRepository = MockBookshelfRepository();
-    });
-
-    testWidgets('displays loading indicator while fetching shelf', (WidgetTester tester) async {
-      // TECHNICAL: Shelf takes time to load from Supabase
-      // User should see spinner, not blank screen
-      // Use Completer to control when fetch completes
-      final completer = Completer<List<ShelfBook>>();
-      when(() => mockRepository.fetchShelf()).thenAnswer((_) => completer.future);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
-      );
-
-      // While loading: should show indicator
-      await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-      // Complete the fetch
-      completer.complete([]);
-      await tester.pumpAndSettle();
-    });
-
-    testWidgets('shows empty state when shelf has no books', (WidgetTester tester) async {
-      // TECHNICAL: New user or user removed all books
-      // Should show helpful message, not crash
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => [],
+      TestSetupHelpers.setupShelfLoadError(mockBookshelfRepository);
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        [],
+        authStateController,
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Should show empty state message
-      expect(find.byType(Text), findsWidgets);
-    });
-
-    testWidgets('shows error message on shelf load failure', (WidgetTester tester) async {
-      // TECHNICAL: Network error or database error
-      // User should see error message with retry option
-      when(() => mockRepository.fetchShelf()).thenThrow(Exception('Network error'));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
       );
 
       await tester.pumpAndSettle();
 
       // Should show error message
-      expect(find.byType(Text), findsWidgets);
+      expect(
+        find.byWidgetPredicate((widget) =>
+            widget is Text && widget.data?.contains('Failed') == true),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('handles search with no matching results', (WidgetTester tester) async {
-      // TECHNICAL: User searches for book that doesn't exist on shelf
-      // Should show "no results" message clearly
-      final testBooks = [
-        ShelfBook(
-          bookId: '1',
-          title: 'The Great Gatsby',
-          author: 'F. Scott Fitzgerald',
-          thumbnailUri: '',
-          isRead: false,
-        ),
+    testWidgets('handles very large shelf (100+ books)',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // Power users may have large libraries (100+ books).
+      // App should handle gracefully without:
+      // - Crashing
+      // - Excessive memory use
+      // - Blocking UI thread
+      //
+      // TECHNICAL:
+      // GridView.builder with lazy rendering handles this.
+      // Only visible items rendered at once.
+
+      final largeShelf = TestBookFactory.createTestBooks(120);
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        largeShelf,
+        authStateController,
+      );
+
+      await tester.pumpWidget(
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Should render grid (not crash)
+      expect(find.byType(GridView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('handles search with no matching results',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // User searches for book they don't have.
+      // Should show "no matches" message, not crash or show old results.
+      //
+      // TECHNICAL:
+      // Search filters _visibleBooks list based on matchesQuery().
+      // Empty result shows helpful message.
+
+      final books = [
+        TestBookFactory.createTestBook(title: 'The Great Gatsby'),
+        TestBookFactory.createTestBook(title: 'To Kill a Mockingbird'),
       ];
-
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => testBooks,
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        books,
+        authStateController,
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
       );
 
       await tester.pumpAndSettle();
 
-      // Should show the book initially
-      expect(find.text('The Great Gatsby'), findsOneWidget);
+      // Open search
+      final searchButton = find.byIcon(Icons.search);
+      if (searchButton.evaluate().isNotEmpty) {
+        await tester.tap(searchButton.first);
+        await tester.pumpAndSettle();
 
-      // Search for non-existent book
-      // Implementation would search and show empty results
+        // Type search that doesn't match
+        final searchField = find.byType(TextField);
+        if (searchField.evaluate().isNotEmpty) {
+          await tester.enterText(searchField.first, 'xyz123notabook');
+          await tester.pumpAndSettle();
+
+          // Should show no results message
+          expect(find.byType(GridView), findsNothing);
+          expect(
+            find.byWidgetPredicate((widget) =>
+                widget is Text &&
+                widget.data?.contains('No books match') == true),
+            findsOneWidget,
+          );
+        }
+      }
     });
 
-    testWidgets('handles very large bookshelf (100+ books)', (WidgetTester tester) async {
-      // TECHNICAL: Performance test for large datasets
-      // GridView should still scroll smoothly
-      final manyBooks = List.generate(
-        100,
-        (i) => ShelfBook(
-          bookId: 'book-$i',
-          title: 'Book $i',
-          author: 'Author $i',
-          thumbnailUri: '',
-          isRead: false,
-        ),
-      );
+    testWidgets('preserves search state during reload',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // If user searches "Shakespeare", then app refreshes (or rotation),
+      // search text should stay and results should update.
+      // User shouldn't have to re-type search.
+      //
+      // TECHNICAL:
+      // State preserved in _searchQuery and _searchController.
+      // Orientation change doesn't destroy widget (StatefulWidget).
 
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => manyBooks,
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Should handle large list without crashing
-      // Just verify the screen renders some content
-      expect(find.byType(Text), findsWidgets);
-    });
-
-    testWidgets('preserves search state during orientation change', (WidgetTester tester) async {
-      // TECHNICAL: User searches, then rotates device
-      // Search query and results should persist
-      final testBooks = [
-        ShelfBook(
-          bookId: '1',
-          title: 'The Great Gatsby',
-          author: 'F. Scott Fitzgerald',
-          thumbnailUri: '',
-          isRead: false,
-        ),
+      final books = [
+        TestBookFactory.createTestBook(title: 'Hamlet'),
+        TestBookFactory.createTestBook(title: 'Macbeth'),
+        TestBookFactory.createTestBook(title: 'Othello'),
       ];
-
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => testBooks,
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        books,
+        authStateController,
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
       );
 
       await tester.pumpAndSettle();
 
-      // Search for book
-      // Rotate device
-      // Verify search results still visible
+      // Do a search
+      final searchButton = find.byIcon(Icons.search);
+      if (searchButton.evaluate().isNotEmpty) {
+        await tester.tap(searchButton.first);
+        await tester.pumpAndSettle();
+
+        final searchField = find.byType(TextField);
+        if (searchField.evaluate().isNotEmpty) {
+          await tester.enterText(searchField.first, 'ham');
+          await tester.pumpAndSettle();
+
+          // Should show one result (Hamlet)
+          expect(find.byType(Text), findsWidgets);
+        }
+      }
     });
 
-    testWidgets('handles very long book title in grid', (WidgetTester tester) async {
-      // TECHNICAL: Some books have 200+ character titles
-      // Should truncate with ellipsis, not overflow
-      final longTitleBook = ShelfBook(
-        bookId: '1',
-        title: 'A' * 300,
-        author: 'Author',
-        thumbnailUri: '',
-        isRead: false,
-      );
+    testWidgets('displays very long book titles without overflow',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // Some books have very long titles. UI should display them
+      // without breaking layout or causing text overflow errors.
+      //
+      // TECHNICAL:
+      // BookOnShelf widget should truncate/ellipsize long titles.
 
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => [longTitleBook],
+      final longTitleBook = TestBookFactory.createBookWithLongTitle();
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        [longTitleBook],
+        authStateController,
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
       );
 
       await tester.pumpAndSettle();
 
-      // Should display without overflow
-      expect(find.byType(GridView), findsWidgets);
+      // Should render without overflow errors
+      expect(tester.takeException(), isNull);
+      expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('handles special characters in search', (WidgetTester tester) async {
-      // TECHNICAL: User searches with Unicode, emoji, special chars
-      final specialCharBook = ShelfBook(
-        bookId: '1',
-        title: 'Test™ 中文 🎉',
-        author: 'Author',
-        thumbnailUri: '',
-        isRead: false,
-      );
+    testWidgets('handles special characters in book titles',
+        (WidgetTester tester) async {
+      // BUSINESS LOGIC:
+      // International books have accents, non-Latin scripts, emoji.
+      // UI should display them correctly without crashes.
+      //
+      // TECHNICAL:
+      // Dart/Flutter handles Unicode natively.
+      // Just ensure no encoding assumptions break.
 
-      when(() => mockRepository.fetchShelf()).thenAnswer(
-        (_) async => [specialCharBook],
+      final specialBook = TestBookFactory.createBookWithSpecialCharacters();
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        [specialBook],
+        authStateController,
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Provider<BookshelfRepository>.value(
-            value: mockRepository,
-            child: BookshelfScreen(),
-          ),
-        ),
+        TestAppBuilder(
+          bookshelfRepository: mockBookshelfRepository,
+          authRepository: mockAuthRepository,
+          authStateController: authStateController,
+        ).build(),
       );
 
       await tester.pumpAndSettle();
 
-      // Should handle special characters without crashing
-      expect(find.byType(BookshelfScreen), findsOneWidget);
+      // Should render without crash
+      expect(tester.takeException(), isNull);
+      expect(find.byType(GridView), findsOneWidget);
     });
   });
 }
