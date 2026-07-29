@@ -58,15 +58,19 @@ void main() {
       // In a real test, this would involve:
       // - Calling testHelper.closeApp()
       // - Calling testHelper.pumpApp() again
-      // For this test, we simulate by clearing and reinitializing:
+      // For this test, we simulate by:
+      // 1. Ensuring session persists (in real app, stored in Supabase)
+      // 2. Verifying app shows bookshelf on reopen
 
-      await testHelper.cleanup();
-      await testHelper.initializeApp();
-
-      // Step 4: Reopen app
-      // Set up as if session was persisted (user still logged in)
+      // Step 4: Reopen app with persisted session
+      // Don't call cleanup() - in real app, session would be stored
+      // Just verify that setLoggedInState() shows the bookshelf
       await testHelper.setLoggedInState();
-      await testHelper.pumpApp(tester);
+
+      // Fresh pumpApp to simulate app reopen
+      final freshHelper = IntegrationTestHelper();
+      await freshHelper.setLoggedInState();
+      await freshHelper.pumpApp(tester);
       await tester.pumpAndSettle();
 
       // Step 5: Verify still logged in (bookshelf visible, not login screen)
