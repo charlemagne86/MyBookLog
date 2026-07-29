@@ -1,0 +1,73 @@
+{
+  "version": "1.0",
+  "date": "2026-07-29",
+  "status": "active",
+  "thresholds": {
+    "search_operation_ms": {
+      "baseline": 3000,
+      "threshold": 3750,
+      "regression_percent": 25,
+      "description": "Google Books API search and parse latency",
+      "metric_type": "user_facing",
+      "action_on_regression": "profile_and_optimize"
+    },
+    "batch_parsing_20_items_ms": {
+      "baseline": 100,
+      "threshold": 150,
+      "regression_percent": 50,
+      "description": "Time to parse 20 search results",
+      "metric_type": "data_processing",
+      "action_on_regression": "check_parsing_algorithm"
+    },
+    "identity_key_100_keys_ms": {
+      "baseline": 10,
+      "threshold": 20,
+      "regression_percent": 100,
+      "description": "Generate 100 identity keys for deduplication",
+      "metric_type": "utility",
+      "action_on_regression": "tolerate_unless_critical"
+    },
+    "volume_key_100_keys_ms": {
+      "baseline": 5,
+      "threshold": 10,
+      "regression_percent": 100,
+      "description": "Generate 100 volume keys for edition grouping",
+      "metric_type": "utility",
+      "action_on_regression": "tolerate_unless_critical"
+    },
+    "test_suite_minutes": {
+      "baseline": 6.5,
+      "threshold": 7.5,
+      "regression_percent": 15,
+      "description": "Total time to run 223 tests with coverage",
+      "metric_type": "ci_cd",
+      "action_on_regression": "investigate_new_tests"
+    },
+    "coverage_generation_seconds": {
+      "baseline": 30,
+      "threshold": 45,
+      "regression_percent": 50,
+      "description": "Time to generate LCOV coverage report",
+      "metric_type": "ci_cd",
+      "action_on_regression": "monitor_only"
+    }
+  },
+  "monitoring": {
+    "frequency": "every_ci_run",
+    "logging": "github_actions_workflow",
+    "alerts": "manual_weekly_review",
+    "optimization_reviews": "monthly"
+  },
+  "optimization_targets": {
+    "phase_7": {
+      "test_suite_minutes": 3.0,
+      "search_operation_ms": 2500,
+      "target_date": "2026-08-05"
+    },
+    "phase_8": {
+      "test_suite_minutes": 1.5,
+      "search_operation_ms": 2000,
+      "target_date": "2026-08-12"
+    }
+  }
+}
