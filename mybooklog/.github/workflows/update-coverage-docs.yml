@@ -2,7 +2,7 @@ name: Update Coverage Documentation
 
 on:
   push:
-    branches: [main, develop]
+    branches: ["*"]
 
 jobs:
   update-coverage-docs:
