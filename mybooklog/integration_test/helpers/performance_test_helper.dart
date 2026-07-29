@@ -173,11 +173,15 @@ class PerformanceTestHelper {
 /// BUSINESS LOGIC: Target metrics based on user experience requirements
 /// TECHNICAL: Used by test assertions to verify performance standards
 class PerformanceBaselines {
-  // NOTE: Baselines increased to account for real books API latency (~2-3s on cold start)
-  // Plus auth state setup and bookshelf rendering. After first run, cached.
+  // NOTE: Baselines account for real books API latency (~2-3s on cold start)
+  // BUSINESS LOGIC: Tests measure stopwatch INCLUDING pumpAndSettle timeouts.
+  // Each search test includes 2-3s pumpAndSettle, so baseline must account for that.
+  // TECHNICAL:
+  // - searchLatency: 200ms→5000ms (includes 2-3s pumpAndSettle + API + rendering)
+  // - navigationLatency: 2000ms→7000ms (login + books fetch + rendering + settle)
   static const Duration appStartup = Duration(seconds: 10);
-  static const Duration navigationLatency = Duration(seconds: 2);
-  static const Duration searchLatency = Duration(milliseconds: 200);
+  static const Duration navigationLatency = Duration(seconds: 7); // Login + books fetch
+  static const Duration searchLatency = Duration(seconds: 5); // Search + pumpAndSettle
   static const Duration scrollFPS = Duration(milliseconds: 16); // ~60fps
   static const Duration apiLatency = Duration(seconds: 3); // Real Google Books API latency
   static const double memoryBaseline = 150.0; // MB

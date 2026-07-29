@@ -35,6 +35,12 @@ class RealBookFixtures {
       final page = await _googleBooks.search('classic novels');
       final results = page.results;
 
+      // CRITICAL: If API returns empty list, fall back to hardcoded books
+      // This prevents tests from running with zero books when API has no results
+      if (results.isEmpty) {
+        return _getFallbackBooks();
+      }
+
       // Convert BookSearchResult to ShelfBook for bookshelf testing
       // Take first 5 results for a diverse test set
       _cachedTestBooks = results.take(5).map((book) {
