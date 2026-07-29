@@ -46,7 +46,8 @@ void main() {
       await tester.enterText(passwordField, 'password123');
       await tester.pumpAndSettle();
 
-      // Step 4: Tap sign in
+      // Step 4: Set up login mock and tap button
+      // Mock successful login BEFORE tapping button so the callback is registered
       await testHelper.mockSuccessfulLogin(
         email: 'newuser@example.com',
         password: 'password123',
@@ -54,7 +55,11 @@ void main() {
 
       final signInButton = find.byType(ElevatedButton).first;
       await tester.tap(signInButton);
-      await tester.pumpAndSettle();
+
+      // Wait for navigation and bookshelf to load
+      // This includes: app calling signIn(), mock callback running,
+      // auth stream updating, router navigating, bookshelf rendering
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Step 5: Verify bookshelf visible
       expect(
