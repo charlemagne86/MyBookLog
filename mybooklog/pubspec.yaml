@@ -53,7 +53,7 @@ dev_dependencies:
   coverage: ^1.7.0              # Coverage data collection
 
   # Code quality
-  flutter_lints: ^6.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
