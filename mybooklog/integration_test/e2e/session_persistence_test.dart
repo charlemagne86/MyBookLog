@@ -112,7 +112,8 @@ void main() {
       );
 
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      // Wait for navigation to bookshelf and books to load
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Verify bookshelf shows books
       expect(find.byType(GridView), findsWidgets);

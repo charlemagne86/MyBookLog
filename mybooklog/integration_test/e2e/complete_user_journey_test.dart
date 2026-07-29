@@ -170,7 +170,8 @@ void main() {
 
       // Step 8: Tap sign in again
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      // Wait for navigation to bookshelf
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Step 9: Verify success (bookshelf visible)
       expect(
