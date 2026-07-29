@@ -106,9 +106,9 @@ void main() {
       await tester.tap(find.byIcon(Icons.search).first);
       await tester.pumpAndSettle();
 
-      // Step 4: Enter search term
+      // Step 4: Enter search term (must match actual book data)
       final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'fiction');
+      await tester.enterText(searchField, 'Great');
       // Wait for search filtering (increased to 3s)
       await tester.pumpAndSettle(Duration(seconds: 3));
 

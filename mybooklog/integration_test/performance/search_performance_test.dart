@@ -46,7 +46,7 @@ void main() {
       // Measure filtering latency
       final stopwatch = Stopwatch()..start();
 
-      await tester.enterText(searchField.first, 'flutter');
+      await tester.enterText(searchField.first, 'Scott');
       // Wait for search filtering (increased to 2s for GridView rendering)
       await tester.pumpAndSettle(Duration(seconds: 2));
 
@@ -88,7 +88,7 @@ void main() {
       // Measure filtering with large dataset
       final stopwatch = Stopwatch()..start();
 
-      await tester.enterText(searchField.first, 'science');
+      await tester.enterText(searchField.first, 'Asimov');
       // Wait for search filtering (increased to 2s for GridView rendering)
       await tester.pumpAndSettle(Duration(seconds: 2));
 
@@ -126,8 +126,8 @@ void main() {
 
       final searchField = find.byType(TextField);
 
-      // Type progressively: 'f' → 'fl' → 'flu' → 'flut'
-      const searchSequence = ['f', 'fl', 'flu', 'flut'];
+      // Type progressively: 'G' → 'Gr' → 'Gre' → 'Grea' (finds 'Great Gatsby')
+      const searchSequence = ['G', 'Gr', 'Gre', 'Grea'];
       final durations = <Duration>[];
 
       for (final query in searchSequence) {
