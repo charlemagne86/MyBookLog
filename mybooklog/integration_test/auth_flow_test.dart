@@ -60,8 +60,9 @@ void main() {
       );
 
       // TECHNICAL:
-      // Verify we're on login screen
-      await helper.waitForText(tester, 'Login');
+      // Verify we're on login screen (check for unique login elements)
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form fields');
+      expect(find.byType(ElevatedButton), findsOneWidget, reason: 'Should show login button');
 
       // TECHNICAL:
       // Enter credentials
@@ -111,8 +112,9 @@ void main() {
       );
 
       // TECHNICAL:
-      // Verify we're on login screen
-      await helper.waitForText(tester, 'Login');
+      // Verify we're on login screen (check for unique login elements)
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form fields');
+      expect(find.byType(ElevatedButton), findsOneWidget, reason: 'Should show login button');
 
       // TECHNICAL:
       // Enter invalid credentials
