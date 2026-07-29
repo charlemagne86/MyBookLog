@@ -148,7 +148,7 @@ void main() {
     testWidgets('form scrolls on small screens', (WidgetTester tester) async {
       // TECHNICAL: On very small phones in portrait, form might exceed screen height
       // Should be scrollable to access all fields and buttons
-      addTearDown(tester.binding.window.resetPhysicalSize);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
       tester.binding.window.physicalSizeTestValue = const Size(400, 600);
 
       when(() => mockAuth.signIn(
