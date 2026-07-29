@@ -64,7 +64,7 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       await testHelper.pumpApp(tester);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
@@ -94,7 +94,7 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       await testHelper.pumpApp(tester);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
@@ -128,7 +128,7 @@ void main() {
       for (int i = 0; i < iterations; i++) {
         final stopwatch = Stopwatch()..start();
         await testHelper.pumpApp(tester);
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(Duration(seconds: 2));
         stopwatch.stop();
 
         durations.add(stopwatch.elapsed);
