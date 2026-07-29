@@ -206,7 +206,7 @@ void main() {
       );
 
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Step 2: Verify logged in (bookshelf visible)
       expect(find.byType(GridView), findsWidgets);
@@ -303,7 +303,7 @@ void main() {
       );
 
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Step 3: Now logged in (state changed)
       expect(find.byType(GridView), findsWidgets);
