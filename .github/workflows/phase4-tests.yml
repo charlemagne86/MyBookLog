@@ -1,0 +1,67 @@
+name: Phase 4 Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  phase4-integration-tests:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run Phase 4 Performance Tests
+        run: |
+          flutter test integration_test/performance/ \
+            --verbose \
+            --dart-define=FLUTTER_TEST=true
+
+      - name: Run Phase 4 E2E Tests
+        run: |
+          flutter test integration_test/e2e/ \
+            --verbose \
+            --dart-define=FLUTTER_TEST=true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: build/
+          retention-days: 7
+
+  phase4-coverage:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run tests with coverage
+        run: |
+          flutter test integration_test/ \
+            --coverage \
+            --verbose
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: integration-tests
+          name: Phase 4 Coverage
