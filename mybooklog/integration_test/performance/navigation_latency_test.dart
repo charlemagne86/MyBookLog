@@ -42,7 +42,8 @@ void main() {
 
       // Trigger navigation
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      // Wait for bookshelf navigation and rendering to complete
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
