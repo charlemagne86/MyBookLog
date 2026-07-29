@@ -3,33 +3,25 @@
 // This file is generated from template in file `flutter_tools/lib/src/flutter_plugins.dart`.
 //
 
-// @dart = 3.11
+// @dart = 3.10
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
-import 'package:passkeys_android/passkeys_android.dart' as passkeys_android;
 import 'package:path_provider_android/path_provider_android.dart' as path_provider_android;
 import 'package:shared_preferences_android/shared_preferences_android.dart' as shared_preferences_android;
 import 'package:sqflite_android/sqflite_android.dart' as sqflite_android;
 import 'package:url_launcher_android/url_launcher_android.dart' as url_launcher_android;
-import 'package:passkeys_darwin/passkeys_darwin.dart' as passkeys_darwin;
 import 'package:path_provider_foundation/path_provider_foundation.dart' as path_provider_foundation;
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart' as shared_preferences_foundation;
 import 'package:sqflite_darwin/sqflite_darwin.dart' as sqflite_darwin;
 import 'package:url_launcher_ios/url_launcher_ios.dart' as url_launcher_ios;
 import 'package:app_links_linux/app_links_linux.dart' as app_links_linux;
-import 'package:device_info_plus/device_info_plus.dart' as device_info_plus;
-import 'package:package_info_plus/package_info_plus.dart' as package_info_plus;
 import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;
 import 'package:shared_preferences_linux/shared_preferences_linux.dart' as shared_preferences_linux;
 import 'package:url_launcher_linux/url_launcher_linux.dart' as url_launcher_linux;
-import 'package:passkeys_darwin/passkeys_darwin.dart' as passkeys_darwin;
 import 'package:path_provider_foundation/path_provider_foundation.dart' as path_provider_foundation;
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart' as shared_preferences_foundation;
 import 'package:sqflite_darwin/sqflite_darwin.dart' as sqflite_darwin;
 import 'package:url_launcher_macos/url_launcher_macos.dart' as url_launcher_macos;
-import 'package:device_info_plus/device_info_plus.dart' as device_info_plus;
-import 'package:package_info_plus/package_info_plus.dart' as package_info_plus;
-import 'package:passkeys_windows/passkeys_windows.dart' as passkeys_windows;
 import 'package:path_provider_windows/path_provider_windows.dart' as path_provider_windows;
 import 'package:shared_preferences_windows/shared_preferences_windows.dart' as shared_preferences_windows;
 import 'package:url_launcher_windows/url_launcher_windows.dart' as url_launcher_windows;
@@ -40,15 +32,6 @@ class _PluginRegistrant {
   @pragma('vm:entry-point')
   static void register() {
     if (Platform.isAndroid) {
-      try {
-        passkeys_android.PasskeysAndroid.registerWith();
-      } catch (err) {
-        print(
-          '`passkeys_android` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
       try {
         path_provider_android.PathProviderAndroid.registerWith();
       } catch (err) {
@@ -86,15 +69,6 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isIOS) {
-      try {
-        passkeys_darwin.PasskeysDarwin.registerWith();
-      } catch (err) {
-        print(
-          '`passkeys_darwin` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
       try {
         path_provider_foundation.PathProviderFoundation.registerWith();
       } catch (err) {
@@ -142,24 +116,6 @@ class _PluginRegistrant {
       }
 
       try {
-        device_info_plus.DeviceInfoPlusLinuxPlugin.registerWith();
-      } catch (err) {
-        print(
-          '`device_info_plus` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
-      try {
-        package_info_plus.PackageInfoPlusLinuxPlugin.registerWith();
-      } catch (err) {
-        print(
-          '`package_info_plus` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
-      try {
         path_provider_linux.PathProviderLinux.registerWith();
       } catch (err) {
         print(
@@ -187,15 +143,6 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isMacOS) {
-      try {
-        passkeys_darwin.PasskeysDarwin.registerWith();
-      } catch (err) {
-        print(
-          '`passkeys_darwin` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
       try {
         path_provider_foundation.PathProviderFoundation.registerWith();
       } catch (err) {
@@ -233,33 +180,6 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isWindows) {
-      try {
-        device_info_plus.DeviceInfoPlusWindowsPlugin.registerWith();
-      } catch (err) {
-        print(
-          '`device_info_plus` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
-      try {
-        package_info_plus.PackageInfoPlusWindowsPlugin.registerWith();
-      } catch (err) {
-        print(
-          '`package_info_plus` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
-      try {
-        passkeys_windows.PasskeysWindows.registerWith();
-      } catch (err) {
-        print(
-          '`passkeys_windows` threw an error: $err. '
-          'The app may not function as expected until you remove this plugin from pubspec.yaml'
-        );
-      }
-
       try {
         path_provider_windows.PathProviderWindows.registerWith();
       } catch (err) {

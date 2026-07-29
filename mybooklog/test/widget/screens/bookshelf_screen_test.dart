@@ -34,10 +34,15 @@ void main() {
       final completer = Completer<List<ShelfBook>>();
       when(() => mockBookshelfRepository.fetchShelf())
           .thenAnswer((_) => completer.future);
-      TestSetupHelpers.setupLoggedOutUser(
+      TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
+        mockBookshelfRepository,
+        [],
         authStateController,
       );
+      // Override fetchShelf to return the incomplete future
+      when(() => mockBookshelfRepository.fetchShelf())
+          .thenAnswer((_) => completer.future);
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -47,8 +52,11 @@ void main() {
         ).build(),
       );
 
+      // Use pump() instead of pumpAndSettle() since we have an intentionally incomplete future
       await tester.pumpAndSettle();
+      await tester.pump();
 
+      expect(find.byType(BookshelfScreen), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
