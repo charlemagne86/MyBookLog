@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/features/auth/login_screen.dart';
+import 'package:provider/provider.dart';
+
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
+import 'package:mybooklog/src/features/auth/login_screen.dart';
 
 // BUSINESS LOGIC:
 // Login is the critical entry point to the app.
@@ -33,7 +34,7 @@ void main() {
       when(() => mockAuth.signIn(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -63,7 +64,7 @@ void main() {
       when(() => mockAuth.signIn(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -124,7 +125,7 @@ void main() {
       when(() => mockAuth.signIn(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -147,13 +148,13 @@ void main() {
     testWidgets('form scrolls on small screens', (WidgetTester tester) async {
       // TECHNICAL: On very small phones in portrait, form might exceed screen height
       // Should be scrollable to access all fields and buttons
-      tester.binding.window.physicalSizeTestValue = Size(400, 600);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(tester.binding.window.resetPhysicalSize);
+      tester.binding.window.physicalSizeTestValue = const Size(400, 600);
 
       when(() => mockAuth.signIn(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -174,7 +175,7 @@ void main() {
       when(() => mockAuth.signIn(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
@@ -199,7 +200,7 @@ void main() {
         password: any(named: 'password'),
       )).thenAnswer((_) {
         callCount++;
-        return Future.delayed(Duration(seconds: 1), () => null);
+        return Future.delayed(const Duration(seconds: 1), () {});
       });
 
       await tester.pumpWidget(

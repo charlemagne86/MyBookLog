@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/features/auth/signup_screen.dart';
+import 'package:provider/provider.dart';
+
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
+import 'package:mybooklog/src/features/auth/signup_screen.dart';
 
 // BUSINESS LOGIC:
 // Splash Screen:
@@ -65,8 +66,9 @@ void main() {
       // TECHNICAL: Invalid email should show error, disable button
       when(() => mockAuth.signUp(
         email: any(named: 'email'),
-        password: any(named: 'password'),
         firstName: any(named: 'firstName'),
+        lastName: any(named: 'lastName'),
+        password: any(named: 'password'),
       )).thenAnswer((_) async {});
 
       await tester.pumpWidget(

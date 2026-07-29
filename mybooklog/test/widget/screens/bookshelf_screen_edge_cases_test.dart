@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:provider/provider.dart';
+
 import 'package:mybooklog/src/data/models/shelf_book.dart';
+import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
 
 // BUSINESS LOGIC:
 // The Bookshelf Screen is the main user interface after login.
