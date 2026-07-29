@@ -171,7 +171,7 @@ void main() {
       );
 
       await tester.tap(find.byType(ElevatedButton).first);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Verify logged in
       expect(find.byType(GridView), findsWidgets);
