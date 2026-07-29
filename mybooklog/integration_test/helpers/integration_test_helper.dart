@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -63,6 +65,7 @@ Future<void> initializeSupabaseForTests() async {
 class IntegrationTestHelper {
   MockAuthRepository? _mockAuth;
   MockBookshelfRepository? _mockBookshelf;
+  StreamController<AuthState>? _authStateController;
 
   /// Creates or gets the mock repositories used in tests
   /// Sets up with REAL books from Google Books API for realistic testing
@@ -74,12 +77,19 @@ class IntegrationTestHelper {
     _mockAuth = MockAuthRepository();
     _mockBookshelf = MockBookshelfRepository();
 
+    // Create a StreamController for auth state that can emit to existing listeners
+    _authStateController = StreamController<AuthState>.broadcast();
+
     // NOTE: Auth stream setup is done in specific methods (setLoggedInState, etc.)
     // This allows tests to manually configure mocks without stream interference
 
     // Default setup: user logged out, empty shelf
     when(() => _mockAuth!.currentSession).thenReturn(null);
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
+
+    // Emit initial logged-out state
+    _authStateController!.add(AuthState(AuthChangeEvent.signedOut, null));
 
     return (_mockAuth!, _mockBookshelf!);
   }
@@ -95,12 +105,10 @@ class IntegrationTestHelper {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
 
-    // Update auth state stream to emit "signed in" event
+    // Emit "signed in" event through the stream controller
     // This triggers the router to redirect to the bookshelf screen
-    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
-        AuthState(AuthChangeEvent.signedIn, MockSession()),
-      ),
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedIn, MockSession()),
     );
 
     // Fetch REAL books from Google Books API (or fallback if unavailable)
@@ -115,12 +123,10 @@ class IntegrationTestHelper {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
 
-    // Update auth state stream to emit "signed out" event
+    // Emit "signed out" event through the stream controller
     // This triggers the router to redirect to the login screen
-    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
-        AuthState(AuthChangeEvent.signedOut, null),
-      ),
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedOut, null),
     );
 
     // Empty bookshelf for logged-out state
@@ -136,11 +142,10 @@ class IntegrationTestHelper {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(MockSession());
 
-    // Update auth state stream to trigger router redirect to bookshelf
-    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
-        AuthState(AuthChangeEvent.signedIn, MockSession()),
-      ),
+    // Emit "signed in" event through the stream controller
+    // This triggers router redirect to bookshelf for existing listeners
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedIn, MockSession()),
     );
 
     // Provide real books for the bookshelf
@@ -156,11 +161,9 @@ class IntegrationTestHelper {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
 
-    // Update auth state stream to emit signed out event
-    when(() => _mockAuth!.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
-        AuthState(AuthChangeEvent.signedOut, null),
-      ),
+    // Emit "signed out" event through the stream controller
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedOut, null),
     );
   }
 
@@ -168,6 +171,10 @@ class IntegrationTestHelper {
   Future<void> cleanup() async {
     _mockAuth = null;
     _mockBookshelf = null;
+    if (_authStateController != null && !_authStateController!.isClosed) {
+      await _authStateController!.close();
+    }
+    _authStateController = null;
   }
 
   /// Launches the app with mocked repositories
@@ -183,17 +190,22 @@ class IntegrationTestHelper {
     _mockAuth = auth;
     _mockBookshelf = shelf;
 
-    // Ensure auth stream is set up to match current session state
-    // This allows manual test setup (like in bookshelf_operations_test)
-    // to work correctly with the router without explicit stream setup
-    final isLoggedIn = auth.currentSession != null;
-    when(() => auth.onAuthStateChange).thenAnswer(
-      (_) => Stream.value(
+    // Set up stream controller if not already done (for direct launchApp calls)
+    if (_authStateController == null) {
+      _authStateController = StreamController<AuthState>.broadcast();
+      when(() => auth.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
+
+      // Emit initial state based on current session
+      final isLoggedIn = auth.currentSession != null;
+      _authStateController!.add(
         isLoggedIn
             ? AuthState(AuthChangeEvent.signedIn, auth.currentSession)
             : AuthState(AuthChangeEvent.signedOut, null),
-      ),
-    );
+      );
+    } else {
+      // Stream controller already exists, ensure auth mock uses it
+      when(() => auth.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
+    }
 
     await tester.pumpWidget(
       MultiProvider(
