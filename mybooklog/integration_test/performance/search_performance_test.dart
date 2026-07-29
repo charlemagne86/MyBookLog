@@ -112,7 +112,11 @@ void main() {
       /// TECHNICAL: Types character by character, verifies results update
       /// each time, all within performance budget.
 
-      await tester.pumpAndSettle();
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Open search
       await tester.tap(find.byIcon(Icons.search).first);
@@ -157,7 +161,11 @@ void main() {
       /// can quickly reset and try different search.
       /// TECHNICAL: Searches, then clears text field, measures grid re-render.
 
-      await tester.pumpAndSettle();
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Open search and type
       await tester.tap(find.byIcon(Icons.search).first);
@@ -195,7 +203,11 @@ void main() {
       /// TECHNICAL: Searches for non-existent term, verifies empty state
       /// renders quickly.
 
-      await tester.pumpAndSettle();
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Open search
       await tester.tap(find.byIcon(Icons.search).first);
@@ -235,7 +247,11 @@ void main() {
       /// TECHNICAL: Rapidly changes search text, verifies app doesn't crash
       /// and shows final state correctly.
 
-      await tester.pumpAndSettle();
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Open search
       await tester.tap(find.byIcon(Icons.search).first);
