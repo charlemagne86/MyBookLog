@@ -6,6 +6,7 @@ import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'helpers/integration_test_helper.dart';
 
@@ -75,8 +76,8 @@ void main() {
       );
 
       // TECHNICAL:
-      // Tap login button
-      await helper.tap(tester, find.byType(ElevatedButton));
+      // Tap login button (without waiting for animations yet)
+      await tester.tap(find.byType(ElevatedButton));
 
       // TECHNICAL:
       // Emit auth state change to trigger router navigation
@@ -138,8 +139,14 @@ void main() {
       );
 
       // TECHNICAL:
-      // Tap login button
-      await helper.tap(tester, find.byType(ElevatedButton));
+      // Tap login button (without waiting for animations yet)
+      await tester.tap(find.byType(ElevatedButton));
+
+      // TECHNICAL:
+      // Emit failed login state (no session)
+      helper.emitAuthStateChange(
+        AuthState(AuthChangeEvent.signedOut, null),
+      );
 
       // TECHNICAL:
       // Wait for error handling
@@ -179,7 +186,8 @@ void main() {
 
       // TECHNICAL:
       // Tap visibility icon to show password
-      await helper.tap(tester, find.byIcon(Icons.visibility));
+      await tester.tap(find.byIcon(Icons.visibility));
+      await tester.pumpAndSettle();
 
       // TECHNICAL:
       // Password should now be visible
@@ -188,7 +196,8 @@ void main() {
 
       // TECHNICAL:
       // Tap again to hide password
-      await helper.tap(tester, find.byIcon(Icons.visibility_off));
+      await tester.tap(find.byIcon(Icons.visibility_off));
+      await tester.pumpAndSettle();
 
       password = tester.widget<TextField>(passwordField) as TextField;
       expect(password.obscureText, true);
