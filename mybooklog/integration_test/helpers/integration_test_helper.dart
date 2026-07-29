@@ -96,6 +96,8 @@ class IntegrationTestHelper {
 
   /// Initializes the app (alias for setupMocks)
   Future<void> initializeApp() async {
+    // Clear any cached test books to ensure fresh load for each test
+    RealBookFixtures.clearCache();
     await setupMocks();
   }
 
