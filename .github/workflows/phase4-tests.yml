@@ -20,15 +20,18 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
+        working-directory: ./mybooklog
         run: flutter pub get
 
       - name: Run Phase 4 Performance Tests
+        working-directory: ./mybooklog
         run: |
           flutter test integration_test/performance/ \
             --verbose \
             --dart-define=FLUTTER_TEST=true
 
       - name: Run Phase 4 E2E Tests
+        working-directory: ./mybooklog
         run: |
           flutter test integration_test/e2e/ \
             --verbose \
@@ -45,9 +48,11 @@ jobs:
         uses: subosito/flutter-action@v2
 
       - name: Get dependencies
+        working-directory: ./mybooklog
         run: flutter pub get
 
       - name: Run tests with coverage
+        working-directory: ./mybooklog
         run: |
           flutter test integration_test/ \
             --coverage \
@@ -56,6 +61,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./coverage/lcov.info
+          files: ./mybooklog/coverage/lcov.info
           flags: integration-tests
           name: Phase 4 Coverage

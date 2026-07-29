@@ -21,17 +21,19 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
+        working-directory: ./mybooklog
         run: flutter pub get
 
       - name: Run tests with coverage
+        working-directory: ./mybooklog
         run: flutter test --coverage
         continue-on-error: true
 
       - name: Extract coverage percentage
         id: coverage
         run: |
-          if [ -f coverage/coverage-summary.xml ]; then
-            COVERAGE=$(grep -oP 'line-rate="\K[^"]*' coverage/coverage-summary.xml | awk '{printf "%.1f%%", $1*100}')
+          if [ -f mybooklog/coverage/coverage-summary.xml ]; then
+            COVERAGE=$(grep -oP 'line-rate="\K[^"]*' mybooklog/coverage/coverage-summary.xml | awk '{printf "%.1f%%", $1*100}')
             echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE"
           else
@@ -83,16 +85,18 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
+        working-directory: ./mybooklog
         run: flutter pub get
 
       - name: Run tests with coverage
+        working-directory: ./mybooklog
         run: flutter test --coverage
         continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./coverage/lcov.info
+          files: ./mybooklog/coverage/lcov.info
           flags: flutter
           name: codecov-umbrella
           fail_ci_if_error: false

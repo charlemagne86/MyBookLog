@@ -22,21 +22,25 @@ jobs:
         channel: 'stable'
 
     - name: Get dependencies
+      working-directory: ./mybooklog
       run: flutter pub get
 
     - name: Analyze code
+      working-directory: ./mybooklog
       run: flutter analyze
 
     - name: Format check
+      working-directory: ./mybooklog
       run: dart format --set-exit-if-changed .
 
     - name: Run tests with coverage
+      working-directory: ./mybooklog
       run: flutter test --coverage
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage/lcov.info
+        file: ./mybooklog/coverage/lcov.info
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
@@ -50,7 +54,7 @@ jobs:
         from pathlib import Path
 
         # Read lcov.info to calculate coverage
-        lcov_file = Path('coverage/lcov.info')
+        lcov_file = Path('mybooklog/coverage/lcov.info')
         total_lines = 0
         covered_lines = 0
 
@@ -83,7 +87,7 @@ jobs:
       if: always()
       run: |
         mkdir -p build/reports
-        cp coverage/lcov.info build/reports/ || true
+        cp mybooklog/coverage/lcov.info build/reports/ || true
 
     - name: Archive test results
       if: always()
