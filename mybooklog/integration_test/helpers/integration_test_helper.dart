@@ -167,6 +167,15 @@ class IntegrationTestHelper {
     );
   }
 
+  /// Emits an auth state change through the stream controller
+  /// Used by tests that manually mock signIn/signOut
+  void emitAuthStateChange(AuthState state) {
+    if (_authStateController == null) {
+      throw StateError('StreamController not initialized. Call setupMocks() first.');
+    }
+    _authStateController!.add(state);
+  }
+
   /// Cleanup after tests
   Future<void> cleanup() async {
     _mockAuth = null;

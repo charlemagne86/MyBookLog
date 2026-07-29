@@ -37,18 +37,15 @@ void main() {
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
       when(() => mockAuth.currentSession).thenReturn(null);
 
-      // Mock successful login
+      // Mock successful login - emit auth state change when signIn is called
       when(
         () => mockAuth.signIn(
           email: any(named: 'email'),
           password: any(named: 'password'),
         ),
       ).thenAnswer((_) async {
-        // Simulate successful login by updating session
-        when(() => mockAuth.currentSession).thenReturn(
-          // Mock session object (just needs to be non-null)
-          MockSession(),
-        );
+        // Update session to logged-in state
+        when(() => mockAuth.currentSession).thenReturn(MockSession());
       });
 
       // TECHNICAL:
@@ -80,6 +77,17 @@ void main() {
       // TECHNICAL:
       // Tap login button
       await helper.tap(tester, find.byType(ElevatedButton));
+
+      // TECHNICAL:
+      // Emit auth state change to trigger router navigation
+      // (In real app, this would come from Supabase auth service)
+      helper.emitAuthStateChange(
+        AuthState(AuthChangeEvent.signedIn, MockSession()),
+      );
+
+      // TECHNICAL:
+      // Wait for navigation and bookshelf to render
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // TECHNICAL:
       // After login, router should navigate to bookshelf.
@@ -132,6 +140,10 @@ void main() {
       // TECHNICAL:
       // Tap login button
       await helper.tap(tester, find.byType(ElevatedButton));
+
+      // TECHNICAL:
+      // Wait for error handling
+      await tester.pumpAndSettle();
 
       // TECHNICAL:
       // Error message should be shown
