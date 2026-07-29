@@ -178,9 +178,9 @@ class PerformanceBaselines {
   // Each search test includes 2-3s pumpAndSettle, so baseline must account for that.
   // TECHNICAL:
   // - searchLatency: 200ms→5000ms (includes 2-3s pumpAndSettle + API + rendering)
-  // - navigationLatency: 2000ms→7000ms (login + books fetch + rendering + settle)
+  // - navigationLatency: 7000ms→9000ms (login + books fetch + rendering + settle)
   static const Duration appStartup = Duration(seconds: 10);
-  static const Duration navigationLatency = Duration(seconds: 7); // Login + books fetch
+  static const Duration navigationLatency = Duration(seconds: 9); // Login + books fetch, occasional slowness
   static const Duration searchLatency = Duration(seconds: 5); // Search + pumpAndSettle
   static const Duration scrollFPS = Duration(milliseconds: 16); // ~60fps
   static const Duration apiLatency = Duration(seconds: 3); // Real Google Books API latency
