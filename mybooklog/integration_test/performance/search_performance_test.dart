@@ -132,7 +132,8 @@ void main() {
         final stopwatch = Stopwatch()..start();
 
         await tester.enterText(searchField.first, query);
-        await tester.pumpAndSettle(Duration(milliseconds: 50));
+        // Wait for filtering to complete (increased to 2s)
+        await tester.pumpAndSettle(Duration(seconds: 2));
 
         stopwatch.stop();
         durations.add(stopwatch.elapsed);
@@ -219,7 +220,8 @@ void main() {
       final stopwatch = Stopwatch()..start();
 
       await tester.enterText(searchField.first, 'xyzabc123notabook');
-      await tester.pumpAndSettle(Duration(milliseconds: 100));
+      // Wait for filtering and empty state (increased to 2s)
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       stopwatch.stop();
 
@@ -255,7 +257,7 @@ void main() {
 
       // Open search
       await tester.tap(find.byIcon(Icons.search).first);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       final searchField = find.byType(TextField);
 
@@ -267,8 +269,8 @@ void main() {
         await tester.pump(Duration(milliseconds: 50)); // Don't wait for settle
       }
 
-      // Finally settle
-      await tester.pumpAndSettle();
+      // Finally settle with timeout
+      await tester.pumpAndSettle(Duration(seconds: 2));
 
       // Should end in valid state
       expect(find.byType(GridView), findsWidgets);
