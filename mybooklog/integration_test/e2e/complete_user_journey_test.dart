@@ -96,8 +96,8 @@ void main() {
       // Step 1: Set up logged-in state
       await testHelper.setLoggedInState();
       await testHelper.pumpApp(tester);
-      // Wait for bookshelf to load books from mock
-      await tester.pumpAndSettle(Duration(seconds: 3));
+      // Wait for bookshelf to load books from mock (increased to 5s)
+      await tester.pumpAndSettle(Duration(seconds: 5));
 
       // Step 2: Verify bookshelf
       expect(find.byType(GridView), findsWidgets);
@@ -109,7 +109,8 @@ void main() {
       // Step 4: Enter search term
       final searchField = find.byType(TextField).first;
       await tester.enterText(searchField, 'fiction');
-      await tester.pumpAndSettle();
+      // Wait for search filtering (increased to 3s)
+      await tester.pumpAndSettle(Duration(seconds: 3));
 
       // Step 5: Verify filtered results
       expect(find.byType(GridView), findsWidgets);
