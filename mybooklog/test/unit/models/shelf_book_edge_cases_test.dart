@@ -91,9 +91,11 @@ void main() {
       );
 
       test('matches with mixed case query', () {
-        expect(testBook.matchesQuery('GREAT'), isTrue);
-        expect(testBook.matchesQuery('gReAt'), isTrue);
-        expect(testBook.matchesQuery('GaT'), isFalse);
+        // TECHNICAL: Case-insensitive substring matching on title and author
+        expect(testBook.matchesQuery('GREAT'), isTrue);  // Matches "GREAT" in title
+        expect(testBook.matchesQuery('gReAt'), isTrue);  // Case-insensitive match
+        expect(testBook.matchesQuery('GaT'), isTrue);    // Matches "gat" in "gatsby"
+        expect(testBook.matchesQuery('xyz'), isFalse);   // No match in title or author
       });
 
       test('matches partial author name', () {

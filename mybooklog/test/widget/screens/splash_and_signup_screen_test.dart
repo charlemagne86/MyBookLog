@@ -66,7 +66,8 @@ void main() {
       when(() => mockAuth.signUp(
         email: any(named: 'email'),
         password: any(named: 'password'),
-      )).thenAnswer((_) async => null);
+        firstName: any(named: 'firstName'),
+      )).thenAnswer((_) async {});
 
       await tester.pumpWidget(
         MaterialApp(
