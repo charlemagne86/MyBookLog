@@ -317,7 +317,12 @@ void main() {
       // Step 5: Verify still logged in
       expect(find.byType(TextField), findsWidgets); // Search field
 
-      // Step 6: Close search
+      // Step 6: Enter search text to show close icon
+      final searchField = find.byType(TextField).first;
+      await tester.enterText(searchField, 'Great');
+      await tester.pumpAndSettle();
+
+      // Step 7: Close search via close button
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 

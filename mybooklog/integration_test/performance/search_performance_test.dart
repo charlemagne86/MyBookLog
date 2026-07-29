@@ -88,7 +88,7 @@ void main() {
       // Measure filtering with large dataset
       final stopwatch = Stopwatch()..start();
 
-      await tester.enterText(searchField.first, 'Asimov');
+      await tester.enterText(searchField.first, 'Scott');
       // Wait for search filtering (increased to 2s for GridView rendering)
       await tester.pumpAndSettle(Duration(seconds: 2));
 

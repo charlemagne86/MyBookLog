@@ -105,6 +105,12 @@ void main() {
       /// TECHNICAL: Performs multiple rapid navigation actions and verifies
       /// app remains in consistent state.
 
+      // Initialize app with logged-in state
+      await testHelper.initializeApp();
+      await testHelper.setLoggedInState();
+      await testHelper.pumpApp(tester);
+      await tester.pumpAndSettle(Duration(seconds: 2));
+
       final stopwatch = Stopwatch()..start();
 
       // Simulate rapid pumpAndSettle calls
