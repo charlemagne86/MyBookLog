@@ -157,9 +157,9 @@ class MockAuthStateProvider {
 // Simulates success/failure scenarios and tracks call history.
 class MockAuthService extends Mock {
   late MockAuthStateProvider _stateProvider;
-  List<String> _loginAttempts = [];
-  List<String> _signupAttempts = [];
-  List<String> _logoutAttempts = [];
+  final List<String> _loginAttempts = [];
+  final List<String> _signupAttempts = [];
+  final List<String> _logoutAttempts = [];
 
   MockAuthService() {
     _stateProvider = MockAuthStateProvider();
@@ -255,7 +255,7 @@ class FailedAuthService extends MockAuthService {
 // Rate-limited auth mock (blocks repeated attempts)
 // TECHNICAL: Throws after N attempts
 class RateLimitedAuthService extends MockAuthService {
-  int _maxAttempts = 3;
+  final int _maxAttempts = 3;
   int _attemptCount = 0;
 
   @override

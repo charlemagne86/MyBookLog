@@ -28,12 +28,8 @@ void main() {
 
         final elapsedMs = stopwatch.elapsedMilliseconds;
 
-        // BASELINE: 3000ms (3 seconds) for Google Books API
         // THRESHOLD: +25% regression = 3750ms
-        const baselineMs = 3000;
         const thresholdMs = 3750;
-
-        print('Search latency: ${elapsedMs}ms (baseline: ${baselineMs}ms)');
 
         expect(
           elapsedMs,
@@ -64,12 +60,8 @@ void main() {
 
         stopwatch.stop();
 
-        // BASELINE: 100ms for parsing 20 items
         // THRESHOLD: +50% regression = 150ms
-        const baselineMs = 100;
         const thresholdMs = 150;
-
-        print('Batch parsing: ${stopwatch.elapsedMilliseconds}ms');
 
         expect(
           stopwatch.elapsedMilliseconds,
@@ -100,12 +92,8 @@ void main() {
 
         stopwatch.stop();
 
-        // BASELINE: 10ms for 100 identity keys
         // THRESHOLD: +100% regression = 20ms (can afford to be slower here)
-        const baselineMs = 10;
         const thresholdMs = 20;
-
-        print('Identity key generation: ${stopwatch.elapsedMilliseconds}ms');
 
         expect(stopwatch.elapsedMilliseconds, lessThanOrEqualTo(thresholdMs));
       });
@@ -128,12 +116,8 @@ void main() {
 
         stopwatch.stop();
 
-        // BASELINE: 5ms for 100 volume keys
         // THRESHOLD: +100% regression = 10ms
-        const baselineMs = 5;
         const thresholdMs = 10;
-
-        print('Volume key generation: ${stopwatch.elapsedMilliseconds}ms');
 
         expect(stopwatch.elapsedMilliseconds, lessThanOrEqualTo(thresholdMs));
       });
@@ -151,14 +135,6 @@ void main() {
 
         const totalTests = 223;
         const expectedMinutes = 8;
-        const expectedSeconds = expectedMinutes * 60;
-
-        print('Test suite baseline:');
-        print('  Total tests: $totalTests');
-        print('  Expected time: ${expectedMinutes}min (${expectedSeconds}sec)');
-        print(
-          '  Per test: ${(expectedSeconds / totalTests).toStringAsFixed(2)}sec',
-        );
 
         // Baseline captured, not tested (testing execution time in test would be circular)
         expect(totalTests, greaterThan(200));
@@ -173,9 +149,6 @@ void main() {
 
         const coverageTimeMs = 30000; // 30 seconds
         const thresholdMs = 45000; // Allow +50%
-
-        print('Coverage generation baseline: ${coverageTimeMs}ms');
-        print('Threshold: ${thresholdMs}ms');
 
         // Baseline documented for monitoring
         expect(coverageTimeMs, lessThan(thresholdMs));

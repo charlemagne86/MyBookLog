@@ -2,6 +2,7 @@
 ///
 /// Tests parsing Google Books API responses, ISBN extraction,
 /// and URL normalization without external dependencies.
+library book_search_result_test;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mybooklog/src/data/models/book_search_result.dart';

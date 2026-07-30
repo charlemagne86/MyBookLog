@@ -2,6 +2,7 @@
 ///
 /// Provides common patterns for widget testing, such as pumping test widgets,
 /// finding elements, and simulating user interactions.
+library widget_test_helpers;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -157,8 +158,8 @@ extension WidgetTesterX on WidgetTester {
 
   /// Sets the display size for responsive testing.
   Future<void> setDisplaySize(Size size) async {
-    binding.window.physicalSizeTestValue = size;
-    addTearDown(binding.window.clearPhysicalSizeTestValue);
+    binding.view.physicalSize = size;
+    addTearDown(binding.view.resetPhysicalSize);
   }
 }
 

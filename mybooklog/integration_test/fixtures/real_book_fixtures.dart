@@ -8,6 +8,7 @@
 /// TECHNICAL:
 /// 1. Query Google Books API during test setup
 /// 2. Cache results for performance (2-3 sec first run, 50ms after)
+library real_book_fixtures;
 /// 3. Convert to ShelfBook format for testing
 /// 4. Fall back to minimal data if API unavailable (offline testing)
 

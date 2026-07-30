@@ -2,6 +2,7 @@
 ///
 /// Tests serialization, deserialization, equality, and business logic
 /// for shelf books without any framework or network dependencies.
+library shelf_book_test;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
