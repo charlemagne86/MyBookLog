@@ -115,7 +115,7 @@ void main() {
 
       // TECHNICAL:
       // Verify the password is now visible (not obscured)
-      password = tester.widget<TextField>(passwordField) as TextField;
+      password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, false);
 
       // TECHNICAL:
@@ -123,7 +123,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.visibility_off));
       await tester.pumpAndSettle();
 
-      password = tester.widget<TextField>(passwordField) as TextField;
+      password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, true);
     });
 

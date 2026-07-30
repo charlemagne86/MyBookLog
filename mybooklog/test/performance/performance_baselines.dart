@@ -22,7 +22,7 @@ void main() {
         final stopwatch = Stopwatch()..start();
 
         // Simulate search operation (mocked, no real API)
-        final results = _simulateSearchOperation();
+        _simulateSearchOperation();
 
         stopwatch.stop();
 
@@ -60,7 +60,7 @@ void main() {
           },
         );
 
-        final results = BookSearchResult.listFromGoogleItems(items);
+        BookSearchResult.listFromGoogleItems(items);
 
         stopwatch.stop();
 
