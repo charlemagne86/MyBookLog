@@ -38,6 +38,9 @@ void main() {
         ).build(),
       );
 
+      // Emit auth state after pumpWidget
+      authStateController.add(AuthState(AuthChangeEvent.signedOut, null));
+
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsWidgets);
