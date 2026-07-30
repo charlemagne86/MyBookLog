@@ -161,20 +161,18 @@ class TestBookSearchResultFactory {
   // Create a realistic search result matching Google Books API structure
   // TECHNICAL: Returns complete BookSearchResult with all fields populated
   static BookSearchResult createTestResult({
-    String? id,
+    String? volumeId,
     String title = 'Test Book',
     String author = 'Test Author',
-    String? isbn13,
-    String? isbn10,
-    String imageUrl = 'https://books.google.com/books/content?id=test',
+    String? isbn,
+    String thumbnail = 'https://books.google.com/books/content?id=test',
   }) {
     return BookSearchResult(
-      id: id ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
+      volumeId: volumeId ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
       title: title,
-      author: author,
-      isbn13: isbn13 ?? '9780123456789',
-      isbn10: isbn10,
-      imageUrl: imageUrl,
+      authors: [author],
+      isbn: isbn ?? '9780123456789',
+      thumbnail: thumbnail,
     );
   }
 
@@ -185,10 +183,10 @@ class TestBookSearchResultFactory {
     return List.generate(
       count,
       (i) => createTestResult(
-        id: 'result-$i',
+        volumeId: 'result-$i',
         title: 'Search Result $i',
         author: 'Author $i',
-        isbn13: '978000000000$i',
+        isbn: '978000000000$i',
       ),
     );
   }
@@ -221,15 +219,14 @@ class TestBookSearchResultFactory {
 
   // BUSINESS LOGIC:
   // Create result with missing ISBN (incomplete API data)
-  // TECHNICAL: Returns result with null isbn13/isbn10
+  // TECHNICAL: Returns result with null isbn
   static BookSearchResult createResultWithoutISBN() {
     return BookSearchResult(
-      id: 'no-isbn-book',
+      volumeId: 'no-isbn-book',
       title: 'Book Without ISBN',
-      author: 'Test Author',
-      isbn13: null,
-      isbn10: null,
-      imageUrl: 'https://books.google.com/books/content?id=no-isbn',
+      authors: ['Test Author'],
+      isbn: null,
+      thumbnail: 'https://books.google.com/books/content?id=no-isbn',
     );
   }
 
