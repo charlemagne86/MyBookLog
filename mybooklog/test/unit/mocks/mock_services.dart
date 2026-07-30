@@ -9,21 +9,20 @@ class GoogleBooksServiceSetupHelpers {
     MockGoogleBooksService service, {
     required List<BookSearchResult> results,
   }) {
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   static void setupEmptySearchResults(MockGoogleBooksService service) {
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => const GoogleBooksPage(results: [], totalItems: 0));
+    when(() => service.search(any())).thenAnswer(
+      (_) async => const GoogleBooksPage(results: [], totalItems: 0),
+    );
   }
 
   static void setupSearchTimeout(MockGoogleBooksService service) {
-    when(
-      () => service.search(any()),
-    ).thenThrow(Exception('Request timeout'));
+    when(() => service.search(any())).thenThrow(Exception('Request timeout'));
   }
 
   static void setupSearchApiError(
@@ -56,9 +55,10 @@ class GoogleBooksServiceSetupHelpers {
         isbn: '978000000000${i % 10}',
       ),
     );
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   static void setupSpecialCharacterResults(MockGoogleBooksService service) {
@@ -78,9 +78,10 @@ class GoogleBooksServiceSetupHelpers {
         isbn: '9780123456790',
       ),
     ];
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   static void setupUnauthorizedError(MockGoogleBooksService service) {
@@ -96,9 +97,9 @@ class GoogleBooksServiceSetupHelpers {
   }
 
   static void setupNotFoundError(MockGoogleBooksService service) {
-    when(
-      () => service.search(any()),
-    ).thenThrow(GoogleBooksException('404: Not Found - Endpoint no longer available'));
+    when(() => service.search(any())).thenThrow(
+      GoogleBooksException('404: Not Found - Endpoint no longer available'),
+    );
   }
 
   static void setupServerError(MockGoogleBooksService service) {
