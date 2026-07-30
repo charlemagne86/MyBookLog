@@ -63,7 +63,9 @@ void main() {
       PerformanceTestHelper.logMetric('Login → Bookshelf', stopwatch.elapsed);
     });
 
-    testWidgets('bookshelf_navigation_consistency', (WidgetTester tester) async {
+    testWidgets('bookshelf_navigation_consistency', (
+      WidgetTester tester,
+    ) async {
       /// Verifies navigation performance is consistent across multiple navigations.
       ///
       /// BUSINESS LOGIC: Users navigate multiple times per session; performance
@@ -83,8 +85,12 @@ void main() {
       }
 
       // Verify consistency
-      final maxDuration = durations.reduce((a, b) => a.inMilliseconds > b.inMilliseconds ? a : b);
-      final minDuration = durations.reduce((a, b) => a.inMilliseconds < b.inMilliseconds ? a : b);
+      final maxDuration = durations.reduce(
+        (a, b) => a.inMilliseconds > b.inMilliseconds ? a : b,
+      );
+      final minDuration = durations.reduce(
+        (a, b) => a.inMilliseconds < b.inMilliseconds ? a : b,
+      );
       final variance = maxDuration.inMilliseconds - minDuration.inMilliseconds;
 
       // Variance should be small (< 100ms)
@@ -94,7 +100,10 @@ void main() {
         reason: 'Navigation latency should be consistent',
       );
 
-      PerformanceTestHelper.logMetric('Navigation variance', Duration(milliseconds: variance));
+      PerformanceTestHelper.logMetric(
+        'Navigation variance',
+        Duration(milliseconds: variance),
+      );
     });
 
     testWidgets('rapid_navigation_handling', (WidgetTester tester) async {
@@ -154,7 +163,10 @@ void main() {
         reason: 'Smooth navigation should complete in < 1 second',
       );
 
-      PerformanceTestHelper.logMetric('Transition smoothness', stopwatch.elapsed);
+      PerformanceTestHelper.logMetric(
+        'Transition smoothness',
+        stopwatch.elapsed,
+      );
     });
   });
 }

@@ -55,9 +55,7 @@ class TestAppBuilder {
         theme: AppTheme.lightTheme,
         builder: (context, child) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaleFactor: 1.0,
-            ),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
             child: child!,
           );
         },
@@ -102,15 +100,15 @@ class TestSetupHelpers {
     List<dynamic> testBooks,
     StreamController<AuthState> authStateController,
   ) {
-    when(() => mockBookshelf.fetchShelf()).thenAnswer(
-      (_) async => List.from(testBooks),
-    );
+    when(
+      () => mockBookshelf.fetchShelf(),
+    ).thenAnswer((_) async => List.from(testBooks));
 
     // Mock auth state stream - this is critical for GoRouter to work
     // GoRouterRefreshStream watches this stream and triggers router updates
-    when(() => mockAuth.onAuthStateChange).thenAnswer(
-      (_) => authStateController.stream,
-    );
+    when(
+      () => mockAuth.onAuthStateChange,
+    ).thenAnswer((_) => authStateController.stream);
 
     // Create a test session
     final now = DateTime.now().toIso8601String();
@@ -143,12 +141,7 @@ class TestSetupHelpers {
     when(() => mockAuth.currentSession).thenReturn(testSession);
 
     // Emit auth event to trigger router update
-    authStateController.add(
-      AuthState(
-        AuthChangeEvent.signedIn,
-        testSession,
-      ),
-    );
+    authStateController.add(AuthState(AuthChangeEvent.signedIn, testSession));
   }
 
   /// BUSINESS LOGIC:
@@ -164,17 +157,12 @@ class TestSetupHelpers {
   ) {
     when(() => mockAuth.currentSession).thenReturn(null);
 
-    when(() => mockAuth.onAuthStateChange).thenAnswer(
-      (_) => authStateController.stream,
-    );
+    when(
+      () => mockAuth.onAuthStateChange,
+    ).thenAnswer((_) => authStateController.stream);
 
     // Emit signedOut event to trigger redirect
-    authStateController.add(
-      AuthState(
-        AuthChangeEvent.signedOut,
-        null,
-      ),
-    );
+    authStateController.add(AuthState(AuthChangeEvent.signedOut, null));
   }
 
   /// BUSINESS LOGIC:
@@ -185,9 +173,9 @@ class TestSetupHelpers {
   /// Makes fetchShelf throw an exception.
   /// The screen should catch this, show error banner, and offer retry.
   static void setupShelfLoadError(BookshelfRepository mockBookshelf) {
-    when(() => mockBookshelf.fetchShelf()).thenThrow(
-      Exception('Network error: Failed to fetch bookshelf'),
-    );
+    when(
+      () => mockBookshelf.fetchShelf(),
+    ).thenThrow(Exception('Network error: Failed to fetch bookshelf'));
   }
 
   /// BUSINESS LOGIC:
@@ -198,9 +186,7 @@ class TestSetupHelpers {
   /// fetchShelf returns empty list successfully (no error).
   /// Screen should show "no books" message and add button.
   static void setupEmptyShelf(BookshelfRepository mockBookshelf) {
-    when(() => mockBookshelf.fetchShelf()).thenAnswer(
-      (_) async => [],
-    );
+    when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => []);
   }
 
   /// BUSINESS LOGIC:
@@ -210,21 +196,25 @@ class TestSetupHelpers {
   /// TECHNICAL:
   /// signUp/signIn complete without error.
   static void setupSuccessfulAuth(
-    AuthRepository mockAuth,
-    {required bool isSignUp}
-  ) {
+    AuthRepository mockAuth, {
+    required bool isSignUp,
+  }) {
     if (isSignUp) {
-      when(() => mockAuth.signUp(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-            firstName: any(named: 'firstName'),
-            lastName: any(named: 'lastName'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockAuth.signUp(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          firstName: any(named: 'firstName'),
+          lastName: any(named: 'lastName'),
+        ),
+      ).thenAnswer((_) async {});
     } else {
-      when(() => mockAuth.signIn(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          )).thenAnswer((_) async {});
+      when(
+        () => mockAuth.signIn(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async {});
     }
   }
 
@@ -236,12 +226,12 @@ class TestSetupHelpers {
   /// signIn throws "Invalid credentials" exception.
   /// UI should show error and let user try again.
   static void setupInvalidCredentials(AuthRepository mockAuth) {
-    when(() => mockAuth.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      Exception('Invalid email or password'),
-    );
+    when(
+      () => mockAuth.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(Exception('Invalid email or password'));
   }
 
   /// BUSINESS LOGIC:
@@ -252,13 +242,13 @@ class TestSetupHelpers {
   /// signUp throws "Email exists" exception.
   /// UI should show error and offer login option.
   static void setupEmailAlreadyExists(AuthRepository mockAuth) {
-    when(() => mockAuth.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          firstName: any(named: 'firstName'),
-          lastName: any(named: 'lastName'),
-        )).thenThrow(
-      Exception('Email already registered'),
-    );
+    when(
+      () => mockAuth.signUp(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+        firstName: any(named: 'firstName'),
+        lastName: any(named: 'lastName'),
+      ),
+    ).thenThrow(Exception('Email already registered'));
   }
 }

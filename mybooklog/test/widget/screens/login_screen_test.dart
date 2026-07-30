@@ -61,12 +61,8 @@ Future<MockAuthRepository> _pumpLoginScreen(
 
   await tester.pumpWidget(
     MultiProvider(
-      providers: [
-        Provider<AuthRepository>.value(value: mockAuth),
-      ],
-      child: MaterialApp(
-        home: const LoginScreen(),
-      ),
+      providers: [Provider<AuthRepository>.value(value: mockAuth)],
+      child: MaterialApp(home: const LoginScreen()),
     ),
   );
 
@@ -83,8 +79,9 @@ void main() {
     // The login screen must present a clear form for users to enter their
     // email and password. For users aged 60+, large text and clear labels
     // are critical for usability.
-    testWidgets('displays login form with email and password fields',
-        (WidgetTester tester) async {
+    testWidgets('displays login form with email and password fields', (
+      WidgetTester tester,
+    ) async {
       await _pumpLoginScreen(tester);
 
       // TECHNICAL:
@@ -100,15 +97,15 @@ void main() {
     // protect privacy in shared spaces or over shoulders. Users can tap an
     // eye icon to temporarily show the password if they need to verify what
     // they typed.
-    testWidgets('password field is obscured by default and can be toggled',
-        (WidgetTester tester) async {
+    testWidgets('password field is obscured by default and can be toggled', (
+      WidgetTester tester,
+    ) async {
       await _pumpLoginScreen(tester);
 
       // TECHNICAL:
       // Find the password TextField and verify it's in obscured mode
       final passwordField = find.byType(TextField).at(1);
-      TextField password =
-          tester.widget<TextField>(passwordField) as TextField;
+      TextField password = tester.widget<TextField>(passwordField) as TextField;
       expect(password.obscureText, true);
 
       // TECHNICAL:
@@ -135,8 +132,9 @@ void main() {
     // shows a spinner and becomes disabled to prevent accidental double-taps
     // while the request is in flight. The user's feedback is that the app
     // is working, not frozen.
-    testWidgets('shows spinner on login button during submission',
-        (WidgetTester tester) async {
+    testWidgets('shows spinner on login button during submission', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Create a completer so we can control when the login completes.
       // This lets us observe the loading state before navigation happens.
@@ -172,16 +170,14 @@ void main() {
     // If login fails (invalid credentials, network error, etc.), the app shows
     // a friendly error message in red so the user understands what went wrong
     // and can try again. Technical errors are hidden behind user-friendly text.
-    testWidgets('displays error message on login failure',
-        (WidgetTester tester) async {
+    testWidgets('displays error message on login failure', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Throw a generic exception (AuthRepository.friendlyMessage will convert
       // it to a user-friendly message like "Something went wrong...")
       final exception = Exception('Network error');
-      await _pumpLoginScreen(
-        tester,
-        onSignIn: () => Future.error(exception),
-      );
+      await _pumpLoginScreen(tester, onSignIn: () => Future.error(exception));
 
       // TECHNICAL:
       // Enter credentials
@@ -201,20 +197,22 @@ void main() {
       // After the error, the friendly message should appear
       // (generic exception returns "Something went wrong. Please check...")
       expect(
-        find.text('Something went wrong. Please check your connection and retry.'),
+        find.text(
+          'Something went wrong. Please check your connection and retry.',
+        ),
         findsOneWidget,
       );
 
       // TECHNICAL:
       // Verify error text is displayed in red (error color from theme)
       final errorText = tester.widget<Text>(
-        find.text('Something went wrong. Please check your connection and retry.'),
+        find.text(
+          'Something went wrong. Please check your connection and retry.',
+        ),
       );
       expect(
         errorText.style?.color,
-        Theme.of(tester.element(find.byType(ElevatedButton)))
-            .colorScheme
-            .error,
+        Theme.of(tester.element(find.byType(ElevatedButton))).colorScheme.error,
       );
     });
 
@@ -222,8 +220,9 @@ void main() {
     // After a login error is shown and the user taps login again,
     // the app should allow retry. The button should show a spinner again
     // when attempting to login after an error.
-    testWidgets('clears error message when user retries login',
-        (WidgetTester tester) async {
+    testWidgets('clears error message when user retries login', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Create a completer so we can control when each login attempt completes.
       // This lets us see the state between attempts without interference.
@@ -261,7 +260,9 @@ void main() {
       // TECHNICAL:
       // Error message should be visible
       expect(
-        find.text('Something went wrong. Please check your connection and retry.'),
+        find.text(
+          'Something went wrong. Please check your connection and retry.',
+        ),
         findsOneWidget,
       );
 
@@ -282,8 +283,9 @@ void main() {
     // password reset feature is not yet implemented. Rather than remove the
     // link and confuse users looking for it, we show a helpful message
     // explaining it will be available soon.
-    testWidgets('forgot password shows not-implemented message',
-        (WidgetTester tester) async {
+    testWidgets('forgot password shows not-implemented message', (
+      WidgetTester tester,
+    ) async {
       await _pumpLoginScreen(tester);
 
       // TECHNICAL:
@@ -293,14 +295,9 @@ void main() {
 
       // TECHNICAL:
       // Verify the snackbar message appears
+      expect(find.byType(SnackBar), findsOneWidget);
       expect(
-        find.byType(SnackBar),
-        findsOneWidget,
-      );
-      expect(
-        find.text(
-          'Forgot password functionality is not implemented yet.',
-        ),
+        find.text('Forgot password functionality is not implemented yet.'),
         findsOneWidget,
       );
     });
@@ -308,8 +305,9 @@ void main() {
     // BUSINESS LOGIC:
     // Below the login button is a link to the signup screen for new users.
     // This is the standard flow when someone doesn't have an account yet.
-    testWidgets('has signup link below login button',
-        (WidgetTester tester) async {
+    testWidgets('has signup link below login button', (
+      WidgetTester tester,
+    ) async {
       await _pumpLoginScreen(tester);
 
       // TECHNICAL:
@@ -325,15 +323,17 @@ void main() {
     // The login button should only be enabled when the user has actually
     // entered something in both fields. A disabled button prevents accidental
     // blank submissions.
-    testWidgets('login button is enabled when both fields have text',
-        (WidgetTester tester) async {
+    testWidgets('login button is enabled when both fields have text', (
+      WidgetTester tester,
+    ) async {
       await _pumpLoginScreen(tester);
 
       // TECHNICAL:
       // Initially both fields are empty, button may or may not be enabled
       // (depends on implementation preference)
-      ElevatedButton button =
-          tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+      ElevatedButton button = tester.widget<ElevatedButton>(
+        find.byType(ElevatedButton),
+      );
       // In this implementation, the button is always enabled to let the user
       // attempt login and see the error message (better UX than a grayed button)
 
@@ -360,8 +360,9 @@ void main() {
     // The entire login form should fit on the screen for users aged 60+,
     // without requiring excessive scrolling. A ScrollView ensures nothing
     // is hidden even on smaller screens, and all elements remain interactive.
-    testWidgets('form is scrollable on small screens',
-        (WidgetTester tester) async {
+    testWidgets('form is scrollable on small screens', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Default screen size test is sufficient (800x600). The real verification
       // is that SingleChildScrollView exists and form elements are accessible.
@@ -393,8 +394,9 @@ void main() {
     // The login form sends the user's email and password to the AuthRepository.
     // We verify that the correct values are passed and that signIn is called
     // exactly once per button tap.
-    testWidgets('calls signIn with email and password from fields',
-        (WidgetTester tester) async {
+    testWidgets('calls signIn with email and password from fields', (
+      WidgetTester tester,
+    ) async {
       final mockAuth = await _pumpLoginScreen(tester);
 
       final email = 'user@example.com';
@@ -413,9 +415,7 @@ void main() {
 
       // TECHNICAL:
       // Verify signIn was called with the correct email and password
-      verify(
-        () => mockAuth.signIn(email: email, password: password),
-      ).called(1);
+      verify(() => mockAuth.signIn(email: email, password: password)).called(1);
     });
   });
 }

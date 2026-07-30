@@ -40,8 +40,9 @@ void main() {
   });
 
   group('LoginScreen - Edge Cases', () {
-    testWidgets('shows error message on network failure',
-        (WidgetTester tester) async {
+    testWidgets('shows error message on network failure', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User tries to login but network is down (airplane mode, no WiFi, etc).
       // Should show user-friendly error message, not crash.
@@ -52,7 +53,10 @@ void main() {
       // keeps form visible for retry.
 
       TestSetupHelpers.setupInvalidCredentials(mockAuthRepository);
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -79,69 +83,77 @@ void main() {
 
           // Should show error message
           expect(
-            find.byWidgetPredicate((widget) =>
-                widget is Text && widget.data?.contains('Invalid') == true),
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is Text && widget.data?.contains('Invalid') == true,
+            ),
             findsWidgets,
           );
         }
       }
     });
 
-    testWidgets('handles rapid login button taps (prevents double submission)',
-        (WidgetTester tester) async {
-      // BUSINESS LOGIC:
-      // User is eager and taps login button multiple times.
-      // Should only submit once, not send multiple requests.
-      // Prevents: duplicate accounts, duplicate transactions, server load.
-      //
-      // TECHNICAL:
-      // Button should disable during submission (isSubmitting flag).
-      // OR: Form should debounce/throttle taps.
-      // OR: Backend handles duplicate detection.
+    testWidgets(
+      'handles rapid login button taps (prevents double submission)',
+      (WidgetTester tester) async {
+        // BUSINESS LOGIC:
+        // User is eager and taps login button multiple times.
+        // Should only submit once, not send multiple requests.
+        // Prevents: duplicate accounts, duplicate transactions, server load.
+        //
+        // TECHNICAL:
+        // Button should disable during submission (isSubmitting flag).
+        // OR: Form should debounce/throttle taps.
+        // OR: Backend handles duplicate detection.
 
-      TestSetupHelpers.setupSuccessfulAuth(
-        mockAuthRepository,
-        isSignUp: false,
-      );
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+        TestSetupHelpers.setupSuccessfulAuth(
+          mockAuthRepository,
+          isSignUp: false,
+        );
+        TestSetupHelpers.setupLoggedOutUser(
+          mockAuthRepository,
+          authStateController,
+        );
 
-      await tester.pumpWidget(
-        TestAppBuilder(
-          bookshelfRepository: mockBookshelfRepository,
-          authRepository: mockAuthRepository,
-          authStateController: authStateController,
-        ).build(),
-      );
+        await tester.pumpWidget(
+          TestAppBuilder(
+            bookshelfRepository: mockBookshelfRepository,
+            authRepository: mockAuthRepository,
+            authStateController: authStateController,
+          ).build(),
+        );
 
-      await tester.pumpAndSettle();
-
-      // Fill form
-      final fields = find.byType(TextField);
-      if (fields.evaluate().length >= 2) {
-        await tester.enterText(fields.at(0), 'user@example.com');
-        await tester.enterText(fields.at(1), 'password123!');
         await tester.pumpAndSettle();
 
-        // Tap button multiple times rapidly
-        final loginButton = find.byType(ElevatedButton);
-        if (loginButton.evaluate().isNotEmpty) {
-          // First tap
-          await tester.tap(loginButton.first);
-          // Rapid second tap (before first completes)
-          await tester.tap(loginButton.first);
-          // Rapid third tap
-          await tester.tap(loginButton.first);
-
+        // Fill form
+        final fields = find.byType(TextField);
+        if (fields.evaluate().length >= 2) {
+          await tester.enterText(fields.at(0), 'user@example.com');
+          await tester.enterText(fields.at(1), 'password123!');
           await tester.pumpAndSettle();
 
-          // Should handle gracefully (no crash)
-          expect(tester.takeException(), isNull);
-        }
-      }
-    });
+          // Tap button multiple times rapidly
+          final loginButton = find.byType(ElevatedButton);
+          if (loginButton.evaluate().isNotEmpty) {
+            // First tap
+            await tester.tap(loginButton.first);
+            // Rapid second tap (before first completes)
+            await tester.tap(loginButton.first);
+            // Rapid third tap
+            await tester.tap(loginButton.first);
 
-    testWidgets('form scrolls on small screens (landscape mode)',
-        (WidgetTester tester) async {
+            await tester.pumpAndSettle();
+
+            // Should handle gracefully (no crash)
+            expect(tester.takeException(), isNull);
+          }
+        }
+      },
+    );
+
+    testWidgets('form scrolls on small screens (landscape mode)', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Phone in landscape mode has limited vertical space.
       // Login form should be scrollable so user can see all fields
@@ -155,7 +167,10 @@ void main() {
       tester.binding.window.physicalSizeTestValue = const Size(500, 300);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -175,8 +190,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('disables login button when email is invalid',
-        (WidgetTester tester) async {
+    testWidgets('disables login button when email is invalid', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User types invalid email (no @, wrong format, etc).
       // Button should be disabled to prevent wasted server request.
@@ -186,7 +202,10 @@ void main() {
       // Form validation checks email format.
       // Button enabled only when email is valid AND password present.
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -207,8 +226,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('disables login button when password is empty',
-        (WidgetTester tester) async {
+    testWidgets('disables login button when password is empty', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User enters email but forgets password.
       // Button should be disabled to prevent failed login attempt.
@@ -218,7 +238,10 @@ void main() {
       // Form validation requires both fields.
       // Button only enables when both are filled.
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -239,8 +262,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('handles very long email address (enterprise emails)',
-        (WidgetTester tester) async {
+    testWidgets('handles very long email address (enterprise emails)', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Enterprise environments sometimes have long email addresses
       // (e.g., john.q.developer+2024@company.co.uk).
@@ -250,11 +274,11 @@ void main() {
       // TextField should handle long input.
       // Server should accept valid email formats.
 
-      TestSetupHelpers.setupSuccessfulAuth(
+      TestSetupHelpers.setupSuccessfulAuth(mockAuthRepository, isSignUp: false);
+      TestSetupHelpers.setupLoggedOutUser(
         mockAuthRepository,
-        isSignUp: false,
+        authStateController,
       );
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
 
       await tester.pumpWidget(
         TestAppBuilder(

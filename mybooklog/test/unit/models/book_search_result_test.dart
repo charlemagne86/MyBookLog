@@ -108,9 +108,7 @@ void main() {
         final volume = {
           'volumeInfo': {
             'title': 'Book',
-            'imageLinks': {
-              'thumbnail': 'http://example.com/cover.jpg',
-            },
+            'imageLinks': {'thumbnail': 'http://example.com/cover.jpg'},
           },
         };
 

@@ -29,8 +29,9 @@ void main() {
   });
 
   group('BookshelfScreen', () {
-    testWidgets('displays loading spinner while fetching shelf',
-        (WidgetTester tester) async {
+    testWidgets('displays loading spinner while fetching shelf', (
+      WidgetTester tester,
+    ) async {
       final completer = Completer<List<ShelfBook>>();
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -39,8 +40,9 @@ void main() {
         authStateController,
       );
       // Override fetchShelf to return incomplete future
-      when(() => mockBookshelfRepository.fetchShelf())
-          .thenAnswer((_) => completer.future);
+      when(
+        () => mockBookshelfRepository.fetchShelf(),
+      ).thenAnswer((_) => completer.future);
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -58,8 +60,9 @@ void main() {
       expect(find.byType(BookshelfScreen), findsOneWidget);
     });
 
-    testWidgets('displays books in grid after successful load',
-        (WidgetTester tester) async {
+    testWidgets('displays books in grid after successful load', (
+      WidgetTester tester,
+    ) async {
       final testBooks = TestBookFactory.createTestBooks(6);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -93,8 +96,9 @@ void main() {
       expect(find.byType(BookOnShelf), findsNWidgets(6));
     });
 
-    testWidgets('displays empty shelf message when no books',
-        (WidgetTester tester) async {
+    testWidgets('displays empty shelf message when no books', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupEmptyShelf(mockBookshelfRepository);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -115,14 +119,16 @@ void main() {
 
       expect(find.byType(BookOnShelf), findsNothing);
       expect(
-        find.byWidgetPredicate((widget) =>
-            widget is Text && widget.data?.contains('empty') == true),
+        find.byWidgetPredicate(
+          (widget) => widget is Text && widget.data?.contains('empty') == true,
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('shows error message when shelf load fails',
-        (WidgetTester tester) async {
+    testWidgets('shows error message when shelf load fails', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupShelfLoadError(mockBookshelfRepository);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -228,7 +234,9 @@ void main() {
       expect(find.byIcon(Icons.logout), findsOneWidget);
     });
 
-    testWidgets('renders large shelf with 50+ books', (WidgetTester tester) async {
+    testWidgets('renders large shelf with 50+ books', (
+      WidgetTester tester,
+    ) async {
       final largeShelf = TestBookFactory.createTestBooks(50);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,

@@ -26,26 +26,24 @@ class TestData {
     String? author = 'Richard Powers',
     String? thumbnailUri = 'https://example.com/overstory.jpg',
     bool isRead = false,
-  }) =>
-      ShelfBook(
-        bookId: bookId,
-        title: title,
-        author: author,
-        thumbnailUri: thumbnailUri ?? '',
-        isRead: isRead,
-      );
+  }) => ShelfBook(
+    bookId: bookId,
+    title: title,
+    author: author,
+    thumbnailUri: thumbnailUri ?? '',
+    isRead: isRead,
+  );
 
   /// A collection of shelf books at various read states.
-  static List<ShelfBook> sampleShelfBooks({int count = 5}) =>
-      List.generate(
-        count,
-        (i) => sampleShelfBook(
-          bookId: 'book-$i',
-          title: 'Book Title $i',
-          author: 'Author $i',
-          isRead: i % 2 == 0,
-        ),
-      );
+  static List<ShelfBook> sampleShelfBooks({int count = 5}) => List.generate(
+    count,
+    (i) => sampleShelfBook(
+      bookId: 'book-$i',
+      title: 'Book Title $i',
+      author: 'Author $i',
+      isRead: i % 2 == 0,
+    ),
+  );
 
   /// A valid [BookSearchResult] from Google Books.
   ///
@@ -64,14 +62,13 @@ class TestData {
     List<String>? authors = const ['Frank Herbert'],
     String? isbn = '9780441013593',
     String? thumbnail = 'https://books.google.com/books/content?id=example',
-  }) =>
-      BookSearchResult(
-        volumeId: volumeId,
-        title: title,
-        authors: authors ?? [],
-        isbn: isbn,
-        thumbnail: thumbnail ?? '',
-      );
+  }) => BookSearchResult(
+    volumeId: volumeId,
+    title: title,
+    authors: authors ?? [],
+    isbn: isbn,
+    thumbnail: thumbnail ?? '',
+  );
 
   /// Multiple search results, useful for pagination testing.
   ///
