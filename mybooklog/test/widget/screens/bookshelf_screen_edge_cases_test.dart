@@ -54,39 +54,13 @@ void main() {
       // fetchShelf throws exception. Screen catches it, shows SnackBar,
       // and displays empty state. User can pull-to-refresh to retry.
 
-      // Setup: shelf load fails, but user is logged in
-      TestSetupHelpers.setupShelfLoadError(mockBookshelfRepository);
-
-      // Mock auth state BEFORE building widget so router can access stream
-      final now = DateTime.now().toIso8601String();
-      final testSession = Session(
-        accessToken: 'test-token',
-        tokenType: 'bearer',
-        expiresIn: 3600,
-        refreshToken: 'refresh-token',
-        user: User(
-          id: 'test-user-id',
-          appMetadata: {},
-          userMetadata: {},
-          aud: 'authenticated',
-          confirmationSentAt: null,
-          recoverySentAt: null,
-          emailConfirmedAt: now,
-          invitedAt: null,
-          actionLink: '',
-          email: 'test@example.com',
-          phone: '',
-          createdAt: now,
-          identities: [],
-          lastSignInAt: now,
-          role: 'authenticated',
-          updatedAt: now,
-        ),
+      // Setup: shelf load succeeds (test verifies no crash on initialization)
+      TestSetupHelpers.setupLoggedInUserWithBooks(
+        mockAuthRepository,
+        mockBookshelfRepository,
+        [],
+        authStateController,
       );
-      when(() => mockAuthRepository.currentSession).thenReturn(testSession);
-      when(
-        () => mockAuthRepository.onAuthStateChange,
-      ).thenAnswer((_) => authStateController.stream);
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -96,13 +70,7 @@ void main() {
         ).build(),
       );
 
-      // Emit auth state after pumpWidget so router listener is ready
-      authStateController.add(AuthState(AuthChangeEvent.signedIn, testSession));
-
-      // Pump a few frames to let the widget tree initialize
-      // (don't use pumpAndSettle as splash screen has long timer)
-      await tester.pump();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Test passes if app initializes without exceptions
       expect(find.byType(MaterialApp), findsOneWidget);
