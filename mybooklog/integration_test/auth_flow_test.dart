@@ -192,7 +192,7 @@ void main() {
 
       // TECHNICAL:
       // Initially password should be obscured
-      TextField password = tester.widget<TextField>(passwordField) as TextField;
+      TextField password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, true);
 
       // TECHNICAL:

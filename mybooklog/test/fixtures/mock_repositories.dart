@@ -76,23 +76,3 @@ void setupMockAuthFailure(MockSupabaseClient mockClient) {
     () => mockClient.auth.onAuthStateChange,
   ).thenAnswer((_) => Stream.value(AuthState(AuthChangeEvent.signedOut, null)));
 }
-
-/// Configure [MockSupabaseClient] to return shelf books from a query.
-void setupMockShelfFetch(
-  MockSupabaseClient mockClient, {
-  required List<Map<String, dynamic>> books,
-}) {
-  // Build the chain: client.from('table').select(...).eq(...).maybeSingle/toList
-  final mockFilterBuilder = MockPostgrestFilterBuilder();
-  // Mock maybeSingle to return the first book if available, else null
-  when(
-    () => mockFilterBuilder.maybeSingle(),
-  ).thenAnswer(
-    (_) => Future.value(books.isNotEmpty ? books.first : null),
-  );
-
-  final mockQueryBuilder = MockSupabaseQueryBuilder();
-  when(() => mockQueryBuilder.select(any())).thenReturn(mockFilterBuilder);
-
-  when(() => mockClient.from('bookshelf_items')).thenReturn(mockQueryBuilder);
-}

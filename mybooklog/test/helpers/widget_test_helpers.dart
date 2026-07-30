@@ -93,9 +93,7 @@ extension WidgetTesterX on WidgetTester {
   /// Types text into a specific TextField by label text.
   Future<void> typeTextInField(String label, String text) async {
     final textFieldFinder = find.byWidgetPredicate(
-      (w) =>
-          w is TextField &&
-          w.decoration?.labelText == label,
+      (w) => w is TextField && w.decoration?.labelText == label,
     );
     await enterText(textFieldFinder, text);
     await pumpAndSettle();
@@ -143,9 +141,9 @@ extension WidgetTesterX on WidgetTester {
     await pumpAndSettle();
     final endTime = DateTime.now().add(timeout);
 
-    while (find.byWidgetPredicate((_) => true).evaluate().isEmpty) {
+    while (finder.evaluate().isEmpty) {
       if (DateTime.now().isAfter(endTime)) {
-        throw TimeoutException('Widget not found after ${timeout.inSeconds}s');
+        throw Exception('Widget not found after ${timeout.inSeconds}s');
       }
       await pump(const Duration(milliseconds: 100));
     }
@@ -154,16 +152,15 @@ extension WidgetTesterX on WidgetTester {
   /// Simulates scrolling a scrollable widget to find a specific item.
   Future<void> scrollToFindWidget(Finder itemFinder) async {
     while (itemFinder.evaluate().isEmpty) {
-      await scroll(find.byType(ListView), -300, const Offset(0, 0));
+      await dragUntilVisible(itemFinder, find.byType(ListView), const Offset(0, -300));
       await pumpAndSettle();
     }
   }
 
   /// Sets the display size for responsive testing.
   Future<void> setDisplaySize(Size size) async {
-    addTearDown(removeSize);
     binding.window.physicalSizeTestValue = size;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(binding.window.clearPhysicalSizeTestValue);
   }
 }
 

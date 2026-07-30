@@ -22,8 +22,8 @@ class GoogleBooksServiceSetupHelpers {
     required List<BookSearchResult> results,
   }) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
-    ).thenAnswer((_) async => results);
+      () => service.search(any()),
+    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
   }
 
   // BUSINESS LOGIC:
@@ -31,8 +31,8 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Returns empty list successfully
   static void setupEmptySearchResults(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
-    ).thenAnswer((_) async => []);
+      () => service.search(any()),
+    ).thenAnswer((_) async => GoogleBooksPage(results: [], totalItems: 0));
   }
 
   // BUSINESS LOGIC:
@@ -40,7 +40,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws TimeoutException
   static void setupSearchTimeout(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('Request timeout'));
   }
 
@@ -53,7 +53,7 @@ class GoogleBooksServiceSetupHelpers {
     required String message,
   }) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('API Error $statusCode: $message'));
   }
 
@@ -62,7 +62,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with parsing error
   static void setupSearchMalformedData(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('Failed to parse search results'));
   }
 
@@ -76,16 +76,16 @@ class GoogleBooksServiceSetupHelpers {
     final results = List.generate(
       count,
       (i) => BookSearchResult(
-        id: 'book-$i',
+        volumeId: 'book-$i',
         title: 'Large Dataset Book $i',
-        author: 'Author $i',
-        isbn13: '978000000000$i',
-        imageUrl: 'https://books.google.com/books/content?id=book$i',
+        authors: ['Author $i'],
+        isbn: '978000000000$i',
+        thumbnail: 'https://books.google.com/books/content?id=book$i',
       ),
     );
     when(
-      () => service.searchBooks(query: any(named: 'query')),
-    ).thenAnswer((_) async => results);
+      () => service.search(any()),
+    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
   }
 
   // BUSINESS LOGIC:
@@ -94,23 +94,23 @@ class GoogleBooksServiceSetupHelpers {
   static void setupSpecialCharacterResults(MockGoogleBooksService service) {
     final results = [
       BookSearchResult(
-        id: 'special-1',
+        volumeId: 'special-1',
         title: 'Test™ 中文 العربية',
-        author: 'Author™ 中文',
-        isbn13: '9780123456789',
-        imageUrl: 'https://books.google.com/books/content?id=special1',
+        authors: ['Author™ 中文'],
+        isbn: '9780123456789',
+        thumbnail: 'https://books.google.com/books/content?id=special1',
       ),
       BookSearchResult(
-        id: 'special-2',
+        volumeId: 'special-2',
         title: 'Señor García Márquez',
-        author: 'José María de Pereda',
-        isbn13: '9780123456790',
-        imageUrl: 'https://books.google.com/books/content?id=special2',
+        authors: ['José María de Pereda'],
+        isbn: '9780123456790',
+        thumbnail: 'https://books.google.com/books/content?id=special2',
       ),
     ];
     when(
-      () => service.searchBooks(query: any(named: 'query')),
-    ).thenAnswer((_) async => results);
+      () => service.search(any()),
+    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
   }
 
   // BUSINESS LOGIC:
@@ -118,7 +118,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with authentication error
   static void setupUnauthorizedError(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('401: Unauthorized - Invalid API key'));
   }
 
@@ -127,7 +127,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with rate limit error
   static void setupForbiddenError(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('403: Forbidden - Rate limit exceeded'));
   }
 
@@ -136,7 +136,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with 404 error
   static void setupNotFoundError(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('404: Not Found - Endpoint no longer available'));
   }
 
@@ -145,7 +145,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with server error
   static void setupServerError(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('500: Internal Server Error'));
   }
 
@@ -154,7 +154,7 @@ class GoogleBooksServiceSetupHelpers {
   // TECHNICAL: Throws with service unavailable error
   static void setupServiceUnavailableError(MockGoogleBooksService service) {
     when(
-      () => service.searchBooks(query: any(named: 'query')),
+      () => service.search(any()),
     ).thenThrow(Exception('503: Service Unavailable'));
   }
 }
@@ -238,6 +238,6 @@ class TestBookSearchResultFactory {
   // Create result with missing thumbnail (no cover art)
   // TECHNICAL: Returns result with empty/placeholder image URL
   static BookSearchResult createResultWithoutImage() {
-    return createTestResult(imageUrl: '');
+    return createTestResult(thumbnail: '');
   }
 }

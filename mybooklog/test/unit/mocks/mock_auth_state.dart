@@ -220,7 +220,7 @@ class MockAuthService extends Mock {
 class SuccessfulAuthService extends MockAuthService {
   @override
   Future<void> signIn(String email, String password) async {
-    super.signIn(email, password);
+    await super.signIn(email, password);
     // Emit successful sign-in after a brief delay to simulate server call
     await Future.delayed(Duration(milliseconds: 100));
     emitAuthState(MockAuthState.signedIn(email: email));
@@ -228,7 +228,7 @@ class SuccessfulAuthService extends MockAuthService {
 
   @override
   Future<void> signUp(String email, String password) async {
-    super.signUp(email, password);
+    await super.signUp(email, password);
     await Future.delayed(Duration(milliseconds: 100));
     emitAuthState(MockAuthState.signedIn(email: email));
   }
@@ -240,13 +240,13 @@ class SuccessfulAuthService extends MockAuthService {
 class FailedAuthService extends MockAuthService {
   @override
   Future<void> signIn(String email, String password) async {
-    super.signIn(email, password);
+    await super.signIn(email, password);
     throw Exception('Invalid email or password');
   }
 
   @override
   Future<void> signUp(String email, String password) async {
-    super.signUp(email, password);
+    await super.signUp(email, password);
     throw Exception('Email already registered');
   }
 }
@@ -260,7 +260,7 @@ class RateLimitedAuthService extends MockAuthService {
 
   @override
   Future<void> signIn(String email, String password) async {
-    super.signIn(email, password);
+    await super.signIn(email, password);
     _attemptCount++;
     if (_attemptCount > _maxAttempts) {
       throw Exception('Too many login attempts. Try again later.');
