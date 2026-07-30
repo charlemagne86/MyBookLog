@@ -84,10 +84,12 @@ void setupMockShelfFetch(
 }) {
   // Build the chain: client.from('table').select(...).eq(...).maybeSingle/toList
   final mockFilterBuilder = MockPostgrestFilterBuilder();
-  // Mock both sync returns and async getters for different query patterns
+  // Mock maybeSingle to return the first book if available, else null
   when(
     () => mockFilterBuilder.maybeSingle(),
-  ).thenAnswer((_) async => books.isNotEmpty ? books.first : null);
+  ).thenAnswer(
+    (_) => Future.value(books.isNotEmpty ? books.first : null),
+  );
 
   final mockQueryBuilder = MockSupabaseQueryBuilder();
   when(() => mockQueryBuilder.select(any())).thenReturn(mockFilterBuilder);

@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/app.dart';
-import 'package:mybooklog/src/data/repositories/auth_repository.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
-import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'helpers/integration_test_helper.dart';
@@ -207,7 +202,7 @@ void main() {
 
       // TECHNICAL:
       // Password should now be visible
-      password = tester.widget<TextField>(passwordField) as TextField;
+      password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, false);
 
       // TECHNICAL:
@@ -215,7 +210,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.visibility_off));
       await tester.pumpAndSettle();
 
-      password = tester.widget<TextField>(passwordField) as TextField;
+      password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, true);
     });
   });

@@ -1,12 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
-import 'package:mybooklog/src/data/repositories/auth_repository.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
-import 'package:provider/provider.dart';
 
 import 'helpers/integration_test_helper.dart';
 

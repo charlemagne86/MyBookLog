@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 // ============================================================================
 // Test Widget Wrappers
@@ -91,11 +92,10 @@ extension WidgetTesterX on WidgetTester {
 
   /// Types text into a specific TextField by label text.
   Future<void> typeTextInField(String label, String text) async {
-    final textFieldFinder = find.descendant(
-      of: find.byWidgetPredicate(
-        (w) => w is InputDecoration && w.labelText == label,
-      ),
-      matching: find.byType(TextField),
+    final textFieldFinder = find.byWidgetPredicate(
+      (w) =>
+          w is TextField &&
+          w.decoration?.labelText == label,
     );
     await enterText(textFieldFinder, text);
     await pumpAndSettle();
