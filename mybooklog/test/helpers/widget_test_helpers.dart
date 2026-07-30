@@ -156,11 +156,6 @@ extension WidgetTesterX on WidgetTester {
     }
   }
 
-  /// Sets the display size for responsive testing.
-  Future<void> setDisplaySize(Size size) async {
-    binding.view.physicalSize = size;
-    addTearDown(binding.view.resetPhysicalSize);
-  }
 }
 
 // ============================================================================
