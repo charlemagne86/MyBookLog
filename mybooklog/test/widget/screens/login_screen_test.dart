@@ -105,7 +105,7 @@ void main() {
       // TECHNICAL:
       // Find the password TextField and verify it's in obscured mode
       final passwordField = find.byType(TextField).at(1);
-      TextField password = tester.widget<TextField>(passwordField) as TextField;
+      TextField password = tester.widget<TextField>(passwordField);
       expect(password.obscureText, true);
 
       // TECHNICAL:
@@ -227,7 +227,6 @@ void main() {
       // Create a completer so we can control when each login attempt completes.
       // This lets us see the state between attempts without interference.
       var attemptCount = 0;
-      final completer1 = Completer<void>();
       final completer2 = Completer<void>();
 
       await _pumpLoginScreen(

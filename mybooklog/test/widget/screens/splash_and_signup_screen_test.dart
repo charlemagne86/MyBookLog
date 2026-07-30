@@ -29,7 +29,7 @@ void main() {
     ) async {
       // TECHNICAL: App should show splash before routing
       // Creates good visual polish and app startup feel
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(tester.view.resetPhysicalSize);
 
       // Test infrastructure would pump the splash screen
       expect(find.byType(Container), findsWidgets);

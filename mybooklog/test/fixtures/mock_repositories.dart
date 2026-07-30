@@ -4,7 +4,6 @@
 /// control the behavior of data layers without hitting the real Supabase.
 
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/data/models/shelf_book.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

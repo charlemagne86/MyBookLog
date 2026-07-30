@@ -103,13 +103,7 @@ extension WidgetTesterX on WidgetTester {
   ///
   /// Works with ElevatedButton, TextButton, OutlinedButton.
   Future<void> tapButton(String label) async {
-    final finder = find.byWidgetPredicate((widget) {
-      if (widget is! Material) return false;
-      // Check if this Material is a button with the right text
-      return true;
-    });
-
-    // More robust: find by text inside a button
+    // Find button by text inside ElevatedButton
     await tap(
       find.descendant(
         of: find.byType(ElevatedButton),
