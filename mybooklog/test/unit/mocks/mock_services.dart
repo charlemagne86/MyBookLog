@@ -21,9 +21,10 @@ class GoogleBooksServiceSetupHelpers {
     MockGoogleBooksService service, {
     required List<BookSearchResult> results,
   }) {
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:
@@ -39,9 +40,7 @@ class GoogleBooksServiceSetupHelpers {
   // Network timeout when searching (slow/no internet)
   // TECHNICAL: Throws TimeoutException
   static void setupSearchTimeout(MockGoogleBooksService service) {
-    when(
-      () => service.search(any()),
-    ).thenThrow(Exception('Request timeout'));
+    when(() => service.search(any())).thenThrow(Exception('Request timeout'));
   }
 
   // BUSINESS LOGIC:
@@ -83,9 +82,10 @@ class GoogleBooksServiceSetupHelpers {
         thumbnail: 'https://books.google.com/books/content?id=book$i',
       ),
     );
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:
@@ -108,9 +108,10 @@ class GoogleBooksServiceSetupHelpers {
         thumbnail: 'https://books.google.com/books/content?id=special2',
       ),
     ];
-    when(
-      () => service.search(any()),
-    ).thenAnswer((_) async => GoogleBooksPage(results: results, totalItems: results.length));
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:

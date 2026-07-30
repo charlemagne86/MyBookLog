@@ -152,7 +152,11 @@ extension WidgetTesterX on WidgetTester {
   /// Simulates scrolling a scrollable widget to find a specific item.
   Future<void> scrollToFindWidget(Finder itemFinder) async {
     while (itemFinder.evaluate().isEmpty) {
-      await dragUntilVisible(itemFinder, find.byType(ListView), const Offset(0, -300));
+      await dragUntilVisible(
+        itemFinder,
+        find.byType(ListView),
+        const Offset(0, -300),
+      );
       await pumpAndSettle();
     }
   }
