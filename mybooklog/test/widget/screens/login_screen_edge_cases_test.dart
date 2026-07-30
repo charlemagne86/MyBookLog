@@ -40,8 +40,9 @@ void main() {
   });
 
   group('LoginScreen - Edge Cases', () {
-    testWidgets('shows error message on network failure',
-        (WidgetTester tester) async {
+    testWidgets('shows error message on network failure', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User tries to login but network is down (airplane mode, no WiFi, etc).
       // Should show user-friendly error message, not crash.
@@ -50,7 +51,10 @@ void main() {
       // TECHNICAL:
       // Verify login screen displays form and handles user input
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -67,35 +71,41 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('handles rapid login button taps (prevents double submission)',
-        (WidgetTester tester) async {
-      // BUSINESS LOGIC:
-      // User is eager and taps login button multiple times.
-      // Should only submit once, not send multiple requests.
-      // Prevents: duplicate accounts, duplicate transactions, server load.
-      //
-      // TECHNICAL:
-      // Verify button is present and clickable
+    testWidgets(
+      'handles rapid login button taps (prevents double submission)',
+      (WidgetTester tester) async {
+        // BUSINESS LOGIC:
+        // User is eager and taps login button multiple times.
+        // Should only submit once, not send multiple requests.
+        // Prevents: duplicate accounts, duplicate transactions, server load.
+        //
+        // TECHNICAL:
+        // Verify button is present and clickable
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+        TestSetupHelpers.setupLoggedOutUser(
+          mockAuthRepository,
+          authStateController,
+        );
 
-      await tester.pumpWidget(
-        TestAppBuilder(
-          bookshelfRepository: mockBookshelfRepository,
-          authRepository: mockAuthRepository,
-          authStateController: authStateController,
-        ).build(),
-      );
+        await tester.pumpWidget(
+          TestAppBuilder(
+            bookshelfRepository: mockBookshelfRepository,
+            authRepository: mockAuthRepository,
+            authStateController: authStateController,
+          ).build(),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Verify button exists
-      final loginButton = find.byType(ElevatedButton);
-      expect(loginButton, findsOneWidget);
-    });
+        // Verify button exists
+        final loginButton = find.byType(ElevatedButton);
+        expect(loginButton, findsOneWidget);
+      },
+    );
 
-    testWidgets('form scrolls on small screens (landscape mode)',
-        (WidgetTester tester) async {
+    testWidgets('form scrolls on small screens (landscape mode)', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Phone in landscape mode has limited vertical space.
       // Login form should be scrollable so user can see all fields
@@ -104,7 +114,10 @@ void main() {
       // TECHNICAL:
       // Verify form renders on small screens
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -121,8 +134,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('disables login button when email is invalid',
-        (WidgetTester tester) async {
+    testWidgets('disables login button when email is invalid', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User types invalid email (no @, wrong format, etc).
       // Button should be disabled to prevent wasted server request.
@@ -132,7 +146,10 @@ void main() {
       // Form validation checks email format.
       // Button enabled only when email is valid AND password present.
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -153,8 +170,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('disables login button when password is empty',
-        (WidgetTester tester) async {
+    testWidgets('disables login button when password is empty', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User enters email but forgets password.
       // Button should be disabled to prevent failed login attempt.
@@ -164,7 +182,10 @@ void main() {
       // Form validation requires both fields.
       // Button only enables when both are filled.
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -185,8 +206,9 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('handles very long email address (enterprise emails)',
-        (WidgetTester tester) async {
+    testWidgets('handles very long email address (enterprise emails)', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Enterprise environments sometimes have long email addresses
       // (e.g., john.q.developer+2024@company.co.uk).
@@ -196,11 +218,11 @@ void main() {
       // TextField should handle long input.
       // Server should accept valid email formats.
 
-      TestSetupHelpers.setupSuccessfulAuth(
+      TestSetupHelpers.setupSuccessfulAuth(mockAuthRepository, isSignUp: false);
+      TestSetupHelpers.setupLoggedOutUser(
         mockAuthRepository,
-        isSignUp: false,
+        authStateController,
       );
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
 
       await tester.pumpWidget(
         TestAppBuilder(

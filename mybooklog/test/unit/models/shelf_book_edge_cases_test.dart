@@ -21,7 +21,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       expect(book.title.length, equals(300));
       expect(book.title, isNotNull);
     });
@@ -35,7 +35,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       expect(book.author!.length, equals(200));
     });
 
@@ -48,7 +48,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       expect(book.title.contains('™'), isTrue);
       expect(book.title.contains('中文'), isTrue);
       expect(book.title.contains('🎉'), isTrue);
@@ -63,7 +63,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       expect(book.author, isNull);
       expect(book.matchesQuery('Test'), isFalse);
     });
@@ -77,7 +77,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       expect(book.bookId, isNotEmpty);
     });
 
@@ -92,10 +92,22 @@ void main() {
 
       test('matches with mixed case query', () {
         // TECHNICAL: Case-insensitive substring matching on title and author
-        expect(testBook.matchesQuery('GREAT'), isTrue);  // Matches "GREAT" in title
-        expect(testBook.matchesQuery('gReAt'), isTrue);  // Case-insensitive match
-        expect(testBook.matchesQuery('GaT'), isTrue);    // Matches "gat" in "gatsby"
-        expect(testBook.matchesQuery('xyz'), isFalse);   // No match in title or author
+        expect(
+          testBook.matchesQuery('GREAT'),
+          isTrue,
+        ); // Matches "GREAT" in title
+        expect(
+          testBook.matchesQuery('gReAt'),
+          isTrue,
+        ); // Case-insensitive match
+        expect(
+          testBook.matchesQuery('GaT'),
+          isTrue,
+        ); // Matches "gat" in "gatsby"
+        expect(
+          testBook.matchesQuery('xyz'),
+          isFalse,
+        ); // No match in title or author
       });
 
       test('matches partial author name', () {
@@ -131,9 +143,9 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       final updated = original.copyWith(isRead: true);
-      
+
       expect(original.isRead, isFalse);
       expect(updated.isRead, isTrue);
       expect(updated.title, equals('Original'));
@@ -148,7 +160,7 @@ void main() {
         thumbnailUri: '',
         isRead: false,
       );
-      
+
       final book2 = ShelfBook(
         bookId: 'same-id',
         title: 'Title 2', // Different
@@ -156,7 +168,7 @@ void main() {
         thumbnailUri: '',
         isRead: true, // Different
       );
-      
+
       // Implementation detail: books with same ID might be considered equal
       expect(book1.bookId, equals(book2.bookId));
     });

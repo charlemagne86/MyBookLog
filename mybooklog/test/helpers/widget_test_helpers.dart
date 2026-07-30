@@ -46,10 +46,7 @@ class TestAppWrapper extends StatelessWidget {
 
     // Create the Material app
     if (home != null) {
-      return MaterialApp(
-        theme: theme,
-        home: home,
-      );
+      return MaterialApp(theme: theme, home: home);
     }
 
     return MaterialApp(
@@ -80,11 +77,7 @@ extension WidgetTesterX on WidgetTester {
     ThemeData? theme,
   }) async {
     await pumpWidget(
-      TestAppWrapper(
-        providers: providers,
-        theme: theme,
-        child: widget,
-      ),
+      TestAppWrapper(providers: providers, theme: theme, child: widget),
     );
   }
 
@@ -136,13 +129,17 @@ extension WidgetTesterX on WidgetTester {
 
   /// Checks if a snackbar with the given message is displayed.
   bool hasSnackbar(String message) {
-    return find.text(message).evaluate().any(
-          (element) => element.widget is Text && element.widget is Text,
-        );
+    return find
+        .text(message)
+        .evaluate()
+        .any((element) => element.widget is Text && element.widget is Text);
   }
 
   /// Waits for a widget to appear on screen.
-  Future<void> waitFor(Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+  Future<void> waitFor(
+    Finder finder, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     await pumpAndSettle();
     final endTime = DateTime.now().add(timeout);
 
@@ -175,10 +172,7 @@ extension WidgetTesterX on WidgetTester {
 // ============================================================================
 
 /// Verifies that a screen shows an error dialog.
-Future<void> expectErrorDialog(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> expectErrorDialog(WidgetTester tester, String message) async {
   expect(find.byType(AlertDialog), findsOneWidget);
   expect(find.text(message), findsOneWidget);
 }
@@ -189,10 +183,7 @@ Future<void> expectLoadingState(WidgetTester tester) async {
 }
 
 /// Verifies that a screen shows an empty state message.
-Future<void> expectEmptyState(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> expectEmptyState(WidgetTester tester, String message) async {
   expect(find.text(message), findsOneWidget);
 }
 

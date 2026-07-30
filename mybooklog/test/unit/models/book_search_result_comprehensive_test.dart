@@ -25,7 +25,10 @@ void main() {
           isbn: null,
         );
 
-        expect(book.authorsLabel, equals('Jane Smith, John Doe, Alice Johnson'));
+        expect(
+          book.authorsLabel,
+          equals('Jane Smith, John Doe, Alice Johnson'),
+        );
       });
 
       test('returns single author name', () {
@@ -209,13 +212,11 @@ void main() {
           'volumeInfo': {
             'title': 'The Great Gatsby',
             'authors': ['F. Scott Fitzgerald'],
-            'imageLinks': {
-              'thumbnail': 'http://example.com/gatsby.jpg'
-            },
+            'imageLinks': {'thumbnail': 'http://example.com/gatsby.jpg'},
             'industryIdentifiers': [
-              {'type': 'ISBN_13', 'identifier': '978-0-7432-7356-5'}
+              {'type': 'ISBN_13', 'identifier': '978-0-7432-7356-5'},
             ],
-          }
+          },
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -250,7 +251,7 @@ void main() {
           'volumeInfo': {
             'title': 'Book Without Authors',
             // No authors field
-          }
+          },
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -267,7 +268,7 @@ void main() {
           'volumeInfo': {
             // No title
             'authors': ['Some Author'],
-          }
+          },
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -283,7 +284,7 @@ void main() {
           'volumeInfo': {
             'title': 'Book Without Cover',
             // No imageLinks
-          }
+          },
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -298,10 +299,8 @@ void main() {
           'id': 'book-123',
           'volumeInfo': {
             'title': 'Test Book',
-            'imageLinks': {
-              'thumbnail': 'http://example.com/book.jpg'
-            }
-          }
+            'imageLinks': {'thumbnail': 'http://example.com/book.jpg'},
+          },
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -312,9 +311,7 @@ void main() {
       test('preserves empty volumeId', () {
         // TECHNICAL: volumeId might be missing or empty
         final volume = {
-          'volumeInfo': {
-            'title': 'Test Book',
-          }
+          'volumeInfo': {'title': 'Test Book'},
         };
 
         final result = BookSearchResult.fromGoogleVolume(volume);
@@ -330,11 +327,17 @@ void main() {
         final items = [
           {
             'id': 'book-1',
-            'volumeInfo': {'title': 'Book 1', 'authors': ['Author 1']},
+            'volumeInfo': {
+              'title': 'Book 1',
+              'authors': ['Author 1'],
+            },
           },
           {
             'id': 'book-2',
-            'volumeInfo': {'title': 'Book 2', 'authors': ['Author 2']},
+            'volumeInfo': {
+              'title': 'Book 2',
+              'authors': ['Author 2'],
+            },
           },
         ];
 
@@ -550,10 +553,7 @@ void main() {
 
       test('ignores hyphens and spaces', () {
         // TECHNICAL: Format variations should be normalized
-        expect(
-          BookSearchResult.isLikelyIsbn13('978 0 7432 7356 5'),
-          isTrue,
-        );
+        expect(BookSearchResult.isLikelyIsbn13('978 0 7432 7356 5'), isTrue);
       });
 
       test('counts X or x as character (ISBN-10 check digit)', () {

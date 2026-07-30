@@ -64,9 +64,7 @@ void setupMockAuthSuccess(
   when(() => mockClient.auth.currentUser).thenReturn(mockUser);
   when(() => mockClient.auth.currentSession).thenReturn(mockSession);
   when(() => mockClient.auth.onAuthStateChange).thenAnswer(
-    (_) => Stream.value(
-      AuthState(AuthChangeEvent.signedIn, mockSession),
-    ),
+    (_) => Stream.value(AuthState(AuthChangeEvent.signedIn, mockSession)),
   );
 }
 
@@ -74,11 +72,9 @@ void setupMockAuthSuccess(
 void setupMockAuthFailure(MockSupabaseClient mockClient) {
   when(() => mockClient.auth.currentUser).thenReturn(null);
   when(() => mockClient.auth.currentSession).thenReturn(null);
-  when(() => mockClient.auth.onAuthStateChange).thenAnswer(
-    (_) => Stream.value(
-      AuthState(AuthChangeEvent.signedOut, null),
-    ),
-  );
+  when(
+    () => mockClient.auth.onAuthStateChange,
+  ).thenAnswer((_) => Stream.value(AuthState(AuthChangeEvent.signedOut, null)));
 }
 
 /// Configure [MockSupabaseClient] to return shelf books from a query.
@@ -89,13 +85,12 @@ void setupMockShelfFetch(
   // Build the chain: client.from('table').select(...).eq(...).maybeSingle/toList
   final mockFilterBuilder = MockPostgrestFilterBuilder();
   // Mock both sync returns and async getters for different query patterns
-  when(() => mockFilterBuilder.maybeSingle())
-      .thenAnswer((_) async => books.isNotEmpty ? books.first : null);
+  when(
+    () => mockFilterBuilder.maybeSingle(),
+  ).thenAnswer((_) async => books.isNotEmpty ? books.first : null);
 
   final mockQueryBuilder = MockSupabaseQueryBuilder();
-  when(() => mockQueryBuilder.select(any()))
-      .thenReturn(mockFilterBuilder);
+  when(() => mockQueryBuilder.select(any())).thenReturn(mockFilterBuilder);
 
-  when(() => mockClient.from('bookshelf_items'))
-      .thenReturn(mockQueryBuilder);
+  when(() => mockClient.from('bookshelf_items')).thenReturn(mockQueryBuilder);
 }

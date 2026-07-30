@@ -41,8 +41,9 @@ void main() {
   });
 
   group('BookshelfScreen - Edge Cases', () {
-    testWidgets('shows error message on shelf load failure',
-        (WidgetTester tester) async {
+    testWidgets('shows error message on shelf load failure', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // When network fails or database is down, user should see:
       // 1. Error message explaining what happened
@@ -83,9 +84,9 @@ void main() {
         ),
       );
       when(() => mockAuthRepository.currentSession).thenReturn(testSession);
-      when(() => mockAuthRepository.onAuthStateChange).thenAnswer(
-        (_) => authStateController.stream,
-      );
+      when(
+        () => mockAuthRepository.onAuthStateChange,
+      ).thenAnswer((_) => authStateController.stream);
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -107,8 +108,9 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('handles very large shelf (100+ books)',
-        (WidgetTester tester) async {
+    testWidgets('handles very large shelf (100+ books)', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Power users may have large libraries (100+ books).
       // App should handle gracefully without:
@@ -143,8 +145,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('handles search with no matching results',
-        (WidgetTester tester) async {
+    testWidgets('handles search with no matching results', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User searches for book they don't have.
       // Should show "no matches" message, not crash or show old results.
@@ -189,17 +192,20 @@ void main() {
           // Should show no results message
           expect(find.byType(GridView), findsNothing);
           expect(
-            find.byWidgetPredicate((widget) =>
-                widget is Text &&
-                widget.data?.contains('No books match') == true),
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is Text &&
+                  widget.data?.contains('No books match') == true,
+            ),
             findsOneWidget,
           );
         }
       }
     });
 
-    testWidgets('preserves search state during reload',
-        (WidgetTester tester) async {
+    testWidgets('preserves search state during reload', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // If user searches "Shakespeare", then app refreshes (or rotation),
       // search text should stay and results should update.
@@ -248,8 +254,9 @@ void main() {
       }
     });
 
-    testWidgets('displays very long book titles without overflow',
-        (WidgetTester tester) async {
+    testWidgets('displays very long book titles without overflow', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Some books have very long titles. UI should display them
       // without breaking layout or causing text overflow errors.
@@ -280,8 +287,9 @@ void main() {
       expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('handles special characters in book titles',
-        (WidgetTester tester) async {
+    testWidgets('handles special characters in book titles', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // International books have accents, non-Latin scripts, emoji.
       // UI should display them correctly without crashes.
