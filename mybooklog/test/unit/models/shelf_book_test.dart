@@ -38,10 +38,7 @@ void main() {
 
       test('handles missing catalog gracefully', () {
         // Arrange
-        final row = {
-          'book_id': 'book456',
-          'is_read': false,
-        };
+        final row = {'book_id': 'book456', 'is_read': false};
 
         // Act
         final result = ShelfBook.fromJoinedRow(row);
@@ -93,10 +90,7 @@ void main() {
         // Arrange
         final row = {
           'book_id': 'book000',
-          'books_catalog': {
-            'title': 'Test',
-            'thumbnail_uri': '',
-          },
+          'books_catalog': {'title': 'Test', 'thumbnail_uri': ''},
         };
 
         // Act

@@ -33,9 +33,9 @@ class RepositorySetupHelpers {
   // Network error when fetching shelf (user has no internet)
   // TECHNICAL: Throws exception with descriptive message
   static void setupNetworkErrorFetch(MockBookshelfRepository repo) {
-    when(() => repo.fetchShelf()).thenThrow(
-      Exception('Network error: Failed to fetch bookshelf'),
-    );
+    when(
+      () => repo.fetchShelf(),
+    ).thenThrow(Exception('Network error: Failed to fetch bookshelf'));
   }
 
   // BUSINESS LOGIC:
@@ -49,100 +49,108 @@ class RepositorySetupHelpers {
   // Successful book addition to shelf
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulAddBook(MockBookshelfRepository repo) {
-    when(() => repo.addBook(
-          isbn: any(named: 'isbn'),
-          title: any(named: 'title'),
-          author: any(named: 'author'),
-          thumbnail: any(named: 'thumbnail'),
-        )).thenAnswer((_) async => false);
+    when(
+      () => repo.addBook(
+        isbn: any(named: 'isbn'),
+        title: any(named: 'title'),
+        author: any(named: 'author'),
+        thumbnail: any(named: 'thumbnail'),
+      ),
+    ).thenAnswer((_) async => false);
   }
 
   // BUSINESS LOGIC:
   // Duplicate book error (already on shelf)
   // TECHNICAL: Throws with specific error message
   static void setupDuplicateBookError(MockBookshelfRepository repo) {
-    when(() => repo.addBook(
-          isbn: any(named: 'isbn'),
-          title: any(named: 'title'),
-          author: any(named: 'author'),
-          thumbnail: any(named: 'thumbnail'),
-        )).thenReturn(Future.value(true));
+    when(
+      () => repo.addBook(
+        isbn: any(named: 'isbn'),
+        title: any(named: 'title'),
+        author: any(named: 'author'),
+        thumbnail: any(named: 'thumbnail'),
+      ),
+    ).thenReturn(Future.value(true));
   }
 
   // BUSINESS LOGIC:
   // Successful book removal from shelf
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulRemoveBook(MockBookshelfRepository repo) {
-    when(() => repo.removeBook(any()))
-        .thenAnswer((_) async {});
+    when(() => repo.removeBook(any())).thenAnswer((_) async {});
   }
 
   // BUSINESS LOGIC:
   // Successful read status update
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulSetReadStatus(MockBookshelfRepository repo) {
-    when(() => repo.setReadStatus(any(), isRead: any(named: 'isRead')))
-        .thenAnswer((_) async {});
+    when(
+      () => repo.setReadStatus(any(), isRead: any(named: 'isRead')),
+    ).thenAnswer((_) async {});
   }
 
   // BUSINESS LOGIC:
   // Auth: Successful login with valid credentials
   // TECHNICAL: Returns session token
   static void setupSuccessfulLogin(MockAuthRepository repo) {
-    when(() => repo.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenAnswer((_) async => 'session-token-123');
+    when(
+      () => repo.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenAnswer((_) async => 'session-token-123');
   }
 
   // BUSINESS LOGIC:
   // Auth: Login failure (invalid credentials)
   // TECHNICAL: Throws with "Invalid credentials" message
   static void setupInvalidCredentialsError(MockAuthRepository repo) {
-    when(() => repo.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      Exception('Invalid email or password'),
-    );
+    when(
+      () => repo.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(Exception('Invalid email or password'));
   }
 
   // BUSINESS LOGIC:
   // Auth: Account not found
   // TECHNICAL: Throws with "No account" message
   static void setupAccountNotFoundError(MockAuthRepository repo) {
-    when(() => repo.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      Exception('No account found with this email'),
-    );
+    when(
+      () => repo.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(Exception('No account found with this email'));
   }
 
   // BUSINESS LOGIC:
   // Auth: Successful signup (new account created)
   // TECHNICAL: Completes without throwing
   static void setupSuccessfulSignup(MockAuthRepository repo) {
-    when(() => repo.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          firstName: any(named: 'firstName'),
-          lastName: any(named: 'lastName'),
-        )).thenAnswer((_) async {});
+    when(
+      () => repo.signUp(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+        firstName: any(named: 'firstName'),
+        lastName: any(named: 'lastName'),
+      ),
+    ).thenAnswer((_) async {});
   }
 
   // BUSINESS LOGIC:
   // Auth: Email already exists
   // TECHNICAL: Throws with "Email exists" message
   static void setupEmailAlreadyExistsError(MockAuthRepository repo) {
-    when(() => repo.signUp(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-          firstName: any(named: 'firstName'),
-          lastName: any(named: 'lastName'),
-        )).thenThrow(
-      Exception('Email already registered'),
-    );
+    when(
+      () => repo.signUp(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+        firstName: any(named: 'firstName'),
+        lastName: any(named: 'lastName'),
+      ),
+    ).thenThrow(Exception('Email already registered'));
   }
 
   // BUSINESS LOGIC:
@@ -156,24 +164,24 @@ class RepositorySetupHelpers {
   // Auth: Session expired (token no longer valid)
   // TECHNICAL: Throws with "Session expired" message
   static void setupSessionExpiredError(MockAuthRepository repo) {
-    when(() => repo.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      Exception('Session expired'),
-    );
+    when(
+      () => repo.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(Exception('Session expired'));
   }
 
   // BUSINESS LOGIC:
   // Auth: Rate limiting (too many login attempts)
   // TECHNICAL: Throws with "Rate limited" message
   static void setupRateLimitedError(MockAuthRepository repo) {
-    when(() => repo.signIn(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      Exception('Too many login attempts. Try again later.'),
-    );
+    when(
+      () => repo.signIn(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(Exception('Too many login attempts. Try again later.'));
   }
 }
 
@@ -193,7 +201,8 @@ class TestBookFactory {
       bookId: bookId ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       author: author,
-      thumbnailUri: thumbnailUri ?? 'https://books.google.com/books/content?id=test',
+      thumbnailUri:
+          thumbnailUri ?? 'https://books.google.com/books/content?id=test',
       isRead: isRead,
     );
   }
@@ -219,11 +228,7 @@ class TestBookFactory {
     String title = 'Read Book',
     String author = 'Test Author',
   }) {
-    return createTestBook(
-      title: title,
-      author: author,
-      isRead: true,
-    );
+    return createTestBook(title: title, author: author, isRead: true);
   }
 
   // BUSINESS LOGIC:

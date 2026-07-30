@@ -27,8 +27,13 @@ void main() {
   });
 
   group('SignupScreen', () {
-    testWidgets('displays signup form with fields', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('displays signup form with fields', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -45,7 +50,10 @@ void main() {
     });
 
     testWidgets('accepts valid email input', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -64,8 +72,13 @@ void main() {
       expect(find.text('user@example.com'), findsOneWidget);
     });
 
-    testWidgets('password visibility toggle exists', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('password visibility toggle exists', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -81,7 +94,10 @@ void main() {
     });
 
     testWidgets('has submit button', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -96,8 +112,13 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('displays password requirements text', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('displays password requirements text', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -110,16 +131,22 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.byWidgetPredicate((widget) =>
-            widget is Text && widget.data?.contains('Password') == true),
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && widget.data?.contains('Password') == true,
+        ),
         findsWidgets,
       );
     });
 
-    testWidgets('shows error on signup with invalid credentials',
-        (WidgetTester tester) async {
+    testWidgets('shows error on signup with invalid credentials', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupEmailAlreadyExists(mockAuthRepository);
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -145,8 +172,13 @@ void main() {
       }
     });
 
-    testWidgets('form accepts all required fields', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('form accepts all required fields', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(

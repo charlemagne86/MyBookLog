@@ -44,8 +44,9 @@ void main() {
   });
 
   group('E2E User Journeys', () {
-    testWidgets('complete signup flow: form → submission → logged in',
-        (WidgetTester tester) async {
+    testWidgets('complete signup flow: form → submission → logged in', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User journey: See signup form → Fill email/password/name →
       // Click signup → Server validates → App logs them in → Redirected to bookshelf
@@ -57,7 +58,10 @@ void main() {
       // 3. Mock success response
       // 4. Verify redirect to bookshelf
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -144,8 +148,9 @@ void main() {
       }
     });
 
-    testWidgets('complete login flow: credentials → session → bookshelf',
-        (WidgetTester tester) async {
+    testWidgets('complete login flow: credentials → session → bookshelf', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // Returning user journey: See login screen → Enter credentials →
       // Server validates → Session created → Redirected to bookshelf
@@ -157,7 +162,10 @@ void main() {
       // 3. Mock successful auth
       // 4. Verify redirect to bookshelf with books loaded
 
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -205,48 +213,51 @@ void main() {
       }
     });
 
-    testWidgets('session persistence: login → close → reopen → still logged in',
-        (WidgetTester tester) async {
-      // BUSINESS LOGIC:
-      // User logs in, closes app, reopens it.
-      // Should remember session and skip login.
-      // This is critical for user retention (friction → abandonment).
-      //
-      // TECHNICAL:
-      // 1. Simulate logged-in state
-      // 2. Router evaluates redirect: logged in → bookshelf
-      // 3. Verify user doesn't see login screen
+    testWidgets(
+      'session persistence: login → close → reopen → still logged in',
+      (WidgetTester tester) async {
+        // BUSINESS LOGIC:
+        // User logs in, closes app, reopens it.
+        // Should remember session and skip login.
+        // This is critical for user retention (friction → abandonment).
+        //
+        // TECHNICAL:
+        // 1. Simulate logged-in state
+        // 2. Router evaluates redirect: logged in → bookshelf
+        // 3. Verify user doesn't see login screen
 
-      // Simulate returning user with active session
-      final testBooks = TestBookFactory.createTestBooks(5);
-      TestSetupHelpers.setupLoggedInUserWithBooks(
-        mockAuthRepository,
-        mockBookshelfRepository,
-        testBooks,
-        authStateController,
-      );
+        // Simulate returning user with active session
+        final testBooks = TestBookFactory.createTestBooks(5);
+        TestSetupHelpers.setupLoggedInUserWithBooks(
+          mockAuthRepository,
+          mockBookshelfRepository,
+          testBooks,
+          authStateController,
+        );
 
-      await tester.pumpWidget(
-        TestAppBuilder(
-          bookshelfRepository: mockBookshelfRepository,
-          authRepository: mockAuthRepository,
-          authStateController: authStateController,
-        ).build(),
-      );
+        await tester.pumpWidget(
+          TestAppBuilder(
+            bookshelfRepository: mockBookshelfRepository,
+            authRepository: mockAuthRepository,
+            authStateController: authStateController,
+          ).build(),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Should NOT see login/splash screens
-      expect(find.byType(LoginScreen), findsNothing);
-      expect(find.byType(SplashScreen), findsNothing);
+        // Should NOT see login/splash screens
+        expect(find.byType(LoginScreen), findsNothing);
+        expect(find.byType(SplashScreen), findsNothing);
 
-      // Should go straight to bookshelf
-      expect(find.byType(BookshelfScreen), findsOneWidget);
-      expect(find.byType(GridView), findsOneWidget);
-    });
+        // Should go straight to bookshelf
+        expect(find.byType(BookshelfScreen), findsOneWidget);
+        expect(find.byType(GridView), findsOneWidget);
+      },
+    );
 
-    testWidgets('error recovery: network fails → user retries → succeeds',
-        (WidgetTester tester) async {
+    testWidgets('error recovery: network fails → user retries → succeeds', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User initiates action (login, fetch shelf, etc).
       // Network fails. User sees error.
@@ -282,17 +293,20 @@ void main() {
 
       // Should show error message (in SnackBar or as Text)
       expect(
-        find.byWidgetPredicate((widget) =>
-            widget is Text && (widget.data?.contains('Failed to load') == true ||
-                widget.data?.contains('Failed') == true)),
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              (widget.data?.contains('Failed to load') == true ||
+                  widget.data?.contains('Failed') == true),
+        ),
         findsWidgets,
       );
 
       // Now setup success state
       final testBooks = TestBookFactory.createTestBooks(3);
-      when(() => mockBookshelfRepository.fetchShelf()).thenAnswer(
-        (_) async => testBooks,
-      );
+      when(
+        () => mockBookshelfRepository.fetchShelf(),
+      ).thenAnswer((_) async => testBooks);
 
       // User triggers retry (pull-to-refresh gesture)
       await tester.fling(
@@ -306,8 +320,9 @@ void main() {
       expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('logout flow: user logs out → redirected to login',
-        (WidgetTester tester) async {
+    testWidgets('logout flow: user logs out → redirected to login', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User clicks logout button.
       // Session cleared.
@@ -351,9 +366,7 @@ void main() {
 
         // Simulate logout by emitting signedOut event
         when(() => mockAuthRepository.currentSession).thenReturn(null);
-        authStateController.add(
-          AuthState(AuthChangeEvent.signedOut, null),
-        );
+        authStateController.add(AuthState(AuthChangeEvent.signedOut, null));
 
         await tester.pumpAndSettle();
 
@@ -363,8 +376,9 @@ void main() {
       }
     });
 
-    testWidgets('search multiple times: results update with each search',
-        (WidgetTester tester) async {
+    testWidgets('search multiple times: results update with each search', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User searches for "Gatsby" → sees results → clears search → searches "Tolkien"
       // Results should update for each search without caching old results.
@@ -433,8 +447,9 @@ void main() {
       }
     });
 
-    testWidgets('rapid navigation: bookshelf → logout → login → bookshelf',
-        (WidgetTester tester) async {
+    testWidgets('rapid navigation: bookshelf → logout → login → bookshelf', (
+      WidgetTester tester,
+    ) async {
       // BUSINESS LOGIC:
       // User navigates rapidly through screens.
       // App should handle rapid state changes without crashing.

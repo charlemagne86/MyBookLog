@@ -124,7 +124,8 @@ class PerformanceTestHelper {
     expect(
       measured.inMilliseconds,
       lessThanOrEqualTo(threshold.inMilliseconds),
-      reason: '$metric should be <= ${threshold.inMilliseconds}ms, got ${measured.inMilliseconds}ms',
+      reason:
+          '$metric should be <= ${threshold.inMilliseconds}ms, got ${measured.inMilliseconds}ms',
     );
   }
 
@@ -149,9 +150,7 @@ class PerformanceTestHelper {
   /// BUSINESS LOGIC: Helps identify performance hotspots during development
   /// TECHNICAL: Formats duration nicely for human reading
   static void logMetric(String name, Duration duration) {
-    debugPrint(
-      '⏱️  $name: ${duration.inMilliseconds}ms',
-    );
+    debugPrint('⏱️  $name: ${duration.inMilliseconds}ms');
   }
 
   /// Creates performance baseline document entry.
@@ -180,10 +179,16 @@ class PerformanceBaselines {
   // - searchLatency: 200ms→5000ms (includes 2-3s pumpAndSettle + API + rendering)
   // - navigationLatency: 7000ms→9000ms (login + books fetch + rendering + settle)
   static const Duration appStartup = Duration(seconds: 10);
-  static const Duration navigationLatency = Duration(seconds: 9); // Login + books fetch, occasional slowness
-  static const Duration searchLatency = Duration(seconds: 5); // Search + pumpAndSettle
+  static const Duration navigationLatency = Duration(
+    seconds: 9,
+  ); // Login + books fetch, occasional slowness
+  static const Duration searchLatency = Duration(
+    seconds: 5,
+  ); // Search + pumpAndSettle
   static const Duration scrollFPS = Duration(milliseconds: 16); // ~60fps
-  static const Duration apiLatency = Duration(seconds: 3); // Real Google Books API latency
+  static const Duration apiLatency = Duration(
+    seconds: 3,
+  ); // Real Google Books API latency
   static const double memoryBaseline = 150.0; // MB
   static const double memoryPeak = 250.0; // MB
 }

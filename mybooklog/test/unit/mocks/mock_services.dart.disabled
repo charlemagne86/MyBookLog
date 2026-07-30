@@ -21,25 +21,27 @@ class GoogleBooksServiceSetupHelpers {
     MockGoogleBooksService service, {
     required List<BookSearchResult> results,
   }) {
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenAnswer((_) async => results);
   }
 
   // BUSINESS LOGIC:
   // Search returns no results (book not in catalog)
   // TECHNICAL: Returns empty list successfully
   static void setupEmptySearchResults(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => []);
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenAnswer((_) async => []);
   }
 
   // BUSINESS LOGIC:
   // Network timeout when searching (slow/no internet)
   // TECHNICAL: Throws TimeoutException
   static void setupSearchTimeout(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('Request timeout'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('Request timeout'));
   }
 
   // BUSINESS LOGIC:
@@ -50,18 +52,18 @@ class GoogleBooksServiceSetupHelpers {
     required int statusCode,
     required String message,
   }) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('API Error $statusCode: $message'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('API Error $statusCode: $message'));
   }
 
   // BUSINESS LOGIC:
   // API returns malformed data (missing fields, corrupt JSON)
   // TECHNICAL: Throws with parsing error
   static void setupSearchMalformedData(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('Failed to parse search results'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('Failed to parse search results'));
   }
 
   // BUSINESS LOGIC:
@@ -81,8 +83,9 @@ class GoogleBooksServiceSetupHelpers {
         imageUrl: 'https://books.google.com/books/content?id=book$i',
       ),
     );
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenAnswer((_) async => results);
   }
 
   // BUSINESS LOGIC:
@@ -105,53 +108,54 @@ class GoogleBooksServiceSetupHelpers {
         imageUrl: 'https://books.google.com/books/content?id=special2',
       ),
     ];
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenAnswer((_) async => results);
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 401 Unauthorized (API key invalid)
   // TECHNICAL: Throws with authentication error
   static void setupUnauthorizedError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('401: Unauthorized - Invalid API key'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('401: Unauthorized - Invalid API key'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 403 Forbidden (quota exceeded)
   // TECHNICAL: Throws with rate limit error
   static void setupForbiddenError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('403: Forbidden - Rate limit exceeded'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('403: Forbidden - Rate limit exceeded'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 404 Not Found (endpoint gone)
   // TECHNICAL: Throws with 404 error
   static void setupNotFoundError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('404: Not Found - Endpoint no longer available'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('404: Not Found - Endpoint no longer available'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 500 Internal Server Error
   // TECHNICAL: Throws with server error
   static void setupServerError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('500: Internal Server Error'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('500: Internal Server Error'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 503 Service Unavailable
   // TECHNICAL: Throws with service unavailable error
   static void setupServiceUnavailableError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('503: Service Unavailable'),
-    );
+    when(
+      () => service.searchBooks(query: any(named: 'query')),
+    ).thenThrow(Exception('503: Service Unavailable'));
   }
 }
 

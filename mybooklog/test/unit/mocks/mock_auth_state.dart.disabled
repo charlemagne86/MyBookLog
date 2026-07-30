@@ -79,10 +79,7 @@ class MockAuthEvent {
   final String type; // "signedIn" or "signedOut"
   final MockAuthState? state;
 
-  MockAuthEvent({
-    required this.type,
-    this.state,
-  });
+  MockAuthEvent({required this.type, this.state});
 
   static MockAuthEvent signedIn(MockAuthState state) =>
       MockAuthEvent(type: 'signedIn', state: state);
@@ -132,10 +129,7 @@ class MockAuthStateProvider {
     String userId = 'user-123',
     String email = 'test@example.com',
   }) {
-    emitAuthState(MockAuthState.signedIn(
-      userId: userId,
-      email: email,
-    ));
+    emitAuthState(MockAuthState.signedIn(userId: userId, email: email));
   }
 
   // BUSINESS LOGIC:
