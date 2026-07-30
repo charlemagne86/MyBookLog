@@ -85,9 +85,7 @@ class IntegrationTestHelper {
 
     // Default setup: user logged out, empty shelf
     when(() => _mockAuth!.currentSession).thenReturn(null);
-    when(
-      () => _mockAuth!.onAuthStateChange,
-    ).thenAnswer((_) => _authStateController!.stream);
+    when(() => _mockAuth!.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
 
     // Emit initial logged-out state
@@ -129,7 +127,9 @@ class IntegrationTestHelper {
 
     // Emit "signed out" event through the stream controller
     // This triggers the router to redirect to the login screen
-    _authStateController!.add(AuthState(AuthChangeEvent.signedOut, null));
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedOut, null),
+    );
 
     // Empty bookshelf for logged-out state
     when(() => _mockBookshelf!.fetchShelf()).thenAnswer((_) async => []);
@@ -156,21 +156,24 @@ class IntegrationTestHelper {
   }
 
   /// Mocks a failed login (no session)
-  Future<void> mockFailedLogin({String? email, String? password}) async {
+  Future<void> mockFailedLogin({
+    String? email,
+    String? password,
+  }) async {
     if (_mockAuth == null) await setupMocks();
     when(() => _mockAuth!.currentSession).thenReturn(null);
 
     // Emit "signed out" event through the stream controller
-    _authStateController!.add(AuthState(AuthChangeEvent.signedOut, null));
+    _authStateController!.add(
+      AuthState(AuthChangeEvent.signedOut, null),
+    );
   }
 
   /// Emits an auth state change through the stream controller
   /// Used by tests that manually mock signIn/signOut
   void emitAuthStateChange(AuthState state) {
     if (_authStateController == null) {
-      throw StateError(
-        'StreamController not initialized. Call setupMocks() first.',
-      );
+      throw StateError('StreamController not initialized. Call setupMocks() first.');
     }
     _authStateController!.add(state);
   }
@@ -201,9 +204,7 @@ class IntegrationTestHelper {
     // Set up stream controller if not already done (for direct launchApp calls)
     if (_authStateController == null) {
       _authStateController = StreamController<AuthState>.broadcast();
-      when(
-        () => auth.onAuthStateChange,
-      ).thenAnswer((_) => _authStateController!.stream);
+      when(() => auth.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
 
       // Emit initial state based on current session
       final isLoggedIn = auth.currentSession != null;
@@ -214,9 +215,7 @@ class IntegrationTestHelper {
       );
     } else {
       // Stream controller already exists, ensure auth mock uses it
-      when(
-        () => auth.onAuthStateChange,
-      ).thenAnswer((_) => _authStateController!.stream);
+      when(() => auth.onAuthStateChange).thenAnswer((_) => _authStateController!.stream);
     }
 
     await tester.pumpWidget(
@@ -226,7 +225,10 @@ class IntegrationTestHelper {
           Provider<BookshelfRepository>.value(value: shelf),
         ],
         // Pass repositories directly to MyApp constructor for testing
-        child: MyApp(authRepository: auth, bookshelfRepository: shelf),
+        child: MyApp(
+          authRepository: auth,
+          bookshelfRepository: shelf,
+        ),
       ),
     );
 
@@ -236,7 +238,11 @@ class IntegrationTestHelper {
 
   /// Pumps the app widget (used in test sequences)
   Future<void> pumpApp(WidgetTester tester) async {
-    await launchApp(tester, mockAuth: _mockAuth, mockBookshelf: _mockBookshelf);
+    await launchApp(
+      tester,
+      mockAuth: _mockAuth,
+      mockBookshelf: _mockBookshelf,
+    );
   }
 
   /// Waits for text to appear on screen
@@ -262,7 +268,10 @@ class IntegrationTestHelper {
   }
 
   /// Scrolls to a widget in a scrollable area
-  Future<void> scrollToWidget(WidgetTester tester, Finder finder) async {
+  Future<void> scrollToWidget(
+    WidgetTester tester,
+    Finder finder,
+  ) async {
     try {
       await tester.ensureVisible(finder);
       await tester.pumpAndSettle();
@@ -272,7 +281,10 @@ class IntegrationTestHelper {
   }
 
   /// Performs a long press on a widget
-  Future<void> longPressWidget(WidgetTester tester, Finder finder) async {
+  Future<void> longPressWidget(
+    WidgetTester tester,
+    Finder finder,
+  ) async {
     await tester.longPress(finder);
     await tester.pumpAndSettle();
   }

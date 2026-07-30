@@ -31,9 +31,8 @@ void main() {
     // 4. On success: LoginScreen routes to BookshelfScreen
     // 5. User can see their books
 
-    testWidgets('complete login flow with valid credentials', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('complete login flow with valid credentials',
+        (WidgetTester tester) async {
       // TECHNICAL:
       // Set up mocks: user not logged in initially
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -60,16 +59,8 @@ void main() {
 
       // TECHNICAL:
       // Verify we're on login screen (check for unique login elements)
-      expect(
-        find.byType(TextField),
-        findsWidgets,
-        reason: 'Should show login form fields',
-      );
-      expect(
-        find.byType(ElevatedButton),
-        findsOneWidget,
-        reason: 'Should show login button',
-      );
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form fields');
+      expect(find.byType(ElevatedButton), findsOneWidget, reason: 'Should show login button');
 
       // TECHNICAL:
       // Enter credentials
@@ -106,9 +97,8 @@ void main() {
       // In this test, we're verifying the flow completes.
     });
 
-    testWidgets('login with invalid credentials shows error', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('login with invalid credentials shows error',
+        (WidgetTester tester) async {
       // TECHNICAL:
       // Set up mocks: user not logged in
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -132,16 +122,8 @@ void main() {
 
       // TECHNICAL:
       // Verify we're on login screen (check for unique login elements)
-      expect(
-        find.byType(TextField),
-        findsWidgets,
-        reason: 'Should show login form fields',
-      );
-      expect(
-        find.byType(ElevatedButton),
-        findsOneWidget,
-        reason: 'Should show login button',
-      );
+      expect(find.byType(TextField), findsWidgets, reason: 'Should show login form fields');
+      expect(find.byType(ElevatedButton), findsOneWidget, reason: 'Should show login button');
 
       // TECHNICAL:
       // Enter invalid credentials
@@ -162,7 +144,9 @@ void main() {
 
       // TECHNICAL:
       // Emit failed login state (no session)
-      helper.emitAuthStateChange(AuthState(AuthChangeEvent.signedOut, null));
+      helper.emitAuthStateChange(
+        AuthState(AuthChangeEvent.signedOut, null),
+      );
 
       // TECHNICAL:
       // Wait for error handling
@@ -173,9 +157,8 @@ void main() {
       // (would verify exact error text from friendlyMessage())
     });
 
-    testWidgets('password visibility toggle works during login', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('password visibility toggle works during login',
+        (WidgetTester tester) async {
       // TECHNICAL:
       // Set up mocks
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -197,7 +180,8 @@ void main() {
 
       // TECHNICAL:
       // Initially password should be obscured
-      TextField password = tester.widget<TextField>(passwordField) as TextField;
+      TextField password =
+          tester.widget<TextField>(passwordField) as TextField;
       expect(password.obscureText, true);
 
       // TECHNICAL:

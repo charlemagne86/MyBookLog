@@ -18,7 +18,10 @@ class MockHttpResponse {
   final int statusCode;
   final String body;
 
-  MockHttpResponse({required this.statusCode, required this.body});
+  MockHttpResponse({
+    required this.statusCode,
+    required this.body,
+  });
 }
 
 // Response factories for common scenarios
@@ -69,7 +72,10 @@ class HttpResponseFactories {
   }
 
   static MockHttpResponse malformedResponse() {
-    return MockHttpResponse(statusCode: 200, body: '{invalid json}');
+    return MockHttpResponse(
+      statusCode: 200,
+      body: '{invalid json}',
+    );
   }
 
   static MockHttpResponse missingFieldsResponse() {
@@ -100,8 +106,7 @@ class HttpResponseFactories {
   static MockHttpResponse largeDatasetResponse(int count) {
     final items = List.generate(
       count,
-      (i) =>
-          '''
+      (i) => '''
 {
   "kind": "books#volume",
   "id": "book-$i",
@@ -119,8 +124,7 @@ class HttpResponseFactories {
 
     return MockHttpResponse(
       statusCode: 200,
-      body:
-          '''
+      body: '''
 {
   "kind": "books#volumes",
   "totalItems": $count,

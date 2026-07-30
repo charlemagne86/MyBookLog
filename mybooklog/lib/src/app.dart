@@ -29,7 +29,11 @@ class MyApp extends StatefulWidget {
   final AuthRepository? authRepository;
   final BookshelfRepository? bookshelfRepository;
 
-  const MyApp({super.key, this.authRepository, this.bookshelfRepository});
+  const MyApp({
+    super.key,
+    this.authRepository,
+    this.bookshelfRepository,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -52,8 +56,7 @@ class _MyAppState extends State<MyApp> {
     // otherwise create real instances from Supabase.
     final client = Supabase.instance.client;
     _authRepository = widget.authRepository ?? AuthRepository(client);
-    _bookshelfRepository =
-        widget.bookshelfRepository ?? BookshelfRepository(client);
+    _bookshelfRepository = widget.bookshelfRepository ?? BookshelfRepository(client);
     _googleBooksService = GoogleBooksService();
     _router = buildRouter(_authRepository);
   }

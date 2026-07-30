@@ -21,6 +21,7 @@ void main() {
       await testHelper.setLoggedInState();
       await testHelper.pumpApp(tester);
 
+
       /// Measures search latency with small dataset (< 20 books).
       ///
       /// BUSINESS LOGIC: Search should feel instant for small collections
@@ -60,10 +61,7 @@ void main() {
         metric: 'Small dataset search',
       );
 
-      PerformanceTestHelper.logMetric(
-        'Search (small dataset)',
-        stopwatch.elapsed,
-      );
+      PerformanceTestHelper.logMetric('Search (small dataset)', stopwatch.elapsed);
     });
 
     testWidgets('search_filter_large_dataset', (WidgetTester tester) async {
@@ -105,10 +103,7 @@ void main() {
         metric: 'Large dataset search',
       );
 
-      PerformanceTestHelper.logMetric(
-        'Search (large dataset)',
-        stopwatch.elapsed,
-      );
+      PerformanceTestHelper.logMetric('Search (large dataset)', stopwatch.elapsed);
     });
 
     testWidgets('search_progressive_filtering', (WidgetTester tester) async {
@@ -155,18 +150,12 @@ void main() {
         expect(
           duration.inMilliseconds,
           lessThanOrEqualTo(5000),
-          reason:
-              'Each filter step should be < 5000ms (includes 2s pumpAndSettle + API)',
+          reason: 'Each filter step should be < 5000ms (includes 2s pumpAndSettle + API)',
         );
       }
 
-      final avgMs =
-          durations.fold<int>(0, (sum, d) => sum + d.inMilliseconds) ~/
-          durations.length;
-      PerformanceTestHelper.logMetric(
-        'Progressive search avg',
-        Duration(milliseconds: avgMs),
-      );
+      final avgMs = durations.fold<int>(0, (sum, d) => sum + d.inMilliseconds) ~/ durations.length;
+      PerformanceTestHelper.logMetric('Progressive search avg', Duration(milliseconds: avgMs));
     });
 
     testWidgets('search_clear_performance', (WidgetTester tester) async {

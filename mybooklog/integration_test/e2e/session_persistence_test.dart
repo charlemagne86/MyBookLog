@@ -19,9 +19,7 @@ void main() {
       await testHelper.cleanup();
     });
 
-    testWidgets('session_persists_after_app_reopen', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('session_persists_after_app_reopen', (WidgetTester tester) async {
       /// Verifies user remains logged in after closing and reopening app.
       ///
       /// BUSINESS LOGIC: Critical for user experience—users should not need
@@ -54,11 +52,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify logged in (bookshelf visible)
-      expect(
-        find.byType(GridView),
-        findsWidgets,
-        reason: 'Should show bookshelf',
-      );
+      expect(find.byType(GridView), findsWidgets, reason: 'Should show bookshelf');
 
       // Step 3: Simulate app close/reopen
       // In a real test, this would involve:
@@ -93,9 +87,7 @@ void main() {
       );
     });
 
-    testWidgets('session_data_available_after_reopen', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('session_data_available_after_reopen', (WidgetTester tester) async {
       /// Verifies user data loads correctly after app reopen.
       ///
       /// BUSINESS LOGIC: User's book collection should be immediately visible

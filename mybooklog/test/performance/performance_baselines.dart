@@ -39,8 +39,7 @@ void main() {
         expect(
           elapsedMs,
           lessThanOrEqualTo(thresholdMs),
-          reason:
-              'Search took ${elapsedMs}ms, exceeds threshold ${thresholdMs}ms',
+          reason: 'Search took ${elapsedMs}ms, exceeds threshold ${thresholdMs}ms',
         );
       });
 
@@ -57,7 +56,7 @@ void main() {
             'volumeInfo': {
               'title': 'Book $i',
               'authors': ['Author $i'],
-            },
+            }
           },
         );
 
@@ -75,8 +74,7 @@ void main() {
         expect(
           stopwatch.elapsedMilliseconds,
           lessThanOrEqualTo(thresholdMs),
-          reason:
-              'Parsing took ${stopwatch.elapsedMilliseconds}ms, exceeds ${thresholdMs}ms',
+          reason: 'Parsing took ${stopwatch.elapsedMilliseconds}ms, exceeds ${thresholdMs}ms',
         );
       });
     });
@@ -108,7 +106,10 @@ void main() {
 
         print('Identity key generation: ${stopwatch.elapsedMilliseconds}ms');
 
-        expect(stopwatch.elapsedMilliseconds, lessThanOrEqualTo(thresholdMs));
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThanOrEqualTo(thresholdMs),
+        );
       });
 
       test('volume key generation is fast', () async {
@@ -136,7 +137,10 @@ void main() {
 
         print('Volume key generation: ${stopwatch.elapsedMilliseconds}ms');
 
-        expect(stopwatch.elapsedMilliseconds, lessThanOrEqualTo(thresholdMs));
+        expect(
+          stopwatch.elapsedMilliseconds,
+          lessThanOrEqualTo(thresholdMs),
+        );
       });
     });
 
@@ -157,9 +161,7 @@ void main() {
         print('Test suite baseline:');
         print('  Total tests: $totalTests');
         print('  Expected time: ${expectedMinutes}min (${expectedSeconds}sec)');
-        print(
-          '  Per test: ${(expectedSeconds / totalTests).toStringAsFixed(2)}sec',
-        );
+        print('  Per test: ${(expectedSeconds / totalTests).toStringAsFixed(2)}sec');
 
         // Baseline captured, not tested (testing execution time in test would be circular)
         expect(totalTests, greaterThan(200));
@@ -195,14 +197,14 @@ List<BookSearchResult> _simulateSearchOperation() {
         'title': 'The Great Gatsby',
         'authors': ['F. Scott Fitzgerald'],
         'imageLinks': {'thumbnail': 'https://example.com/gatsby.jpg'},
-      },
+      }
     },
     {
       'id': 'book-2',
       'volumeInfo': {
         'title': 'To Kill a Mockingbird',
         'authors': ['Harper Lee'],
-      },
+      }
     },
   ];
 
