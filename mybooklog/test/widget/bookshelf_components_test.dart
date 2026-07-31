@@ -17,7 +17,11 @@ import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_search_bar.da
 
 void main() {
   group('BookshelfSearchBar - Search and Filter', () {
-    final controller = TextEditingController();
+    late TextEditingController controller;
+
+    setUp(() {
+      controller = TextEditingController();
+    });
 
     // BUSINESS LOGIC: User can type to filter books
     testWidgets('displays search input field', (tester) async {
