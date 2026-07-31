@@ -9,6 +9,7 @@
 /// - Unit tests: 61 tests passing (covers models + services)
 /// - Widget tests: 10 tests passing (covers screens)
 library bookshelf_repository_test;
+
 /// - Repository tests: Skipped for refactor (medium priority)
 ///
 /// Blocked By:
