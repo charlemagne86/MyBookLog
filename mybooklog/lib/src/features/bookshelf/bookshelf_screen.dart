@@ -6,7 +6,10 @@ import 'package:provider/provider.dart';
 import '../../data/models/shelf_book.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/bookshelf_repository.dart';
-import 'widgets/book_on_shelf.dart';
+import 'widgets/bookshelf_empty_state.dart';
+import 'widgets/bookshelf_grid.dart';
+import 'widgets/bookshelf_loading_state.dart';
+import 'widgets/bookshelf_search_bar.dart';
 
 /// The app's home screen: the user's bookshelf.
 ///
@@ -225,7 +228,6 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookshelf'),
@@ -252,96 +254,42 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
         child: Column(
           children: [
             const SizedBox(height: 12),
-            if (_showSearchBar) _buildSearchBar(colorScheme),
-            Expanded(child: _buildGrid(colorScheme)),
+            if (_showSearchBar)
+              BookshelfSearchBar(
+                controller: _searchController,
+                searchQuery: _searchQuery,
+                visibleBooksCount: _visibleBooks.length,
+                totalBooksCount: _books.length,
+                onChanged: (value) => setState(() => _searchQuery = value),
+                onClear: () => setState(() {
+                  _searchController.clear();
+                  _searchQuery = '';
+                }),
+              ),
+            Expanded(child: _buildMainContent()),
           ],
         ),
       ),
     );
   }
 
-  /// The filter box that slides in under the title bar. Its helper line
-  /// coaches the user ("Enter at least 3 characters!") and then reports how
-  /// many books match. The small × button clears the text in one tap.
-  Widget _buildSearchBar(ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            onChanged: (value) => setState(() => _searchQuery = value),
-            decoration: InputDecoration(
-              hintText: 'Search title or author',
-              helperText: _searchQuery.trim().length < 3
-                  ? 'Enter at least 3 characters!'
-                  : '${_visibleBooks.length} matching '
-                        '${_visibleBooks.length == 1 ? 'book' : 'books'}',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.trim().isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.close),
-                      tooltip: 'Clear search',
-                      onPressed: () => setState(() {
-                        _searchController.clear();
-                        _searchQuery = '';
-                      }),
-                    ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// The main body of the screen. It shows one of three things:
-  ///   1. a spinner while the shelf is still loading,
-  ///   2. a helpful message when there is nothing to show (shelf empty, or
-  ///      no books match the filter),
-  ///   3. otherwise, the grid of book covers itself.
-  Widget _buildGrid(ColorScheme colorScheme) {
+  /// BUSINESS LOGIC: Show appropriate content based on state
+  /// TECHNICAL: Loading → Empty → Grid (in priority order)
+  Widget _buildMainContent() {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const BookshelfLoadingState();
     }
     if (_visibleBooks.isEmpty) {
-      return Center(
-        child: Text(
-          _books.isEmpty
-              ? 'Your bookshelf is empty. Tap + to add a book.'
-              : 'No books match your search.',
-          style: TextStyle(fontSize: 16, color: colorScheme.primary),
-          textAlign: TextAlign.center,
-        ),
+      return BookshelfEmptyState(
+        message: _books.isEmpty
+            ? 'Your bookshelf is empty. Tap + to add a book.'
+            : 'No books match your search.',
       );
     }
-    // Three covers per row; each cell is taller than wide, like a real book.
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 32,
-        crossAxisSpacing: 32,
-        childAspectRatio: 0.44,
-      ),
-      itemCount: _visibleBooks.length,
-      itemBuilder: (context, index) {
-        final book = _visibleBooks[index];
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onLongPressStart: (details) =>
-              _onBookLongPress(book, details.globalPosition),
-          child: BookOnShelf(
-            imageUrl: book.thumbnailUri,
-            title: book.title,
-            isRead: book.isRead,
-            isContextMenuTarget: _contextMenuBookSelectionKey == book.bookId,
-          ),
-        );
-      },
+    return BookshelfGrid(
+      books: _visibleBooks,
+      selectedBookId: _contextMenuBookSelectionKey,
+      onBookLongPress: _onBookLongPress,
     );
   }
 }
