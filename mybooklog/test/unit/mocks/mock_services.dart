@@ -21,25 +21,26 @@ class GoogleBooksServiceSetupHelpers {
     MockGoogleBooksService service, {
     required List<BookSearchResult> results,
   }) {
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:
   // Search returns no results (book not in catalog)
   // TECHNICAL: Returns empty list successfully
   static void setupEmptySearchResults(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => []);
+    when(
+      () => service.search(any()),
+    ).thenAnswer((_) async => GoogleBooksPage(results: [], totalItems: 0));
   }
 
   // BUSINESS LOGIC:
   // Network timeout when searching (slow/no internet)
   // TECHNICAL: Throws TimeoutException
   static void setupSearchTimeout(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('Request timeout'),
-    );
+    when(() => service.search(any())).thenThrow(Exception('Request timeout'));
   }
 
   // BUSINESS LOGIC:
@@ -50,18 +51,18 @@ class GoogleBooksServiceSetupHelpers {
     required int statusCode,
     required String message,
   }) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('API Error $statusCode: $message'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('API Error $statusCode: $message'));
   }
 
   // BUSINESS LOGIC:
   // API returns malformed data (missing fields, corrupt JSON)
   // TECHNICAL: Throws with parsing error
   static void setupSearchMalformedData(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('Failed to parse search results'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('Failed to parse search results'));
   }
 
   // BUSINESS LOGIC:
@@ -74,15 +75,17 @@ class GoogleBooksServiceSetupHelpers {
     final results = List.generate(
       count,
       (i) => BookSearchResult(
-        id: 'book-$i',
+        volumeId: 'book-$i',
         title: 'Large Dataset Book $i',
-        author: 'Author $i',
-        isbn13: '978000000000$i',
-        imageUrl: 'https://books.google.com/books/content?id=book$i',
+        authors: ['Author $i'],
+        isbn: '978000000000$i',
+        thumbnail: 'https://books.google.com/books/content?id=book$i',
       ),
     );
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:
@@ -91,67 +94,69 @@ class GoogleBooksServiceSetupHelpers {
   static void setupSpecialCharacterResults(MockGoogleBooksService service) {
     final results = [
       BookSearchResult(
-        id: 'special-1',
+        volumeId: 'special-1',
         title: 'Test™ 中文 العربية',
-        author: 'Author™ 中文',
-        isbn13: '9780123456789',
-        imageUrl: 'https://books.google.com/books/content?id=special1',
+        authors: ['Author™ 中文'],
+        isbn: '9780123456789',
+        thumbnail: 'https://books.google.com/books/content?id=special1',
       ),
       BookSearchResult(
-        id: 'special-2',
+        volumeId: 'special-2',
         title: 'Señor García Márquez',
-        author: 'José María de Pereda',
-        isbn13: '9780123456790',
-        imageUrl: 'https://books.google.com/books/content?id=special2',
+        authors: ['José María de Pereda'],
+        isbn: '9780123456790',
+        thumbnail: 'https://books.google.com/books/content?id=special2',
       ),
     ];
-    when(() => service.searchBooks(query: any(named: 'query')))
-        .thenAnswer((_) async => results);
+    when(() => service.search(any())).thenAnswer(
+      (_) async =>
+          GoogleBooksPage(results: results, totalItems: results.length),
+    );
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 401 Unauthorized (API key invalid)
   // TECHNICAL: Throws with authentication error
   static void setupUnauthorizedError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('401: Unauthorized - Invalid API key'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('401: Unauthorized - Invalid API key'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 403 Forbidden (quota exceeded)
   // TECHNICAL: Throws with rate limit error
   static void setupForbiddenError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('403: Forbidden - Rate limit exceeded'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('403: Forbidden - Rate limit exceeded'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 404 Not Found (endpoint gone)
   // TECHNICAL: Throws with 404 error
   static void setupNotFoundError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('404: Not Found - Endpoint no longer available'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('404: Not Found - Endpoint no longer available'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 500 Internal Server Error
   // TECHNICAL: Throws with server error
   static void setupServerError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('500: Internal Server Error'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('500: Internal Server Error'));
   }
 
   // BUSINESS LOGIC:
   // Search fails due to 503 Service Unavailable
   // TECHNICAL: Throws with service unavailable error
   static void setupServiceUnavailableError(MockGoogleBooksService service) {
-    when(() => service.searchBooks(query: any(named: 'query'))).thenThrow(
-      Exception('503: Service Unavailable'),
-    );
+    when(
+      () => service.search(any()),
+    ).thenThrow(Exception('503: Service Unavailable'));
   }
 }
 
@@ -161,20 +166,18 @@ class TestBookSearchResultFactory {
   // Create a realistic search result matching Google Books API structure
   // TECHNICAL: Returns complete BookSearchResult with all fields populated
   static BookSearchResult createTestResult({
-    String? id,
+    String? volumeId,
     String title = 'Test Book',
     String author = 'Test Author',
-    String? isbn13,
-    String? isbn10,
-    String imageUrl = 'https://books.google.com/books/content?id=test',
+    String? isbn,
+    String thumbnail = 'https://books.google.com/books/content?id=test',
   }) {
     return BookSearchResult(
-      id: id ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
+      volumeId: volumeId ?? 'book-${DateTime.now().millisecondsSinceEpoch}',
       title: title,
-      author: author,
-      isbn13: isbn13 ?? '9780123456789',
-      isbn10: isbn10,
-      imageUrl: imageUrl,
+      authors: [author],
+      isbn: isbn ?? '9780123456789',
+      thumbnail: thumbnail,
     );
   }
 
@@ -185,10 +188,10 @@ class TestBookSearchResultFactory {
     return List.generate(
       count,
       (i) => createTestResult(
-        id: 'result-$i',
+        volumeId: 'result-$i',
         title: 'Search Result $i',
         author: 'Author $i',
-        isbn13: '978000000000$i',
+        isbn: '978000000000$i',
       ),
     );
   }
@@ -221,15 +224,14 @@ class TestBookSearchResultFactory {
 
   // BUSINESS LOGIC:
   // Create result with missing ISBN (incomplete API data)
-  // TECHNICAL: Returns result with null isbn13/isbn10
+  // TECHNICAL: Returns result with null isbn
   static BookSearchResult createResultWithoutISBN() {
     return BookSearchResult(
-      id: 'no-isbn-book',
+      volumeId: 'no-isbn-book',
       title: 'Book Without ISBN',
-      author: 'Test Author',
-      isbn13: null,
-      isbn10: null,
-      imageUrl: 'https://books.google.com/books/content?id=no-isbn',
+      authors: ['Test Author'],
+      isbn: null,
+      thumbnail: 'https://books.google.com/books/content?id=no-isbn',
     );
   }
 
@@ -237,6 +239,6 @@ class TestBookSearchResultFactory {
   // Create result with missing thumbnail (no cover art)
   // TECHNICAL: Returns result with empty/placeholder image URL
   static BookSearchResult createResultWithoutImage() {
-    return createTestResult(imageUrl: '');
+    return createTestResult(thumbnail: '');
   }
 }

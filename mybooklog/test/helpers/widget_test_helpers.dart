@@ -2,10 +2,12 @@
 ///
 /// Provides common patterns for widget testing, such as pumping test widgets,
 /// finding elements, and simulating user interactions.
+library widget_test_helpers;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 // ============================================================================
 // Test Widget Wrappers
@@ -46,10 +48,7 @@ class TestAppWrapper extends StatelessWidget {
 
     // Create the Material app
     if (home != null) {
-      return MaterialApp(
-        theme: theme,
-        home: home,
-      );
+      return MaterialApp(theme: theme, home: home);
     }
 
     return MaterialApp(
@@ -80,11 +79,7 @@ extension WidgetTesterX on WidgetTester {
     ThemeData? theme,
   }) async {
     await pumpWidget(
-      TestAppWrapper(
-        providers: providers,
-        theme: theme,
-        child: widget,
-      ),
+      TestAppWrapper(providers: providers, theme: theme, child: widget),
     );
   }
 
@@ -98,11 +93,8 @@ extension WidgetTesterX on WidgetTester {
 
   /// Types text into a specific TextField by label text.
   Future<void> typeTextInField(String label, String text) async {
-    final textFieldFinder = find.descendant(
-      of: find.byWidgetPredicate(
-        (w) => w is InputDecoration && w.labelText == label,
-      ),
-      matching: find.byType(TextField),
+    final textFieldFinder = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.labelText == label,
     );
     await enterText(textFieldFinder, text);
     await pumpAndSettle();
@@ -112,13 +104,7 @@ extension WidgetTesterX on WidgetTester {
   ///
   /// Works with ElevatedButton, TextButton, OutlinedButton.
   Future<void> tapButton(String label) async {
-    final finder = find.byWidgetPredicate((widget) {
-      if (widget is! Material) return false;
-      // Check if this Material is a button with the right text
-      return true;
-    });
-
-    // More robust: find by text inside a button
+    // Find button by text inside ElevatedButton
     await tap(
       find.descendant(
         of: find.byType(ElevatedButton),
@@ -136,19 +122,23 @@ extension WidgetTesterX on WidgetTester {
 
   /// Checks if a snackbar with the given message is displayed.
   bool hasSnackbar(String message) {
-    return find.text(message).evaluate().any(
-          (element) => element.widget is Text && element.widget is Text,
-        );
+    return find
+        .text(message)
+        .evaluate()
+        .any((element) => element.widget is Text && element.widget is Text);
   }
 
   /// Waits for a widget to appear on screen.
-  Future<void> waitFor(Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+  Future<void> waitFor(
+    Finder finder, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
     await pumpAndSettle();
     final endTime = DateTime.now().add(timeout);
 
-    while (find.byWidgetPredicate((_) => true).evaluate().isEmpty) {
+    while (finder.evaluate().isEmpty) {
       if (DateTime.now().isAfter(endTime)) {
-        throw TimeoutException('Widget not found after ${timeout.inSeconds}s');
+        throw Exception('Widget not found after ${timeout.inSeconds}s');
       }
       await pump(const Duration(milliseconds: 100));
     }
@@ -157,16 +147,13 @@ extension WidgetTesterX on WidgetTester {
   /// Simulates scrolling a scrollable widget to find a specific item.
   Future<void> scrollToFindWidget(Finder itemFinder) async {
     while (itemFinder.evaluate().isEmpty) {
-      await scroll(find.byType(ListView), -300, const Offset(0, 0));
+      await dragUntilVisible(
+        itemFinder,
+        find.byType(ListView),
+        const Offset(0, -300),
+      );
       await pumpAndSettle();
     }
-  }
-
-  /// Sets the display size for responsive testing.
-  Future<void> setDisplaySize(Size size) async {
-    addTearDown(removeSize);
-    binding.window.physicalSizeTestValue = size;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
   }
 }
 
@@ -175,10 +162,7 @@ extension WidgetTesterX on WidgetTester {
 // ============================================================================
 
 /// Verifies that a screen shows an error dialog.
-Future<void> expectErrorDialog(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> expectErrorDialog(WidgetTester tester, String message) async {
   expect(find.byType(AlertDialog), findsOneWidget);
   expect(find.text(message), findsOneWidget);
 }
@@ -189,10 +173,7 @@ Future<void> expectLoadingState(WidgetTester tester) async {
 }
 
 /// Verifies that a screen shows an empty state message.
-Future<void> expectEmptyState(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> expectEmptyState(WidgetTester tester, String message) async {
   expect(find.text(message), findsOneWidget);
 }
 

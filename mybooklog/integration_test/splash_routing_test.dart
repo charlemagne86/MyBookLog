@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
-import 'package:mybooklog/src/features/auth/login_screen.dart';
-import 'package:mybooklog/src/features/auth/splash_screen.dart';
-import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'helpers/integration_test_helper.dart';
@@ -31,8 +27,9 @@ void main() {
     // - Bookshelf screen (if logged in from before)
     // This provides confidence that the app is loading and recognizes their state.
 
-    testWidgets('routes to login screen when user not logged in',
-        (WidgetTester tester) async {
+    testWidgets('routes to login screen when user not logged in', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Set up auth mock to return no session (not logged in)
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -54,7 +51,9 @@ void main() {
       expect(find.text('Password'), findsOneWidget);
     });
 
-    testWidgets('displays splash screen initially', (WidgetTester tester) async {
+    testWidgets('displays splash screen initially', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Set up auth mock
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -79,8 +78,9 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('splash screen waits 2 seconds before routing',
-        (WidgetTester tester) async {
+    testWidgets('splash screen waits 2 seconds before routing', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // This test verifies the timing of the splash screen display.
       // After 2 seconds, navigation to login should complete.

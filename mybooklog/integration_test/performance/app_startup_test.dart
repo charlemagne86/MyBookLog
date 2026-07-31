@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:mybooklog/src/app.dart';
 import '../helpers/integration_test_helper.dart';
 import '../helpers/performance_test_helper.dart';
 
@@ -81,7 +79,10 @@ void main() {
         metric: 'Logged-in startup',
       );
 
-      PerformanceTestHelper.logMetric('Warm startup (logged in)', stopwatch.elapsed);
+      PerformanceTestHelper.logMetric(
+        'Warm startup (logged in)',
+        stopwatch.elapsed,
+      );
     });
 
     testWidgets('app_startup_logged_out_state', (WidgetTester tester) async {
@@ -111,7 +112,10 @@ void main() {
         metric: 'Logout startup',
       );
 
-      PerformanceTestHelper.logMetric('Logout state startup', stopwatch.elapsed);
+      PerformanceTestHelper.logMetric(
+        'Logout state startup',
+        stopwatch.elapsed,
+      );
     });
 
     testWidgets('multiple_cold_starts', (WidgetTester tester) async {
@@ -139,7 +143,10 @@ void main() {
       }
 
       // Calculate average
-      final totalMs = durations.fold<int>(0, (sum, d) => sum + d.inMilliseconds);
+      final totalMs = durations.fold<int>(
+        0,
+        (sum, d) => sum + d.inMilliseconds,
+      );
       final averageMs = totalMs ~/ iterations;
       final averageDuration = Duration(milliseconds: averageMs);
 
@@ -152,7 +159,10 @@ void main() {
         );
       }
 
-      PerformanceTestHelper.logMetric('Average startup (3 runs)', averageDuration);
+      PerformanceTestHelper.logMetric(
+        'Average startup (3 runs)',
+        averageDuration,
+      );
     });
   });
 }

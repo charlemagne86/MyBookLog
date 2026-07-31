@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/app.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
-import 'package:mybooklog/src/data/repositories/auth_repository.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
-import 'package:provider/provider.dart';
 
 import 'helpers/integration_test_helper.dart';
 
@@ -31,8 +26,9 @@ void main() {
     // - Remove books they no longer want
     // These gestures and operations are critical for the core user experience.
 
-    testWidgets('display bookshelf with sample books',
-        (WidgetTester tester) async {
+    testWidgets('display bookshelf with sample books', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Set up mocks: user is logged in, has books on shelf
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
@@ -41,22 +37,24 @@ void main() {
       when(() => mockAuth.currentSession).thenReturn(MockSession());
 
       // Mock shelf with sample books
-      when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => [
-            ShelfBook(
-              bookId: '1',
-              title: 'The Foundation',
-              author: 'Isaac Asimov',
-              thumbnailUri: 'https://example.com/foundation.jpg',
-              isRead: false,
-            ),
-            ShelfBook(
-              bookId: '2',
-              title: 'Dune',
-              author: 'Frank Herbert',
-              thumbnailUri: 'https://example.com/dune.jpg',
-              isRead: true,
-            ),
-          ]);
+      when(() => mockBookshelf.fetchShelf()).thenAnswer(
+        (_) async => [
+          ShelfBook(
+            bookId: '1',
+            title: 'The Foundation',
+            author: 'Isaac Asimov',
+            thumbnailUri: 'https://example.com/foundation.jpg',
+            isRead: false,
+          ),
+          ShelfBook(
+            bookId: '2',
+            title: 'Dune',
+            author: 'Frank Herbert',
+            thumbnailUri: 'https://example.com/dune.jpg',
+            isRead: true,
+          ),
+        ],
+      );
 
       // TECHNICAL:
       // Launch app (should route to bookshelf since logged in)
@@ -77,29 +75,32 @@ void main() {
       expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('search functionality filters books',
-        (WidgetTester tester) async {
+    testWidgets('search functionality filters books', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Set up mocks: user logged in with books
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
       when(() => mockAuth.currentSession).thenReturn(MockSession());
 
-      when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => [
-            ShelfBook(
-              bookId: '1',
-              title: 'The Foundation',
-              author: 'Isaac Asimov',
-              thumbnailUri: 'https://example.com/foundation.jpg',
-              isRead: false,
-            ),
-            ShelfBook(
-              bookId: '2',
-              title: 'Dune',
-              author: 'Frank Herbert',
-              thumbnailUri: 'https://example.com/dune.jpg',
-              isRead: true,
-            ),
-          ]);
+      when(() => mockBookshelf.fetchShelf()).thenAnswer(
+        (_) async => [
+          ShelfBook(
+            bookId: '1',
+            title: 'The Foundation',
+            author: 'Isaac Asimov',
+            thumbnailUri: 'https://example.com/foundation.jpg',
+            isRead: false,
+          ),
+          ShelfBook(
+            bookId: '2',
+            title: 'Dune',
+            author: 'Frank Herbert',
+            thumbnailUri: 'https://example.com/dune.jpg',
+            isRead: true,
+          ),
+        ],
+      );
 
       // TECHNICAL:
       // Launch app
@@ -115,11 +116,7 @@ void main() {
 
       // TECHNICAL:
       // Enter search query
-      await helper.enterText(
-        tester,
-        find.byType(TextField),
-        'dune',
-      );
+      await helper.enterText(tester, find.byType(TextField), 'dune');
 
       // TECHNICAL:
       // Verify filtered results (only Dune should show)
@@ -127,22 +124,25 @@ void main() {
       // Foundation should be filtered out (or at least verify search worked)
     });
 
-    testWidgets('long press book shows context menu',
-        (WidgetTester tester) async {
+    testWidgets('long press book shows context menu', (
+      WidgetTester tester,
+    ) async {
       // TECHNICAL:
       // Set up mocks: user logged in with books
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
       when(() => mockAuth.currentSession).thenReturn(MockSession());
 
-      when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => [
-            ShelfBook(
-              bookId: '1',
-              title: 'The Foundation',
-              author: 'Isaac Asimov',
-              thumbnailUri: 'https://example.com/foundation.jpg',
-              isRead: false,
-            ),
-          ]);
+      when(() => mockBookshelf.fetchShelf()).thenAnswer(
+        (_) async => [
+          ShelfBook(
+            bookId: '1',
+            title: 'The Foundation',
+            author: 'Isaac Asimov',
+            thumbnailUri: 'https://example.com/foundation.jpg',
+            isRead: false,
+          ),
+        ],
+      );
 
       // TECHNICAL:
       // Launch app
@@ -178,14 +178,15 @@ void main() {
         ),
       ];
 
-      when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => initialBooks);
+      when(
+        () => mockBookshelf.fetchShelf(),
+      ).thenAnswer((_) async => initialBooks);
 
       // Mock remove operation
-      when(() => mockBookshelf.removeBook(any()))
-          .thenAnswer((_) async {
-            // Simulate removal by clearing the list
-            initialBooks.clear();
-          });
+      when(() => mockBookshelf.removeBook(any())).thenAnswer((_) async {
+        // Simulate removal by clearing the list
+        initialBooks.clear();
+      });
 
       // TECHNICAL:
       // Launch app
@@ -218,19 +219,22 @@ void main() {
       final (mockAuth, mockBookshelf) = await helper.setupMocks();
       when(() => mockAuth.currentSession).thenReturn(MockSession());
 
-      when(() => mockBookshelf.fetchShelf()).thenAnswer((_) async => [
-            ShelfBook(
-              bookId: '1',
-              title: 'The Foundation',
-              author: 'Isaac Asimov',
-              thumbnailUri: 'https://example.com/foundation.jpg',
-              isRead: false,
-            ),
-          ]);
+      when(() => mockBookshelf.fetchShelf()).thenAnswer(
+        (_) async => [
+          ShelfBook(
+            bookId: '1',
+            title: 'The Foundation',
+            author: 'Isaac Asimov',
+            thumbnailUri: 'https://example.com/foundation.jpg',
+            isRead: false,
+          ),
+        ],
+      );
 
       // Mock read status update
-      when(() => mockBookshelf.setReadStatus(any(), isRead: any(named: 'isRead')))
-          .thenAnswer((_) async {});
+      when(
+        () => mockBookshelf.setReadStatus(any(), isRead: any(named: 'isRead')),
+      ).thenAnswer((_) async {});
 
       // TECHNICAL:
       // Launch app
@@ -250,8 +254,9 @@ void main() {
 
       // TECHNICAL:
       // Verify setReadStatus was called
-      verify(() => mockBookshelf.setReadStatus(any(), isRead: true))
-          .called(greaterThan(0));
+      verify(
+        () => mockBookshelf.setReadStatus(any(), isRead: true),
+      ).called(greaterThan(0));
     });
   });
 }

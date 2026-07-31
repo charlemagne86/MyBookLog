@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import '../helpers/integration_test_helper.dart';
 
 void main() {
@@ -19,7 +18,9 @@ void main() {
       await testHelper.cleanup();
     });
 
-    testWidgets('complete_onboarding_to_bookshelf', (WidgetTester tester) async {
+    testWidgets('complete_onboarding_to_bookshelf', (
+      WidgetTester tester,
+    ) async {
       /// Complete user flow: App launch → Login → Bookshelf view.
       ///
       /// BUSINESS LOGIC: New user journey is critical for retention.
@@ -123,7 +124,9 @@ void main() {
       expect(find.byType(GridView), findsWidgets);
     });
 
-    testWidgets('complete_error_recovery_workflow', (WidgetTester tester) async {
+    testWidgets('complete_error_recovery_workflow', (
+      WidgetTester tester,
+    ) async {
       /// Tests user recovery from login error and successful retry.
       ///
       /// BUSINESS LOGIC: Users make mistakes; app should help them
@@ -183,7 +186,9 @@ void main() {
       );
     });
 
-    testWidgets('complete_session_across_multiple_operations', (WidgetTester tester) async {
+    testWidgets('complete_session_across_multiple_operations', (
+      WidgetTester tester,
+    ) async {
       /// Verifies session remains valid across multiple app operations.
       ///
       /// BUSINESS LOGIC: Users should not be logged out unexpectedly
@@ -277,7 +282,9 @@ void main() {
       expect(find.byType(GridView), findsWidgets);
     });
 
-    testWidgets('complete_workflow_with_state_changes', (WidgetTester tester) async {
+    testWidgets('complete_workflow_with_state_changes', (
+      WidgetTester tester,
+    ) async {
       /// Complete flow with state changes (logged in → interact → still logged in).
       ///
       /// BUSINESS LOGIC: App state should persist correctly through

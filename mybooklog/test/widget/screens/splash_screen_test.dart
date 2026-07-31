@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mybooklog/src/features/auth/splash_screen.dart';
 
@@ -25,8 +24,13 @@ void main() {
   });
 
   group('SplashScreen', () {
-    testWidgets('displays splash screen on startup', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('displays splash screen on startup', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -44,8 +48,13 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
-    testWidgets('shows loading spinner during splash', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('shows loading spinner during splash', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -64,7 +73,10 @@ void main() {
     });
 
     testWidgets('displays text on splash', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -83,8 +95,13 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
-    testWidgets('navigates away from splash eventually', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('navigates away from splash eventually', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -103,7 +120,10 @@ void main() {
     });
 
     testWidgets('responds to auth state changes', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -128,8 +148,13 @@ void main() {
       expect(find.byType(SplashScreen), findsNothing);
     });
 
-    testWidgets('splash screen mounts without error', (WidgetTester tester) async {
-      TestSetupHelpers.setupLoggedOutUser(mockAuthRepository, authStateController);
+    testWidgets('splash screen mounts without error', (
+      WidgetTester tester,
+    ) async {
+      TestSetupHelpers.setupLoggedOutUser(
+        mockAuthRepository,
+        authStateController,
+      );
 
       await tester.pumpWidget(
         TestAppBuilder(

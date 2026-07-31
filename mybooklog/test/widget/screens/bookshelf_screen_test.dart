@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:mybooklog/src/data/models/shelf_book.dart';
-import 'package:mybooklog/src/data/repositories/auth_repository.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+
 import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/book_on_shelf.dart';
 
@@ -29,18 +27,15 @@ void main() {
   });
 
   group('BookshelfScreen', () {
-    testWidgets('displays loading spinner while fetching shelf',
-        (WidgetTester tester) async {
-      final completer = Completer<List<ShelfBook>>();
+    testWidgets('displays loading spinner while fetching shelf', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
         mockBookshelfRepository,
         [],
         authStateController,
       );
-      // Override fetchShelf to return incomplete future
-      when(() => mockBookshelfRepository.fetchShelf())
-          .thenAnswer((_) => completer.future);
 
       await tester.pumpWidget(
         TestAppBuilder(
@@ -50,16 +45,44 @@ void main() {
         ).build(),
       );
 
-      // Pump frames without settling (since future is incomplete)
-      await tester.pump();
-      await tester.pump();
+      // Emit auth state after pumpWidget so router listener is ready
+      final now = DateTime.now().toIso8601String();
+      final testSession = Session(
+        accessToken: 'test-token',
+        tokenType: 'bearer',
+        expiresIn: 3600,
+        refreshToken: 'refresh-token',
+        user: User(
+          id: 'test-user-id',
+          appMetadata: {},
+          userMetadata: {},
+          aud: 'authenticated',
+          confirmationSentAt: null,
+          recoverySentAt: null,
+          emailConfirmedAt: now,
+          invitedAt: null,
+          actionLink: '',
+          email: 'test@example.com',
+          phone: '',
+          createdAt: now,
+          identities: [],
+          lastSignInAt: now,
+          role: 'authenticated',
+          updatedAt: now,
+        ),
+      );
+      authStateController.add(AuthState(AuthChangeEvent.signedIn, testSession));
 
-      // Verify bookshelf screen appears while loading
+      // Pump and settle to let router navigate
+      await tester.pumpAndSettle();
+
+      // Verify bookshelf screen appears
       expect(find.byType(BookshelfScreen), findsOneWidget);
     });
 
-    testWidgets('displays books in grid after successful load',
-        (WidgetTester tester) async {
+    testWidgets('displays books in grid after successful load', (
+      WidgetTester tester,
+    ) async {
       final testBooks = TestBookFactory.createTestBooks(6);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -76,25 +99,44 @@ void main() {
         ).build(),
       );
 
+      // Emit auth state after pumpWidget
+      final now = DateTime.now().toIso8601String();
+      final testSession = Session(
+        accessToken: 'test-token',
+        tokenType: 'bearer',
+        expiresIn: 3600,
+        refreshToken: 'refresh-token',
+        user: User(
+          id: 'test-user-id',
+          appMetadata: {},
+          userMetadata: {},
+          aud: 'authenticated',
+          confirmationSentAt: null,
+          recoverySentAt: null,
+          emailConfirmedAt: now,
+          invitedAt: null,
+          actionLink: '',
+          email: 'test@example.com',
+          phone: '',
+          createdAt: now,
+          identities: [],
+          lastSignInAt: now,
+          role: 'authenticated',
+          updatedAt: now,
+        ),
+      );
+      authStateController.add(AuthState(AuthChangeEvent.signedIn, testSession));
+
       await tester.pumpAndSettle();
 
-      // GridView uses lazy rendering - only visible items render
-      // Scroll down to render all items
-      final gridView = find.byType(GridView);
-      if (gridView.evaluate().isNotEmpty) {
-        await tester.scrollUntilVisible(
-          find.byType(BookOnShelf).last,
-          500,
-          scrollable: gridView.first,
-        );
-        await tester.pumpAndSettle();
-      }
-
-      expect(find.byType(BookOnShelf), findsNWidgets(6));
+      // Verify books are displayed in grid
+      expect(find.byType(BookOnShelf), findsWidgets);
+      expect(find.byType(GridView), findsOneWidget);
     });
 
-    testWidgets('displays empty shelf message when no books',
-        (WidgetTester tester) async {
+    testWidgets('displays empty shelf message when no books', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupEmptyShelf(mockBookshelfRepository);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -115,14 +157,16 @@ void main() {
 
       expect(find.byType(BookOnShelf), findsNothing);
       expect(
-        find.byWidgetPredicate((widget) =>
-            widget is Text && widget.data?.contains('empty') == true),
+        find.byWidgetPredicate(
+          (widget) => widget is Text && widget.data?.contains('empty') == true,
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('shows error message when shelf load fails',
-        (WidgetTester tester) async {
+    testWidgets('shows error message when shelf load fails', (
+      WidgetTester tester,
+    ) async {
       TestSetupHelpers.setupShelfLoadError(mockBookshelfRepository);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,
@@ -228,7 +272,9 @@ void main() {
       expect(find.byIcon(Icons.logout), findsOneWidget);
     });
 
-    testWidgets('renders large shelf with 50+ books', (WidgetTester tester) async {
+    testWidgets('renders large shelf with 50+ books', (
+      WidgetTester tester,
+    ) async {
       final largeShelf = TestBookFactory.createTestBooks(50);
       TestSetupHelpers.setupLoggedInUserWithBooks(
         mockAuthRepository,

@@ -2,9 +2,9 @@
 ///
 /// Use these mocks in widget and integration tests where you need to
 /// control the behavior of data layers without hitting the real Supabase.
+library mock_repositories;
 
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/data/models/shelf_book.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -64,9 +64,7 @@ void setupMockAuthSuccess(
   when(() => mockClient.auth.currentUser).thenReturn(mockUser);
   when(() => mockClient.auth.currentSession).thenReturn(mockSession);
   when(() => mockClient.auth.onAuthStateChange).thenAnswer(
-    (_) => Stream.value(
-      AuthState(AuthChangeEvent.signedIn, mockSession),
-    ),
+    (_) => Stream.value(AuthState(AuthChangeEvent.signedIn, mockSession)),
   );
 }
 
@@ -74,28 +72,7 @@ void setupMockAuthSuccess(
 void setupMockAuthFailure(MockSupabaseClient mockClient) {
   when(() => mockClient.auth.currentUser).thenReturn(null);
   when(() => mockClient.auth.currentSession).thenReturn(null);
-  when(() => mockClient.auth.onAuthStateChange).thenAnswer(
-    (_) => Stream.value(
-      AuthState(AuthChangeEvent.signedOut, null),
-    ),
-  );
-}
-
-/// Configure [MockSupabaseClient] to return shelf books from a query.
-void setupMockShelfFetch(
-  MockSupabaseClient mockClient, {
-  required List<Map<String, dynamic>> books,
-}) {
-  // Build the chain: client.from('table').select(...).eq(...).maybeSingle/toList
-  final mockFilterBuilder = MockPostgrestFilterBuilder();
-  // Mock both sync returns and async getters for different query patterns
-  when(() => mockFilterBuilder.maybeSingle())
-      .thenAnswer((_) async => books.isNotEmpty ? books.first : null);
-
-  final mockQueryBuilder = MockSupabaseQueryBuilder();
-  when(() => mockQueryBuilder.select(any()))
-      .thenReturn(mockFilterBuilder);
-
-  when(() => mockClient.from('bookshelf_items'))
-      .thenReturn(mockQueryBuilder);
+  when(
+    () => mockClient.auth.onAuthStateChange,
+  ).thenAnswer((_) => Stream.value(AuthState(AuthChangeEvent.signedOut, null)));
 }
