@@ -7,10 +7,21 @@ import 'package:provider/provider.dart';
 import '../../core/config/app_config.dart';
 import '../../data/services/google_books_service.dart';
 import 'search_results_page.dart';
+import 'widgets/book_search_form.dart';
+import 'widgets/search_button.dart';
+import 'widgets/search_error_message.dart';
 
-/// The "Add Book" screen: two text boxes (Title and Author) and a Search
-/// button. Filling in either box (or both) and tapping Search looks the book
-/// up on the internet and moves to the results screen to pick the right one.
+/// BUSINESS LOGIC:
+/// Add book screen lets users search Google Books by title and/or author.
+/// User fills in fields, taps Search, and navigates to results screen.
+/// Validates that search is available and query is not empty.
+///
+/// TECHNICAL:
+/// Refactored into testable components:
+/// - BookSearchForm: text input fields
+/// - SearchButton: search action button
+/// - SearchErrorMessage: error display
+/// - AddBookPage: orchestrates components and handles search logic
 class AddBookPage extends StatefulWidget {
   const AddBookPage({super.key});
 
@@ -31,13 +42,11 @@ class _AddBookPageState extends State<AddBookPage> {
     super.dispose();
   }
 
-  /// Runs when the Search button is tapped.
-  ///
-  /// Before actually searching, two quick checks: (1) this build of the app
-  /// must have a search access key configured at all, and (2) the user must
-  /// have typed something. Then the search runs, the button shows
-  /// "Searching...", and on success we move to the results screen.
+  /// BUSINESS LOGIC: Validate and execute book search
+  /// TECHNICAL: Check API key, validate query, call Google Books API
   Future<void> _searchBooks() async {
+    // BUSINESS LOGIC: Search unavailable without API key
+    // TECHNICAL: AppConfig.hasGoogleBooksApiKey indicates availability
     if (!AppConfig.hasGoogleBooksApiKey) {
       setState(() {
         _errorText =
@@ -46,7 +55,9 @@ class _AddBookPageState extends State<AddBookPage> {
       });
       return;
     }
-    // Turn the typed title/author into the search phrase Google expects.
+
+    // BUSINESS LOGIC: Both fields optional, but at least one required
+    // TECHNICAL: buildQuery returns empty string if both fields empty
     final query = GoogleBooksService.buildQuery(
       title: _titleController.text,
       author: _authorController.text,
@@ -63,10 +74,10 @@ class _AddBookPageState extends State<AddBookPage> {
       _isSearching = true;
     });
     try {
+      // BUSINESS LOGIC: Search Google Books API and navigate to results
+      // TECHNICAL: Get first page of results; user can load more on results screen
       final page = await context.read<GoogleBooksService>().search(query);
       if (!mounted) return;
-      // Hand the first page of results (and the search phrase, so the next
-      // screen can fetch more pages) over to the results screen.
       unawaited(
         context.push(
           '/shelf/results',
@@ -86,7 +97,6 @@ class _AddBookPageState extends State<AddBookPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Add Book')),
       body: SafeArea(
@@ -95,48 +105,20 @@ class _AddBookPageState extends State<AddBookPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Search for a book...',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _authorController,
-                decoration: const InputDecoration(labelText: 'Author'),
+              // Input form (title and author fields)
+              BookSearchForm(
+                titleController: _titleController,
+                authorController: _authorController,
               ),
               const SizedBox(height: 32),
-              if (_errorText != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Text(
-                    _errorText!,
-                    style: TextStyle(
-                      color: colorScheme.error,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              Center(
-                child: SizedBox(
-                  width: 200,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSearching ? null : _searchBooks,
-                    icon: const Icon(Icons.search_rounded),
-                    label: Text(
-                      _isSearching ? 'Searching...' : 'Search Books',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+
+              // Error message (if any)
+              SearchErrorMessage(message: _errorText),
+
+              // Search button
+              SearchButton(
+                isLoading: _isSearching,
+                onPressed: _searchBooks,
               ),
             ],
           ),
