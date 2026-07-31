@@ -18,44 +18,81 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  late Future<bool> _authCheckFuture;
+
   @override
   void initState() {
     super.initState();
-    // Schedule the routing after the first frame renders.
+    // BUSINESS LOGIC:
+    // Optimize splash screen UX by running initialization in parallel with
+    // minimum visibility time. This ensures:
+    // - Splash is visible long enough for branding (minimum 1.2 seconds)
+    // - Users on slow devices aren't blocked by a fixed 2-second wait
+    // - Fast devices show splash for only as long as needed (no artificial delay)
+    // - UX is adaptive to actual device performance and network speed
+    //
     // TECHNICAL:
-    // We use addPostFrameCallback to ensure the splash screen is fully rendered
-    // before starting the 2-second delay timer. This provides a cleaner visual
-    // experience and allows widget tests to complete without pending timers.
-    // The user-perceived delay remains ~2 seconds (imperceptible <50ms difference).
+    // We use Future.wait to ensure both conditions are met:
+    // 1. Minimum visibility time elapsed (splash looks intentional, not instant)
+    // 2. Auth check completed (we know if user is logged in)
+    // The user routes when BOTH complete, providing optimal UX regardless of device.
+    _authCheckFuture = _initializeAuth();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _routeAfterSplash();
     });
   }
 
+  Future<bool> _initializeAuth() async {
+    // Perform authentication check (in parallel with minimum visibility time).
+    // Returns true if user has active session, false otherwise.
+    // This check is fast (just reading cached session), typically < 100ms.
+    try {
+      final session = context.read<AuthRepository>().currentSession;
+      return session != null;
+    } catch (e) {
+      // If auth check fails, treat as logged out (go to login screen)
+      return false;
+    }
+  }
+
   Future<void> _routeAfterSplash() async {
     // BUSINESS LOGIC:
-    // Pause briefly so the welcome branding is actually visible to users.
-    // This 2-second delay gives users time to see the app name and branding
-    // before routing to the next screen (either bookshelf or login).
+    // Wait for BOTH conditions:
+    // 1. Minimum visibility time (ensures splash is seen, not instant)
+    // 2. Auth check completion (know where to route user)
+    // This provides optimal UX: fast devices skip artificial delay,
+    // slow devices have time to see the branding.
     //
     // TECHNICAL:
-    // The Future.delayed is scheduled after the first frame render, allowing
-    // the splash screen to display cleanly before the timer begins.
-    await Future.delayed(const Duration(seconds: 2));
+    // Future.wait runs both futures in parallel and waits for both to complete.
+    // The timeout acts as a safety net (prevents indefinite splash screen).
+    try {
+      final results =
+          await Future.wait([
+            Future.delayed(
+              const Duration(milliseconds: 1200),
+            ), // Minimum visibility
+            _authCheckFuture, // Auth check (usually completes much faster)
+          ]).timeout(
+            const Duration(
+              seconds: 5,
+            ), // Safety timeout (prevents stuck splash)
+            onTimeout: () => [null, false], // Default to logged-out if timeout
+          );
 
-    // Safety check: do nothing if the screen was closed during the pause.
-    // This prevents navigation attempts on unmounted widgets.
-    if (!mounted) return;
+      final hasSession = results[1] as bool? ?? false;
 
-    // BUSINESS LOGIC:
-    // Check if the user is still logged in from their previous visit.
-    // This provides a seamless experience for returning users (they skip login).
-    // New or logged-out users are taken to the login screen for authentication.
-    //
-    // TECHNICAL:
-    // currentSession is null if no valid auth token exists.
-    final hasSession = context.read<AuthRepository>().currentSession != null;
-    context.go(hasSession ? '/shelf' : '/login');
+      // Safety check: do nothing if screen unmounted during initialization
+      if (!mounted) return;
+
+      // Route based on auth status
+      context.go(hasSession ? '/shelf' : '/login');
+    } catch (e) {
+      // If anything fails, default to login screen for safety
+      if (mounted) {
+        context.go('/login');
+      }
+    }
   }
 
   @override
