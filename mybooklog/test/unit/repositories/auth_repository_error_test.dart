@@ -46,14 +46,20 @@ void main() {
     test('translates generic exceptions to connection error message', () {
       final error = Exception('Socket exception: Connection refused');
       final friendly = AuthRepository.friendlyMessage(error);
-      expect(friendly, 'Something went wrong. Please check your connection and retry.');
+      expect(
+        friendly,
+        'Something went wrong. Please check your connection and retry.',
+      );
     });
 
     // BUSINESS LOGIC: Network error string should trigger generic message
     test('translates network error to connection error message', () {
       final error = Exception('Failed host lookup');
       final friendly = AuthRepository.friendlyMessage(error);
-      expect(friendly, 'Something went wrong. Please check your connection and retry.');
+      expect(
+        friendly,
+        'Something went wrong. Please check your connection and retry.',
+      );
     });
 
     // BUSINESS LOGIC: Case-insensitive error matching (user input varies)
@@ -64,15 +70,23 @@ void main() {
     });
 
     // BUSINESS LOGIC: Case-insensitive error matching for email confirmation
-    test('performs case-insensitive error matching for email not confirmed', () {
-      final error = AuthException('EMAIL NOT CONFIRMED');
-      final friendly = AuthRepository.friendlyMessage(error);
-      expect(friendly, 'Please confirm your email address before logging in.');
-    });
+    test(
+      'performs case-insensitive error matching for email not confirmed',
+      () {
+        final error = AuthException('EMAIL NOT CONFIRMED');
+        final friendly = AuthRepository.friendlyMessage(error);
+        expect(
+          friendly,
+          'Please confirm your email address before logging in.',
+        );
+      },
+    );
 
     // BUSINESS LOGIC: Multiple auth errors - both conditions could match
     test('prioritizes invalid login check over others', () {
-      final error = AuthException('Invalid login credentials with email confirmation');
+      final error = AuthException(
+        'Invalid login credentials with email confirmation',
+      );
       final friendly = AuthRepository.friendlyMessage(error);
       expect(friendly, 'Incorrect email or password.');
     });
@@ -109,14 +123,20 @@ void main() {
     test('handles String error type', () {
       const error = 'Some string error';
       final friendly = AuthRepository.friendlyMessage(error);
-      expect(friendly, 'Something went wrong. Please check your connection and retry.');
+      expect(
+        friendly,
+        'Something went wrong. Please check your connection and retry.',
+      );
     });
 
     // BUSINESS LOGIC: Multiple error types
     test('handles FormatException (malformed data)', () {
       final error = FormatException('Invalid JSON response');
       final friendly = AuthRepository.friendlyMessage(error);
-      expect(friendly, 'Something went wrong. Please check your connection and retry.');
+      expect(
+        friendly,
+        'Something went wrong. Please check your connection and retry.',
+      );
     });
   });
 }
