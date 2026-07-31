@@ -134,9 +134,9 @@ void main() {
         // (actual enforcement is in CI workflow)
 
         const totalTests = 223;
-        const expectedMinutes = 8;
 
         // Baseline captured, not tested (testing execution time in test would be circular)
+        // Target: <8 minutes per run
         expect(totalTests, greaterThan(200));
       });
     });
