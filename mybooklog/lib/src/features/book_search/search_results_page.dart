@@ -218,18 +218,18 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                     selectedIndex: _selectedIndex,
                     scrollController: _scrollController,
                     onResultTap: (index) {
-                      setState(() =>
-                          _selectedIndex = _selectedIndex == index ? null : index);
+                      setState(
+                        () => _selectedIndex = _selectedIndex == index
+                            ? null
+                            : index,
+                      );
                     },
                     onScroll: _onScroll,
                   ),
           ),
           if (_isLoadingMore) const SearchLoadingIndicator(),
           if (_selectedIndex != null)
-            AddToShelfButton(
-              isLoading: _isAdding,
-              onPressed: _addSelectedBook,
-            ),
+            AddToShelfButton(isLoading: _isAdding, onPressed: _addSelectedBook),
         ],
       ),
     );

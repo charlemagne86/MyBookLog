@@ -175,10 +175,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SearchButton(
-              isLoading: false,
-              onPressed: () {},
-            ),
+            body: SearchButton(isLoading: false, onPressed: () {}),
           ),
         ),
       );
@@ -211,12 +208,7 @@ void main() {
     testWidgets('displays loading state during search', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchButton(
-              isLoading: true,
-              onPressed: () {},
-            ),
-          ),
+          home: Scaffold(body: SearchButton(isLoading: true, onPressed: () {})),
         ),
       );
 
@@ -228,12 +220,7 @@ void main() {
     testWidgets('disables button during search', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchButton(
-              isLoading: true,
-              onPressed: () {},
-            ),
-          ),
+          home: Scaffold(body: SearchButton(isLoading: true, onPressed: () {})),
         ),
       );
 
@@ -246,10 +233,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SearchButton(
-              isLoading: false,
-              onPressed: () {},
-            ),
+            body: SearchButton(isLoading: false, onPressed: () {}),
           ),
         ),
       );
@@ -277,11 +261,7 @@ void main() {
     // BUSINESS LOGIC: Hide error when none exists
     testWidgets('hides error message when null', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchErrorMessage(message: null),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: SearchErrorMessage(message: null))),
       );
 
       expect(find.byType(Text), findsNothing);
@@ -291,11 +271,7 @@ void main() {
     testWidgets('displays error with prominent color', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchErrorMessage(
-              message: 'Validation error',
-            ),
-          ),
+          home: Scaffold(body: SearchErrorMessage(message: 'Validation error')),
         ),
       );
 
@@ -310,9 +286,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchErrorMessage(message: validationError),
-          ),
+          home: Scaffold(body: SearchErrorMessage(message: validationError)),
         ),
       );
 
@@ -327,9 +301,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchErrorMessage(message: apiError),
-          ),
+          home: Scaffold(body: SearchErrorMessage(message: apiError)),
         ),
       );
 
@@ -342,9 +314,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchErrorMessage(message: searchError),
-          ),
+          home: Scaffold(body: SearchErrorMessage(message: searchError)),
         ),
       );
 

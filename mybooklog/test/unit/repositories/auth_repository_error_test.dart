@@ -148,7 +148,9 @@ void main() {
 
     // BUSINESS LOGIC: Complex error messages with multiple keywords
     test('matches first applicable error rule', () {
-      final error = AuthException('Invalid credentials and email not confirmed');
+      final error = AuthException(
+        'Invalid credentials and email not confirmed',
+      );
       final friendly = AuthRepository.friendlyMessage(error);
       // Should match "invalid credentials" first
       expect(friendly, 'Incorrect email or password.');
@@ -163,14 +165,18 @@ void main() {
 
     // BUSINESS LOGIC: Partial string matching
     test('matches partial strings in error messages', () {
-      final error = AuthException('User email not confirmed - please check inbox');
+      final error = AuthException(
+        'User email not confirmed - please check inbox',
+      );
       final friendly = AuthRepository.friendlyMessage(error);
       expect(friendly, 'Please confirm your email address before logging in.');
     });
 
     // BUSINESS LOGIC: Error message with extra context
     test('extracts key error from verbose message', () {
-      final error = AuthException('Error code 400: Invalid login credentials. Please try again.');
+      final error = AuthException(
+        'Error code 400: Invalid login credentials. Please try again.',
+      );
       final friendly = AuthRepository.friendlyMessage(error);
       expect(friendly, 'Incorrect email or password.');
     });

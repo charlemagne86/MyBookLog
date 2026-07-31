@@ -82,10 +82,7 @@ void main() {
 
     // BUSINESS LOGIC: Special characters in author must be URL-encoded
     test('encodes special characters in author', () {
-      final query = GoogleBooksService.buildQuery(
-        title: '',
-        author: 'Müller',
-      );
+      final query = GoogleBooksService.buildQuery(title: '', author: 'Müller');
       expect(query, isNotEmpty);
     });
 
@@ -109,38 +106,26 @@ void main() {
 
     // BUSINESS LOGIC: Single character searches should work
     test('handles single character input', () {
-      final query = GoogleBooksService.buildQuery(
-        title: 'A',
-        author: '',
-      );
+      final query = GoogleBooksService.buildQuery(title: 'A', author: '');
       expect(query, isNotEmpty);
     });
 
     // BUSINESS LOGIC: Very long titles should be supported
     test('handles very long title input', () {
       final longTitle = 'A' * 100;
-      final query = GoogleBooksService.buildQuery(
-        title: longTitle,
-        author: '',
-      );
+      final query = GoogleBooksService.buildQuery(title: longTitle, author: '');
       expect(query, isNotEmpty);
     });
 
     // BUSINESS LOGIC: Unicode characters should be preserved
     test('preserves unicode characters', () {
-      final query = GoogleBooksService.buildQuery(
-        title: '日本語',
-        author: '',
-      );
+      final query = GoogleBooksService.buildQuery(title: '日本語', author: '');
       expect(query, isNotEmpty);
     });
 
     // BUSINESS LOGIC: Empty strings with only whitespace are treated as empty
     test('treats whitespace-only input as empty', () {
-      final query = GoogleBooksService.buildQuery(
-        title: '   ',
-        author: '   ',
-      );
+      final query = GoogleBooksService.buildQuery(title: '   ', author: '   ');
       expect(query, isEmpty);
     });
 

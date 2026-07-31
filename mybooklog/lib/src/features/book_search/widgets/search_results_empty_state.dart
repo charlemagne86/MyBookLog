@@ -15,10 +15,7 @@ class SearchEmptyState extends StatelessWidget {
     return Center(
       child: Text(
         'No results found. Try a different search.',
-        style: TextStyle(
-          fontSize: 16,
-          color: colorScheme.primary,
-        ),
+        style: TextStyle(fontSize: 16, color: colorScheme.primary),
         textAlign: TextAlign.center,
       ),
     );

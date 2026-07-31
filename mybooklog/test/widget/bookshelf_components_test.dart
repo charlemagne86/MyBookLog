@@ -301,9 +301,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: BookshelfEmptyState(
-              message: 'No books match your search.',
-            ),
+            body: BookshelfEmptyState(message: 'No books match your search.'),
           ),
         ),
       );
@@ -315,11 +313,7 @@ void main() {
     testWidgets('centers message text', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: BookshelfEmptyState(
-              message: 'Test message',
-            ),
-          ),
+          home: Scaffold(body: BookshelfEmptyState(message: 'Test message')),
         ),
       );
 
@@ -332,11 +326,7 @@ void main() {
     // BUSINESS LOGIC: Show loading indicator while fetching
     testWidgets('displays loading spinner', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfLoadingState(),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: BookshelfLoadingState())),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -345,11 +335,7 @@ void main() {
     // BUSINESS LOGIC: Spinner is centered
     testWidgets('centers loading indicator', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfLoadingState(),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: BookshelfLoadingState())),
       );
 
       expect(find.byType(Center), findsOneWidget);

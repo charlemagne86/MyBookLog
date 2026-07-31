@@ -116,10 +116,7 @@ class _AddBookPageState extends State<AddBookPage> {
               SearchErrorMessage(message: _errorText),
 
               // Search button
-              SearchButton(
-                isLoading: _isSearching,
-                onPressed: _searchBooks,
-              ),
+              SearchButton(isLoading: _isSearching, onPressed: _searchBooks),
             ],
           ),
         ),

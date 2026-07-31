@@ -30,7 +30,6 @@ class BookshelfSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final queryLength = searchQuery.trim().length;
-    final isSearching = queryLength >= 3;
     final hasText = searchQuery.trim().isNotEmpty;
 
     return Padding(
@@ -48,7 +47,7 @@ class BookshelfSearchBar extends StatelessWidget {
               helperText: queryLength < 3
                   ? 'Enter at least 3 characters!'
                   : '$visibleBooksCount matching '
-                      '${visibleBooksCount == 1 ? 'book' : 'books'}',
+                        '${visibleBooksCount == 1 ? 'book' : 'books'}',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: !hasText
                   ? null

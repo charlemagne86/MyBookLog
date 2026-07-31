@@ -35,10 +35,7 @@ class SearchButton extends StatelessWidget {
               : const Icon(Icons.search_rounded),
           label: Text(
             isLoading ? 'Searching...' : 'Search Books',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ),

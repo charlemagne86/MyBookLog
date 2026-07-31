@@ -15,10 +15,7 @@ void main() {
 
     // BUSINESS LOGIC: Whitespace-only input treated as empty
     test('buildQuery treats whitespace-only input as empty', () {
-      final query = GoogleBooksService.buildQuery(
-        title: '   ',
-        author: '   ',
-      );
+      final query = GoogleBooksService.buildQuery(title: '   ', author: '   ');
       expect(query, isEmpty);
     });
 
@@ -124,7 +121,6 @@ void main() {
       final book2 = 'Book 1'; // Same book in next page
 
       final books = [book1];
-      final deduped = books.toSet().toList();
 
       // Adding duplicate wouldn't increase count
       if (!books.contains(book2)) {
@@ -148,7 +144,8 @@ void main() {
   group('Error Message Handling', () {
     // BUSINESS LOGIC: API key missing message
     test('API unavailable message is clear', () {
-      const message = 'Book search is unavailable: no Google Books API key was configured for this build.';
+      const message =
+          'Book search is unavailable: no Google Books API key was configured for this build.';
       expect(message, contains('Book search'));
       expect(message, contains('unavailable'));
     });
@@ -240,14 +237,8 @@ void main() {
       const query2 = 'Gatsby';
       const query3 = 'GATSBY';
 
-      expect(
-        query1.toLowerCase(),
-        equals(query2.toLowerCase()),
-      );
-      expect(
-        query2.toLowerCase(),
-        equals(query3.toLowerCase()),
-      );
+      expect(query1.toLowerCase(), equals(query2.toLowerCase()));
+      expect(query2.toLowerCase(), equals(query3.toLowerCase()));
     });
 
     // BUSINESS LOGIC: Partial matching works
@@ -255,10 +246,7 @@ void main() {
       const title = 'The Great Gatsby';
       const query = 'gatsby';
 
-      expect(
-        title.toLowerCase().contains(query.toLowerCase()),
-        isTrue,
-      );
+      expect(title.toLowerCase().contains(query.toLowerCase()), isTrue);
     });
 
     // BUSINESS LOGIC: Empty query shows all books

@@ -32,7 +32,9 @@ class SearchResultTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+          color: isSelected
+              ? colorScheme.primaryContainer
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: isSelected
               ? Border.all(color: colorScheme.primary, width: 2)

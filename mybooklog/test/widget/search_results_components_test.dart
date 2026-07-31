@@ -22,11 +22,7 @@ void main() {
     // BUSINESS LOGIC: Empty search should encourage retry
     testWidgets('displays helpful message when no results', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SearchEmptyState(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: SearchEmptyState())),
       );
 
       expect(
@@ -34,7 +30,6 @@ void main() {
         findsOneWidget,
       );
     });
-
   });
 
   group('SearchResultTile - Book Card Display', () {
@@ -238,10 +233,7 @@ void main() {
             body: Stack(
               children: [
                 const Center(child: Text('Content')),
-                AddToShelfButton(
-                  isLoading: false,
-                  onPressed: () {},
-                ),
+                AddToShelfButton(isLoading: false, onPressed: () {}),
               ],
             ),
           ),
@@ -259,10 +251,7 @@ void main() {
             body: Stack(
               children: [
                 const Center(child: Text('Content')),
-                AddToShelfButton(
-                  isLoading: true,
-                  onPressed: () {},
-                ),
+                AddToShelfButton(isLoading: true, onPressed: () {}),
               ],
             ),
           ),
@@ -281,10 +270,7 @@ void main() {
             body: Stack(
               children: [
                 const Center(child: Text('Content')),
-                AddToShelfButton(
-                  isLoading: true,
-                  onPressed: () {},
-                ),
+                AddToShelfButton(isLoading: true, onPressed: () {}),
               ],
             ),
           ),

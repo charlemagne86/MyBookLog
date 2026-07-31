@@ -10,10 +10,7 @@ import 'package:flutter/material.dart';
 /// Takes message parameter to support multiple scenarios.
 /// Uses theme primary color for visibility.
 class BookshelfEmptyState extends StatelessWidget {
-  const BookshelfEmptyState({
-    super.key,
-    required this.message,
-  });
+  const BookshelfEmptyState({super.key, required this.message});
 
   final String message;
 
@@ -24,10 +21,7 @@ class BookshelfEmptyState extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: TextStyle(
-          fontSize: 16,
-          color: colorScheme.primary,
-        ),
+        style: TextStyle(fontSize: 16, color: colorScheme.primary),
         textAlign: TextAlign.center,
       ),
     );
