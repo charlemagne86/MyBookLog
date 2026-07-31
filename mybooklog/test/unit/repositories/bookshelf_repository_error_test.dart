@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // BUSINESS LOGIC:
 // The BookshelfRepository is the data layer for all bookshelf operations.
