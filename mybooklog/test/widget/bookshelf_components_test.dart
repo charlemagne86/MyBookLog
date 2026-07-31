@@ -296,8 +296,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Your bookshelf is empty'), findsOneWidget);
-      expect(find.text('Tap + to add a book'), findsOneWidget);
+      expect(
+        find.text('Your bookshelf is empty. Tap + to add a book.'),
+        findsOneWidget,
+      );
     });
 
     // BUSINESS LOGIC: Show no search results message
