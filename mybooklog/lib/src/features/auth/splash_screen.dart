@@ -67,13 +67,18 @@ class _SplashScreenState extends State<SplashScreen> {
     // Future.wait runs both futures in parallel and waits for both to complete.
     // The timeout acts as a safety net (prevents indefinite splash screen).
     try {
-      final results = await Future.wait([
-        Future.delayed(const Duration(milliseconds: 1200)), // Minimum visibility
-        _authCheckFuture, // Auth check (usually completes much faster)
-      ]).timeout(
-        const Duration(seconds: 5), // Safety timeout (prevents stuck splash)
-        onTimeout: () => [null, false], // Default to logged-out if timeout
-      );
+      final results =
+          await Future.wait([
+            Future.delayed(
+              const Duration(milliseconds: 1200),
+            ), // Minimum visibility
+            _authCheckFuture, // Auth check (usually completes much faster)
+          ]).timeout(
+            const Duration(
+              seconds: 5,
+            ), // Safety timeout (prevents stuck splash)
+            onTimeout: () => [null, false], // Default to logged-out if timeout
+          );
 
       final hasSession = results[1] as bool? ?? false;
 
