@@ -284,6 +284,149 @@ void main() {
       });
     });
 
+    group('choosing a cover', () {
+      testWidgets('saves the selected edition\'s own cover once it validates', (
+        tester,
+      ) async {
+        when(
+          () => service.isThumbnailValid('https://covers.example.com/good.jpg'),
+        ).thenAnswer((_) async => true);
+        when(
+          () => repository.addBook(
+            isbn: any(named: 'isbn'),
+            title: any(named: 'title'),
+            author: any(named: 'author'),
+            thumbnail: any(named: 'thumbnail'),
+          ),
+        ).thenAnswer((_) async => false);
+        final books = [
+          BookSearchResult(
+            volumeId: 'vol-0',
+            title: 'Book 0',
+            authors: const ['Author 0'],
+            isbn: '9780000000000',
+            thumbnail: 'https://covers.example.com/good.jpg',
+          ),
+        ];
+        await pumpPage(tester, results: books, totalItems: 1);
+
+        await tester.tap(find.text('Book 0'));
+        await tester.pump();
+        await tester.tap(find.byType(AddToShelfButton));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repository.addBook(
+            isbn: '9780000000000',
+            title: 'Book 0',
+            author: 'Author 0',
+            thumbnail: 'https://covers.example.com/good.jpg',
+          ),
+        ).called(1);
+      });
+
+      testWidgets(
+        'borrows a sibling edition\'s cover when the selected one is invalid',
+        (tester) async {
+          // BUSINESS LOGIC: Two entries for the same title+author (e.g.
+          // hardcover vs. paperback) — the tapped one's cover is broken,
+          // but the other edition's is real. The real one should be used.
+          when(
+            () => service.isThumbnailValid(
+              'https://covers.example.com/broken.jpg',
+            ),
+          ).thenAnswer((_) async => false);
+          when(
+            () =>
+                service.isThumbnailValid('https://covers.example.com/good.jpg'),
+          ).thenAnswer((_) async => true);
+          when(
+            () => repository.addBook(
+              isbn: any(named: 'isbn'),
+              title: any(named: 'title'),
+              author: any(named: 'author'),
+              thumbnail: any(named: 'thumbnail'),
+            ),
+          ).thenAnswer((_) async => false);
+          final editions = [
+            BookSearchResult(
+              volumeId: 'vol-a',
+              title: 'Dune',
+              authors: const ['Frank Herbert'],
+              isbn: '9781111111111',
+              thumbnail: 'https://covers.example.com/broken.jpg',
+            ),
+            BookSearchResult(
+              volumeId: 'vol-b',
+              title: 'Dune',
+              authors: const ['Frank Herbert'],
+              isbn: '9782222222222',
+              thumbnail: 'https://covers.example.com/good.jpg',
+            ),
+          ];
+          await pumpPage(tester, results: editions, totalItems: 2);
+
+          // Selects the FIRST (broken-cover) edition.
+          await tester.tap(find.text('Dune').first);
+          await tester.pump();
+          await tester.tap(find.byType(AddToShelfButton));
+          await tester.pumpAndSettle();
+
+          verify(
+            () => repository.addBook(
+              isbn: '9781111111111', // the tapped edition's own ISBN
+              title: 'Dune',
+              author: 'Frank Herbert',
+              thumbnail: 'https://covers.example.com/good.jpg', // borrowed
+            ),
+          ).called(1);
+        },
+      );
+
+      testWidgets('adds the book with no thumbnail when no cover validates', (
+        tester,
+      ) async {
+        when(
+          () => service.isThumbnailValid(any()),
+        ).thenAnswer((_) async => false);
+        when(
+          () => repository.addBook(
+            isbn: any(named: 'isbn'),
+            title: any(named: 'title'),
+            author: any(named: 'author'),
+            thumbnail: any(named: 'thumbnail'),
+          ),
+        ).thenAnswer((_) async => false);
+        final books = [
+          BookSearchResult(
+            volumeId: 'vol-0',
+            title: 'Book 0',
+            authors: const ['Author 0'],
+            isbn: '9780000000000',
+            thumbnail: 'https://covers.example.com/placeholder.jpg',
+          ),
+        ];
+        await pumpPage(tester, results: books, totalItems: 1);
+
+        await tester.tap(find.text('Book 0'));
+        await tester.pump();
+        await tester.tap(find.byType(AddToShelfButton));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repository.addBook(
+            isbn: '9780000000000',
+            title: 'Book 0',
+            author: 'Author 0',
+            thumbnail: null,
+          ),
+        ).called(1);
+        // The book still lands on the shelf despite no valid cover —
+        // GenericBookCover covers the display side of this case.
+        expect(find.text('Bookshelf destination'), findsOneWidget);
+      });
+    });
+
     group('pagination', () {
       testWidgets('loads the next page when scrolled near the end', (
         tester,
