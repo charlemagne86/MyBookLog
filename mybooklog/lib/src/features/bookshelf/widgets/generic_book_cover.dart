@@ -11,10 +11,27 @@ import 'package:flutter/material.dart';
 ///
 /// TECHNICAL:
 /// A bundled asset image (assets/images/generic_book_cover.png), clipped
-/// to the same rounded-corner radius the real cover art uses, and scaled
-/// with the same [BoxFit.contain] fit BookOnShelf applies to real cover
-/// thumbnails — so it occupies exactly the same size within the shelf
-/// cell as any other book's cover, rather than being cropped to fill it.
+/// to the same rounded-corner radius the real cover art uses. Unlike real
+/// cover thumbnails — which use [BoxFit.contain] to preserve their own,
+/// externally-sourced proportions even if that means letterboxing — this
+/// placeholder has no "true" aspect ratio to preserve, so it uses
+/// [BoxFit.cover] instead: it always scales to completely fill whatever
+/// box BookOnShelf's `AspectRatio` gives it, with the same width and
+/// height a real cover occupies in that same cell. Because Flutter
+/// recomputes that fit against the actual box size on every layout pass,
+/// this holds automatically for any grid layout (2, 3, 4+ books per row)
+/// without this widget needing to know the current column count or
+/// aspect ratio.
+///
+/// The [SizedBox.expand] is load-bearing, not decorative: BookOnShelf's
+/// Stack loosens the constraints it hands down to this widget (Stack
+/// always loosens constraints for its non-positioned child), and
+/// Image/ClipRRect don't grow to fill loose constraints on their own —
+/// left alone, the image renders at whatever size its own pixels + fit
+/// computation imply, which can be shorter than the box. SizedBox.expand
+/// forces this cover to claim the box's full biggest size before the
+/// image and fit are applied, matching a real cover's effective
+/// footprint exactly.
 class GenericBookCover extends StatelessWidget {
   const GenericBookCover({
     super.key,
@@ -27,9 +44,11 @@ class GenericBookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: Image.asset(assetPath, fit: BoxFit.contain),
+    return SizedBox.expand(
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Image.asset(assetPath, fit: BoxFit.cover),
+      ),
     );
   }
 }
