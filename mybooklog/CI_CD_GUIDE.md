@@ -351,7 +351,7 @@ A: Flutter compilation and test execution. Typical breakdown:
 A: No, branch protection requires all checks pass first.
 
 **Q: What if CI is flaky?**  
-A: Report in GitHub issues. Current pass rate is 100% (371/371).
+A: Report in GitHub issues. Current pass rate is 100% (369/369).
 
 **Q: How do I see coverage for specific files?**  
 A: Run locally: `flutter test --coverage` then generate HTML report.

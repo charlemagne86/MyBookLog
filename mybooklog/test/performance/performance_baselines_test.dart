@@ -122,38 +122,6 @@ void main() {
         expect(stopwatch.elapsedMilliseconds, lessThanOrEqualTo(thresholdMs));
       });
     });
-
-    group('Test Suite Execution', () {
-      test('baseline test count execution time', () async {
-        // BUSINESS LOGIC: CI/CD must stay fast to enable rapid iteration
-        // Slow tests block developers and reduce productivity
-        // Current: ~223 tests in 5-8 minutes
-        // Target: <8 minutes per run
-
-        // This test documents the baseline, not enforces it
-        // (actual enforcement is in CI workflow)
-
-        const totalTests = 223;
-
-        // Baseline captured, not tested (testing execution time in test would be circular)
-        // Target: <8 minutes per run
-        expect(totalTests, greaterThan(200));
-      });
-    });
-
-    group('Build & Coverage Generation', () {
-      test('coverage report generation baseline', () async {
-        // BUSINESS LOGIC: Coverage generation should be fast
-        // Slows down CI/CD if too slow
-        // Current: ~30 seconds for full coverage with 223 tests
-
-        const coverageTimeMs = 30000; // 30 seconds
-        const thresholdMs = 45000; // Allow +50%
-
-        // Baseline documented for monitoring
-        expect(coverageTimeMs, lessThan(thresholdMs));
-      });
-    });
   });
 }
 
