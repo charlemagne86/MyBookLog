@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
 import 'package:mybooklog/src/features/auth/login_screen.dart';
 import 'package:mybooklog/src/features/auth/splash_screen.dart';
+import 'package:mybooklog/src/features/bookshelf/bookshelf_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../helpers/test_app_builder.dart';
 import '../../unit/mocks/mock_repositories.dart';

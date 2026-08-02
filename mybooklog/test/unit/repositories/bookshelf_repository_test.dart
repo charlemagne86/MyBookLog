@@ -66,6 +66,9 @@ class FakeFilterBuilder<T> extends Fake implements PostgrestFilterBuilder<T> {
 /// Fake table handle (`client.from('bookshelf_items')`) that hands out
 /// pre-configured [FakeFilterBuilder]s and records what select()/update()
 /// were called with.
+// The SDK marks builders immutable; this fake deliberately mutates two
+// recording fields so tests can assert what the repository asked for.
+// ignore: must_be_immutable
 class FakeQueryBuilder extends Fake implements SupabaseQueryBuilder {
   FakeQueryBuilder({
     FakeFilterBuilder<PostgrestList>? selectBuilder,
@@ -89,7 +92,7 @@ class FakeQueryBuilder extends Fake implements SupabaseQueryBuilder {
   PostgrestFilterBuilder<dynamic> delete() => mutateBuilder;
 
   @override
-  PostgrestFilterBuilder<dynamic> update(Map values) {
+  PostgrestFilterBuilder<dynamic> update(Map<dynamic, dynamic> values) {
     updatePayload = values;
     return mutateBuilder;
   }

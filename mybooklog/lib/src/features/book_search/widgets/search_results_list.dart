@@ -39,7 +39,7 @@ class SearchResultsList extends StatelessWidget {
         bottom: selectedIndex != null ? 96.0 : 28.0,
       ),
       itemCount: results.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 18),
+      separatorBuilder: (_, _) => const SizedBox(height: 18),
       itemBuilder: (context, index) {
         final book = results[index];
         final isSelected = selectedIndex == index;

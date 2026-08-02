@@ -2,7 +2,7 @@
 ///
 /// Provides common patterns for widget testing, such as pumping test widgets,
 /// finding elements, and simulating user interactions.
-library widget_test_helpers;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

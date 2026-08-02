@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:mybooklog/src/data/repositories/auth_repository.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:mybooklog/src/core/router/app_router.dart';
 import 'package:mybooklog/src/core/theme/app_theme.dart';
+import 'package:mybooklog/src/data/repositories/auth_repository.dart';
+import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// BUSINESS LOGIC:
 /// Widget tests need complete app context: routing, theme, dependency injection,
