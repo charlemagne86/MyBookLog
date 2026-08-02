@@ -75,9 +75,9 @@ jobs:
 
         echo "Coverage: ${COVERAGE}%"
 
-        # Check minimum threshold (50% - Phase 3 baseline + buffer)
-        # TODO: Increase to 60%+ in Phase 7 with better widget/repo tests
-        THRESHOLD=50.0
+        # Minimum threshold unified at 60% across CI, local script, and docs
+        # (raised from 50% on 2026-08-02 after shadow verification; suite measures above 63%)
+        THRESHOLD=60.0
         if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
           echo "❌ Coverage ${COVERAGE}% is below minimum ${THRESHOLD}%"
           exit 1

@@ -5,7 +5,7 @@
 
 set -e
 
-THRESHOLD=${1:-80}
+THRESHOLD=${1:-60}  # default unified with CI workflow (test.yml)
 LCOV_FILE="coverage/lcov.info"
 
 if [ ! -f "$LCOV_FILE" ]; then
