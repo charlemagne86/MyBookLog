@@ -47,7 +47,16 @@ class GenericBookCover extends StatelessWidget {
     return SizedBox.expand(
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: Image.asset(assetPath, fit: BoxFit.cover),
+        // The image is wider (relative to its height) than the shelf's
+        // cover slot, so BoxFit.cover always crops some width off. Anchor
+        // that crop to the left edge — where the spine is — instead of
+        // the default center, so cropping only ever removes width from
+        // the right side and the spine stays visible.
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.cover,
+          alignment: Alignment.centerLeft,
+        ),
       ),
     );
   }
