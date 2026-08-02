@@ -130,6 +130,54 @@ void main() {
       },
     );
 
+    testWidgets(
+      'stays visible long enough to actually read the name and tagline',
+      (WidgetTester tester) async {
+        // BUSINESS LOGIC / REGRESSION: the splash previously navigated away
+        // after only 1.2s minimum visibility, which registered as a quick
+        // flash rather than something readable. Thresholds below have
+        // margin on both sides of the real measured transition (the 2.5s
+        // delay plus ~400-500ms for Flutter's page-transition animation
+        // to finish unmounting the old route, landing around t=2.9-3.0s)
+        // so this fails clearly if the minimum is ever shrunk back down.
+        TestSetupHelpers.setupLoggedOutUser(
+          mockAuthRepository,
+          authStateController,
+        );
+
+        await tester.pumpWidget(
+          TestAppBuilder(
+            bookshelfRepository: mockBookshelfRepository,
+            authRepository: mockAuthRepository,
+            authStateController: authStateController,
+          ).build(),
+        );
+        await tester.pump();
+
+        // Advance in small steps rather than one big jump: the page
+        // transition that unmounts SplashScreen is ticker-driven, and a
+        // single large pump() doesn't simulate the intermediate frames a
+        // real animation needs — it can under-report how long the old
+        // route actually stays mounted.
+        const step = Duration(milliseconds: 100);
+        var elapsedMs = 0;
+        while (elapsedMs < 2000) {
+          await tester.pump(step);
+          elapsedMs += 100;
+        }
+        // Comfortably still visible well past where a 1.2s minimum would
+        // have already finished transitioning away.
+        expect(find.byType(SplashScreen), findsOneWidget);
+
+        while (elapsedMs < 3500) {
+          await tester.pump(step);
+          elapsedMs += 100;
+        }
+        // Gone well after the 2.5s minimum plus transition time.
+        expect(find.byType(SplashScreen), findsNothing);
+      },
+    );
+
     testWidgets('navigates away from splash eventually', (
       WidgetTester tester,
     ) async {

@@ -31,8 +31,10 @@ class _SplashScreenState extends State<SplashScreen> {
     // BUSINESS LOGIC:
     // Optimize splash screen UX by running initialization in parallel with
     // minimum visibility time. This ensures:
-    // - Splash is visible long enough for branding (minimum 1.2 seconds)
-    // - Users on slow devices aren't blocked by a fixed 2-second wait
+    // - Splash is visible long enough to actually read the name and tagline
+    //   (minimum 2.5 seconds — 1.2s was long enough to register but too
+    //   quick to read)
+    // - Users on slow devices aren't blocked by a fixed longer wait
     // - Fast devices show splash for only as long as needed (no artificial delay)
     // - UX is adaptive to actual device performance and network speed
     //
@@ -75,8 +77,8 @@ class _SplashScreenState extends State<SplashScreen> {
       final results =
           await Future.wait([
             Future.delayed(
-              const Duration(milliseconds: 1200),
-            ), // Minimum visibility
+              const Duration(milliseconds: 2500),
+            ), // Minimum visibility — long enough to read
             _authCheckFuture, // Auth check (usually completes much faster)
           ]).timeout(
             const Duration(
