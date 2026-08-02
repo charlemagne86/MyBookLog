@@ -26,6 +26,25 @@ void main() {
       expect((image.image as AssetImage).assetName, GenericBookCover.assetPath);
     });
 
+    testWidgets('scales with BoxFit.contain, matching real cover thumbnails', (
+      tester,
+    ) async {
+      // BUSINESS LOGIC: BookOnShelf renders a real cover with
+      // BoxFit.contain so it fits within the shelf cell without being
+      // cropped; the generic cover must scale the same way so every
+      // book — real cover or not — occupies the same size on screen.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(width: 100, height: 150, child: GenericBookCover()),
+          ),
+        ),
+      );
+
+      final image = tester.widget<Image>(find.byType(Image));
+      expect(image.fit, BoxFit.contain);
+    });
+
     testWidgets('clips to the given border radius', (tester) async {
       const radius = BorderRadius.all(Radius.circular(12));
       await tester.pumpWidget(

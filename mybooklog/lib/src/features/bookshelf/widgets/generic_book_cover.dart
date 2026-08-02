@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 ///
 /// TECHNICAL:
 /// A bundled asset image (assets/images/generic_book_cover.png), clipped
-/// to the same rounded-corner radius the real cover art uses so it sits
-/// in a shelf cell without looking out of place.
+/// to the same rounded-corner radius the real cover art uses, and scaled
+/// with the same [BoxFit.contain] fit BookOnShelf applies to real cover
+/// thumbnails — so it occupies exactly the same size within the shelf
+/// cell as any other book's cover, rather than being cropped to fill it.
 class GenericBookCover extends StatelessWidget {
   const GenericBookCover({
     super.key,
@@ -27,7 +29,7 @@ class GenericBookCover extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: borderRadius,
-      child: Image.asset(assetPath, fit: BoxFit.cover),
+      child: Image.asset(assetPath, fit: BoxFit.contain),
     );
   }
 }
