@@ -55,6 +55,21 @@ dev_dependencies:
   # Code quality
   flutter_lints: ^6.0.0
 
+  # App icon generation (dart run flutter_launcher_icons)
+  flutter_launcher_icons: ^0.14.4
+
+# Generates platform launcher icons from the master 1024x1024 art.
+# iOS gets the flattened no-alpha image (App Store requirement);
+# Android gets adaptive layers: solid paper-beige background + scaled book
+# foreground so circular/squircle masks never clip the artwork.
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#F5F1E6"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

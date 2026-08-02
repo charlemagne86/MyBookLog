@@ -2,8 +2,8 @@
 
 **Generated:** 2026-07-29  
 **Status:** ✅ Established  
-**Test Suite:** 223 tests  
-**Coverage:** 66.7%
+**Test Suite:** 369 tests  
+**Coverage:** 76.1%
 
 ---
 
@@ -16,7 +16,7 @@ Performance baselines have been established for critical MyBookLog operations. T
 - ✅ Batch Parsing: 100ms for 20 items (±50%)
 - ✅ Identity Key Generation: 10ms for 100 keys (±100%)
 - ✅ Volume Key Generation: 5ms for 100 keys (±100%)
-- ✅ Test Suite: ~5-8 minutes for 223 tests (±15%)
+- ✅ Test Suite: ~20-30 seconds for 369 tests (±15%)
 - ✅ Coverage Generation: ~30 seconds (±50%)
 
 ---
@@ -126,7 +126,7 @@ flutter test test/performance/performance_baselines.dart -k "search completes"
 - CI/CD should complete <10 minutes
 
 **Current Status:**
-- 223 tests passing
+- 369 tests passing
 - ~2.5-3.5 seconds per test
 - 30-40 seconds per 100 tests
 - Scalable for 250+ tests before hitting 10 minute threshold
@@ -143,7 +143,7 @@ flutter test test/performance/performance_baselines.dart -k "search completes"
 **Performance Tips:**
 - Coverage generation is I/O bound
 - Can't parallelize easily
-- 30 seconds is reasonable for 223 tests
+- 30 seconds is reasonable for 369 tests
 - Acceptable up to 45 seconds
 
 ---

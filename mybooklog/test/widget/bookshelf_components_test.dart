@@ -200,7 +200,7 @@ void main() {
             body: BookshelfGrid(
               books: testBooks,
               selectedBookId: null,
-              onBookLongPress: (_, __) {},
+              onBookLongPress: (_, _) {},
             ),
           ),
         ),
@@ -217,7 +217,7 @@ void main() {
             body: BookshelfGrid(
               books: testBooks,
               selectedBookId: null,
-              onBookLongPress: (_, __) {},
+              onBookLongPress: (_, _) {},
             ),
           ),
         ),
@@ -236,7 +236,7 @@ void main() {
             body: BookshelfGrid(
               books: testBooks,
               selectedBookId: null,
-              onBookLongPress: (_, __) => longPressed = true,
+              onBookLongPress: (_, _) => longPressed = true,
             ),
           ),
         ),
@@ -256,7 +256,7 @@ void main() {
             body: BookshelfGrid(
               books: testBooks,
               selectedBookId: 'book-1',
-              onBookLongPress: (_, __) {},
+              onBookLongPress: (_, _) {},
             ),
           ),
         ),
@@ -273,7 +273,7 @@ void main() {
             body: BookshelfGrid(
               books: [],
               selectedBookId: null,
-              onBookLongPress: (_, __) {},
+              onBookLongPress: (_, _) {},
             ),
           ),
         ),

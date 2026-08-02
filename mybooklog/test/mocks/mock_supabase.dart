@@ -13,10 +13,11 @@ class MockRealtimeClient extends Mock implements RealtimeClient {}
 
 class MockStorageClient extends Mock implements SupabaseStorageClient {}
 
-class MockPostgrestQueryBuilder extends Mock implements PostgrestQueryBuilder {}
+class MockPostgrestQueryBuilder extends Mock
+    implements PostgrestQueryBuilder<dynamic> {}
 
 class MockPostgrestFilterBuilder extends Mock
-    implements PostgrestFilterBuilder {}
+    implements PostgrestFilterBuilder<dynamic> {}
 
 class MockPostgrestTransformBuilder extends Mock
-    implements PostgrestTransformBuilder {}
+    implements PostgrestTransformBuilder<dynamic> {}

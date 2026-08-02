@@ -2,7 +2,7 @@
 ///
 /// This file provides factory methods to create test objects without
 /// duplicating data setup across multiple test files.
-library test_data;
+library;
 
 import 'package:mybooklog/src/data/models/book_search_result.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';

@@ -2,7 +2,7 @@
 ///
 /// Use these mocks in widget and integration tests where you need to
 /// control the behavior of data layers without hitting the real Supabase.
-library mock_repositories;
+library;
 
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';

@@ -1,6 +1,6 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:mybooklog/src/data/services/google_books_service.dart';
 import 'package:mybooklog/src/data/models/book_search_result.dart';
+import 'package:mybooklog/src/data/services/google_books_service.dart';
 
 // BUSINESS LOGIC:
 // Services perform external integrations (API calls, authentication).

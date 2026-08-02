@@ -1,7 +1,7 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
-import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
+import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 
 // BUSINESS LOGIC:
 // Repositories abstract database/network operations. When testing business logic,

@@ -11,8 +11,8 @@
 | **When** | Every push to main/develop, every PR to main |
 | **What** | 345+ automated tests across 32 files |
 | **How Long** | 2-3 minutes total execution |
-| **Pass Rate** | 97.8% (338/345) |
-| **Coverage** | 63% (minimum 50%) |
+| **Pass Rate** | 100% (369/369) |
+| **Coverage** | 76.1% (minimum 60%) |
 | **Status** | ✅ All green |
 
 ---
@@ -76,7 +76,7 @@ flutter test test/[path-to-failing-test]
 
 1. **Code Format** — `dart format --set-exit-if-changed .`
 2. **All Tests** — `flutter test --coverage` (345+)
-3. **Coverage** — Minimum 50% (current: 63%)
+3. **Coverage** — Minimum 60% (current: 76.1%)
 4. **Analysis** — `flutter analyze` (informational)
 
 ---
@@ -185,9 +185,9 @@ lcov --list coverage/lcov.info
 
 - **Tests:** 345+ cases
 - **Files:** 32 test files
-- **Pass Rate:** 97.8%
+- **Pass Rate:** 100%
 - **Flakiness:** 0%
-- **Coverage:** 63%
+- **Coverage:** 76.1%
 - **Execution:** 2-3 minutes
 
 ---
