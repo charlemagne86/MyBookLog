@@ -95,6 +95,41 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 
+    testWidgets(
+      'shows the app icon above the name, so OS launch icon and Flutter '
+      'splash read as one continuous screen',
+      (WidgetTester tester) async {
+        TestSetupHelpers.setupLoggedOutUser(
+          mockAuthRepository,
+          authStateController,
+        );
+
+        await tester.pumpWidget(
+          TestAppBuilder(
+            bookshelfRepository: mockBookshelfRepository,
+            authRepository: mockAuthRepository,
+            authStateController: authStateController,
+          ).build(),
+        );
+
+        await tester.pump();
+
+        final image = tester.widget<Image>(find.byType(Image));
+        expect(image.image, isA<AssetImage>());
+        expect(
+          (image.image as AssetImage).assetName,
+          'assets/icon/app_icon_512.png',
+        );
+        // Icon must be above the title, not below or beside it.
+        final iconTop = tester.getTopLeft(find.byType(Image)).dy;
+        final titleTop = tester.getTopLeft(find.text('My Book Log')).dy;
+        expect(iconTop, lessThan(titleTop));
+
+        // Cleanup: wait for timers to complete
+        await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      },
+    );
+
     testWidgets('navigates away from splash eventually', (
       WidgetTester tester,
     ) async {

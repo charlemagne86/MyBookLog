@@ -4,12 +4,17 @@ import 'package:provider/provider.dart';
 
 import '../../data/repositories/auth_repository.dart';
 
-/// The welcome screen shown for the first two seconds after the app opens.
+/// The welcome screen shown for the first moment after the app opens.
 ///
-/// While the app name and a small spinner are displayed, we check whether the
-/// user was still logged in from last time. If so, they go straight to their
-/// bookshelf — no need to type their password again. If not, they are taken
-/// to the login screen. (BUG-4)
+/// BUSINESS LOGIC:
+/// Before Flutter can draw anything, the OS briefly shows its own default
+/// launch screen — just the app icon, centered. This widget deliberately
+/// leads with that exact same icon so the handoff from OS to Flutter reads
+/// as one continuous screen instead of a jarring content swap (icon, then
+/// suddenly text). The app name and tagline appear below it here, and a
+/// spinner shows while we check whether the user was still logged in from
+/// last time. If so, they go straight to their bookshelf — no need to type
+/// their password again. If not, they are taken to the login screen. (BUG-4)
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -103,6 +108,18 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Same artwork as the OS's own launch icon (see class doc) —
+            // carrying it over here is what makes the two screens read as
+            // one continuous splash instead of two different ones.
+            ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Image.asset(
+                'assets/icon/app_icon_512.png',
+                width: 128,
+                height: 128,
+              ),
+            ),
+            const SizedBox(height: 28),
             const Text(
               'My Book Log',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),

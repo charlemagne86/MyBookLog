@@ -82,6 +82,7 @@ flutter:
 
   assets:
     - assets/images/generic_book_cover.png
+    - assets/icon/app_icon_512.png
 
 # To add assets to your application, add an assets section, like this:
 # assets1:
