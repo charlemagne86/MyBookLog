@@ -41,6 +41,12 @@ class GoogleBooksService {
   static const int pageSize = 20;
   static const String _base = 'https://www.googleapis.com/books/v1/volumes';
 
+  /// Google's own "no cover available" placeholder is a tiny flat-color
+  /// graphic — real cover art, with actual illustration detail, is
+  /// consistently larger than this. Used by [isThumbnailValid] to tell the
+  /// two apart by file size when a byte count is available.
+  static const int _minValidThumbnailBytes = 2000;
+
   /// Turns what the user typed (a title, an author, or both) into the exact
   /// search phrase Google's service expects — e.g. title "Dune" and author
   /// "Herbert" become "intitle:Dune+inauthor:Herbert". Special characters are
@@ -106,5 +112,37 @@ class GoogleBooksService {
     return BookSearchResult.extractPreferredIsbn(
       volumeInfo['industryIdentifiers'],
     );
+  }
+
+  /// BUSINESS LOGIC:
+  /// Google sometimes lists a book without ever having real cover art on
+  /// file. When that happens, the cover URL either fails to load or loads
+  /// a tiny generic placeholder graphic instead of the book's actual
+  /// cover. Showing users one of those as if it were the real cover reads
+  /// as broken or wrong, so every candidate cover is checked before it's
+  /// saved to the shelf (see [SearchResultsPage._resolveBestThumbnail]).
+  ///
+  /// TECHNICAL:
+  /// A HEAD request confirms the image is reachable without downloading
+  /// it. A cover only counts as valid when the server returns 200, reports
+  /// an `image/*` content type, and — when the server discloses a byte
+  /// count — is bigger than [_minValidThumbnailBytes]. Any network failure
+  /// (timeout, DNS, connection refused) is treated as "not valid" rather
+  /// than propagated, since a slow/broken cover check should never block
+  /// adding the book itself.
+  Future<bool> isThumbnailValid(String url) async {
+    if (url.isEmpty) return false;
+    try {
+      final response = await _client.head(Uri.parse(url)).timeout(timeout);
+      if (response.statusCode != 200) return false;
+      final contentType = response.headers['content-type'] ?? '';
+      if (!contentType.startsWith('image/')) return false;
+      final lengthHeader = response.headers['content-length'];
+      final length = lengthHeader != null ? int.tryParse(lengthHeader) : null;
+      if (length != null && length < _minValidThumbnailBytes) return false;
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

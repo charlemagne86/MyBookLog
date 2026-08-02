@@ -11,6 +11,25 @@ import '../../features/book_search/add_book_page.dart';
 import '../../features/book_search/search_results_page.dart';
 import '../../features/bookshelf/bookshelf_screen.dart';
 
+/// BUSINESS LOGIC:
+/// The add-book flow (BookshelfScreen -> AddBookPage -> SearchResultsPage)
+/// returns to the shelf via `context.go('/shelf')` rather than popping back
+/// through each pushed screen — go_router treats that as "navigate to this
+/// location", and since a BookshelfScreen page is already sitting at the
+/// bottom of the stack, it reuses that existing instance instead of
+/// creating a fresh one. That means the shelf's one-time `initState` fetch
+/// never runs again, so a newly added book wouldn't appear until the user
+/// force-restarted the app.
+///
+/// TECHNICAL:
+/// A [RouteObserver] notifies a screen's [RouteAware.didPopNext] whenever a
+/// route that was covering it is removed — including removals caused by a
+/// declarative `go()` call, not just an imperative `pop()`. BookshelfScreen
+/// subscribes to this and refetches on that callback, so it reloads however
+/// the user gets back to it.
+final RouteObserver<PageRoute<void>> shelfRouteObserver =
+    RouteObserver<PageRoute<void>>();
+
 /// A small adapter that watches the "signed in / signed out" event feed and
 /// pokes the router each time it changes, so the router can immediately
 /// re-check which screen the user is allowed to see. Without this, signing
@@ -39,6 +58,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 GoRouter buildRouter(AuthRepository auth) {
   return GoRouter(
     initialLocation: '/splash', // the first screen shown at startup
+    observers: [shelfRouteObserver],
     // Re-run the rules whenever someone signs in or out.
     refreshListenable: GoRouterRefreshStream(auth.onAuthStateChange),
     redirect: (context, state) {

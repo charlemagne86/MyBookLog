@@ -144,6 +144,35 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     return best ?? selected;
   }
 
+  /// BUSINESS LOGIC: Different editions of the same book (hardcover vs.
+  /// paperback, different printings) often carry different — or missing —
+  /// cover art in Google's data. Rather than save whatever cover happened
+  /// to be on the specific edition the user tapped, every edition sharing
+  /// this title+author is checked and the first one with a real, working
+  /// cover wins. If none of them have one, an empty string is returned and
+  /// the shelf falls back to the plain green GenericBookCover instead of a
+  /// broken or blank image.
+  ///
+  /// TECHNICAL: [primary]'s own thumbnail is checked first (it's already
+  /// the ISBN-preferred edition from [_resolveBestRecord]), then the other
+  /// same-[BookSearchResult.volumeKey] candidates in list order, skipping
+  /// duplicate URLs. Each candidate is validated over the network via
+  /// [GoogleBooksService.isThumbnailValid].
+  Future<String> _resolveBestThumbnail(BookSearchResult primary) async {
+    final seen = <String>{};
+    final candidates = [
+      primary.thumbnail,
+      ..._results
+          .where((r) => r.volumeKey() == primary.volumeKey())
+          .map((r) => r.thumbnail),
+    ];
+    for (final url in candidates) {
+      if (url.isEmpty || !seen.add(url)) continue;
+      if (await _service.isThumbnailValid(url)) return url;
+    }
+    return '';
+  }
+
   /// BUSINESS LOGIC: Save selected book to shelf
   /// TECHNICAL: Resolve ISBN; validate title/author/ISBN present; call repository
   Future<void> _addSelectedBook() async {
@@ -172,11 +201,15 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         throw Exception('Failed to add to bookshelf due to missing ISBN');
       }
 
+      // A missing/invalid cover isn't fatal — GenericBookCover covers for
+      // it on the shelf — so this never blocks the add itself.
+      final thumbnail = await _resolveBestThumbnail(book);
+
       final alreadyOnShelf = await bookshelfRepo.addBook(
         isbn: isbn,
         title: book.title,
         author: book.authors.join(', '),
-        thumbnail: book.thumbnail.isEmpty ? null : book.thumbnail,
+        thumbnail: thumbnail.isEmpty ? null : thumbnail,
       );
       if (!mounted) return;
 

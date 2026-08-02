@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/router/app_router.dart';
 import '../../data/models/shelf_book.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/bookshelf_repository.dart';
@@ -25,7 +26,7 @@ class BookshelfScreen extends StatefulWidget {
   State<BookshelfScreen> createState() => _BookshelfScreenState();
 }
 
-class _BookshelfScreenState extends State<BookshelfScreen> {
+class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   // The full list of the user's books, as last loaded from the database.
   List<ShelfBook> _books = [];
   // True while the first load is in flight (shows the spinner).
@@ -50,10 +51,27 @@ class _BookshelfScreenState extends State<BookshelfScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribes (or re-subscribes, if the route changed) to this screen's
+    // own route so didPopNext fires once the add-book flow returns here.
+    shelfRouteObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
   void dispose() {
+    shelfRouteObserver.unsubscribe(this);
     _searchController.dispose();
     super.dispose();
   }
+
+  /// BUSINESS LOGIC: Fires when a route that was covering this screen (the
+  /// add-book flow) is removed and the shelf becomes visible again — however
+  /// that happened, whether the covering screens were popped one at a time
+  /// or the whole stack collapsed via a single `go('/shelf')`. This is what
+  /// makes a newly added book show up immediately, with no manual reload.
+  @override
+  void didPopNext() => _fetchBooks();
 
   /// The books to actually show on screen. If the filter box has fewer than
   /// three characters typed, we show everything (filtering on one or two

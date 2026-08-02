@@ -379,6 +379,102 @@ void main() {
       });
     });
 
+    group('isThumbnailValid', () {
+      test('returns true for a real image with sufficient size', () async {
+        when(() => mockClient.head(any())).thenAnswer(
+          (_) async => http.Response(
+            '',
+            200,
+            headers: {'content-type': 'image/jpeg', 'content-length': '5000'},
+          ),
+        );
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/good.jpg',
+        );
+
+        expect(valid, isTrue);
+      });
+
+      test('returns false for an empty URL without a network call', () async {
+        final valid = await service.isThumbnailValid('');
+
+        expect(valid, isFalse);
+        verifyNever(() => mockClient.head(any()));
+      });
+
+      test('returns false when the server responds with 404', () async {
+        when(
+          () => mockClient.head(any()),
+        ).thenAnswer((_) async => http.Response('', 404));
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/missing.jpg',
+        );
+
+        expect(valid, isFalse);
+      });
+
+      test('returns false when the content type is not an image', () async {
+        when(() => mockClient.head(any())).thenAnswer(
+          (_) async =>
+              http.Response('', 200, headers: {'content-type': 'text/html'}),
+        );
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/notanimage',
+        );
+
+        expect(valid, isFalse);
+      });
+
+      test('returns false for a tiny placeholder-sized image', () async {
+        // BUSINESS LOGIC: Google's "no cover" stand-in is a small
+        // flat-color graphic; anything under the size threshold is
+        // treated as a placeholder, not real cover art.
+        when(() => mockClient.head(any())).thenAnswer(
+          (_) async => http.Response(
+            '',
+            200,
+            headers: {'content-type': 'image/png', 'content-length': '900'},
+          ),
+        );
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/placeholder.png',
+        );
+
+        expect(valid, isFalse);
+      });
+
+      test('treats a missing content-length as valid', () async {
+        // TECHNICAL: Some CDNs use chunked transfer and never disclose a
+        // byte count; without one to distrust, the image is accepted.
+        when(() => mockClient.head(any())).thenAnswer(
+          (_) async =>
+              http.Response('', 200, headers: {'content-type': 'image/jpeg'}),
+        );
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/chunked.jpg',
+        );
+
+        expect(valid, isTrue);
+      });
+
+      test('returns false when the request throws', () async {
+        // TECHNICAL: timeout, DNS failure, connection refused, etc. — a
+        // broken cover check must never surface as an error to the user.
+        when(() => mockClient.head(any())).thenThrow(Exception('down'));
+
+        final valid = await service.isThumbnailValid(
+          'https://covers.example.com/unreachable.jpg',
+        );
+
+        expect(valid, isFalse);
+      });
+    });
+
     group('GoogleBooksException', () {
       test('exception has proper message', () {
         final exception = GoogleBooksException('Test error message');

@@ -1,14 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import 'generic_book_cover.dart';
+
 /// Draws one book in the shelf grid: the cover picture with a soft shadow
 /// (so it appears to sit on a shelf), the title underneath, a green
 /// checkmark badge when the book has been read, and a subtle "lift" animation
 /// while the user is holding their finger on it.
 ///
-/// If the cover picture is missing or fails to download, a generic open-book
-/// icon is shown in its place. Downloaded covers are cached on the device so
-/// they appear instantly (and offline) on later visits.
+/// If the cover picture is missing or fails to download, a plain green
+/// [GenericBookCover] is shown in its place. Downloaded covers are cached on
+/// the device so they appear instantly (and offline) on later visits.
 class BookOnShelf extends StatelessWidget {
   const BookOnShelf({
     super.key,
@@ -89,22 +91,11 @@ class BookOnShelf extends StatelessWidget {
                             child: CachedNetworkImage(
                               imageUrl: imageUrl!,
                               fit: BoxFit.contain,
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.menu_book,
-                                  size: 48,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
+                              errorWidget: (context, url, error) =>
+                                  const GenericBookCover(),
                             ),
                           )
-                        : Center(
-                            child: Icon(
-                              Icons.menu_book,
-                              size: 48,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
+                        : const GenericBookCover(),
                   ),
                 ),
               ),
