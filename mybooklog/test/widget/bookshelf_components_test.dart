@@ -8,20 +8,14 @@ import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_grid.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_loading_state.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_search_bar.dart';
 
-/// Builds a [BookshelfSearchBar] with sensible defaults for the new
-/// filter/category params, overridable per test.
+/// Builds a [BookshelfSearchBar] with sensible defaults, overridable per
+/// test.
 Widget _buildSearchBar({
   required TextEditingController controller,
   String searchQuery = '',
   int visibleBooksCount = 0,
-  int totalBooksCount = 10,
   ValueChanged<String>? onChanged,
   VoidCallback? onClear,
-  ReadFilter selectedFilter = ReadFilter.all,
-  ValueChanged<ReadFilter>? onFilterChanged,
-  List<String> availableCategories = const [],
-  Set<String> selectedCategories = const {},
-  ValueChanged<String>? onCategoryToggled,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -29,14 +23,8 @@ Widget _buildSearchBar({
         controller: controller,
         searchQuery: searchQuery,
         visibleBooksCount: visibleBooksCount,
-        totalBooksCount: totalBooksCount,
         onChanged: onChanged ?? (_) {},
         onClear: onClear ?? () {},
-        selectedFilter: selectedFilter,
-        onFilterChanged: onFilterChanged ?? (_) {},
-        availableCategories: availableCategories,
-        selectedCategories: selectedCategories,
-        onCategoryToggled: onCategoryToggled ?? (_) {},
       ),
     ),
   );
@@ -66,24 +54,29 @@ void main() {
       expect(find.text('Search title or author'), findsOneWidget);
     });
 
-    // TECHNICAL: The bar is always on screen now, so it must never grab
-    // the keyboard automatically.
-    testWidgets('never autofocuses, since it is always on screen', (
+    // TECHNICAL: The bar only appears after a deliberate tap on the search
+    // icon, so it should grab the keyboard immediately.
+    testWidgets('autofocuses, since opening it is a deliberate action', (
       tester,
     ) async {
       await tester.pumpWidget(_buildSearchBar(controller: controller));
 
       final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.autofocus, isFalse);
+      expect(field.autofocus, isTrue);
     });
 
-    // BUSINESS LOGIC: Show guidance until 3 characters entered
-    testWidgets('shows character requirement message', (tester) async {
+    // BUSINESS LOGIC: No guidance clutter below the 3-character threshold —
+    // the field is self-explanatory once opened deliberately.
+    testWidgets('shows no helper text until 3 characters are entered', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildSearchBar(controller: controller, searchQuery: 'ab'),
       );
 
-      expect(find.text('Enter at least 3 characters!'), findsOneWidget);
+      expect(find.text('Enter at least 3 characters!'), findsNothing);
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.decoration?.helperText, isNull);
     });
 
     // BUSINESS LOGIC: Show match count after threshold
@@ -146,165 +139,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(cleared, isTrue);
-    });
-
-    // BUSINESS LOGIC: All three read-status choices are always offered
-    testWidgets('shows All/Unread/Read filter chips', (tester) async {
-      await tester.pumpWidget(_buildSearchBar(controller: controller));
-
-      expect(find.widgetWithText(ChoiceChip, 'All'), findsOneWidget);
-      expect(find.widgetWithText(ChoiceChip, 'Unread'), findsOneWidget);
-      expect(find.widgetWithText(ChoiceChip, 'Read'), findsOneWidget);
-    });
-
-    // BUSINESS LOGIC: The active filter is visibly selected
-    testWidgets('marks the current read filter as selected', (tester) async {
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          selectedFilter: ReadFilter.unread,
-        ),
-      );
-
-      final unreadChip = tester.widget<ChoiceChip>(
-        find.widgetWithText(ChoiceChip, 'Unread'),
-      );
-      expect(unreadChip.selected, isTrue);
-      final allChip = tester.widget<ChoiceChip>(
-        find.widgetWithText(ChoiceChip, 'All'),
-      );
-      expect(allChip.selected, isFalse);
-    });
-
-    // BUSINESS LOGIC: Tapping a filter chip reports the tapped filter
-    testWidgets('calls onFilterChanged when a chip is tapped', (tester) async {
-      ReadFilter? selected;
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          onFilterChanged: (f) => selected = f,
-        ),
-      );
-
-      await tester.tap(find.widgetWithText(ChoiceChip, 'Read'));
-      await tester.pump();
-
-      expect(selected, ReadFilter.read);
-    });
-
-    // REGRESSION: the app's shared chipTheme.labelStyle carries no color of
-    // its own (nothing used a Chip anywhere in the app before this feature,
-    // so the gap was invisible until a real device render showed white
-    // labels on a white/light background). Each chip must set its own
-    // explicit, non-null label color so this can never silently regress.
-    testWidgets('filter chip labels always have an explicit, visible color', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          selectedFilter: ReadFilter.unread,
-        ),
-      );
-
-      for (final label in ['All', 'Unread', 'Read']) {
-        final chip = tester.widget<ChoiceChip>(
-          find.widgetWithText(ChoiceChip, label),
-        );
-        expect(
-          chip.labelStyle?.color,
-          isNotNull,
-          reason: '$label chip must set an explicit label color',
-        );
-      }
-    });
-
-    // BUSINESS LOGIC: No categories on the shelf means no category row
-    testWidgets('hides the category row when there are no categories', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildSearchBar(controller: controller));
-
-      expect(find.byType(FilterChip), findsNothing);
-    });
-
-    // BUSINESS LOGIC: Every category present on the shelf gets its own chip
-    testWidgets('shows a chip for each available category', (tester) async {
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          availableCategories: const ['Fiction', 'Biography'],
-        ),
-      );
-
-      expect(find.widgetWithText(FilterChip, 'Fiction'), findsOneWidget);
-      expect(find.widgetWithText(FilterChip, 'Biography'), findsOneWidget);
-    });
-
-    // BUSINESS LOGIC: Selected categories are visibly marked, multi-select
-    testWidgets('marks selected categories and allows more than one', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          availableCategories: const ['Fiction', 'Biography'],
-          selectedCategories: const {'Fiction', 'Biography'},
-        ),
-      );
-
-      final fiction = tester.widget<FilterChip>(
-        find.widgetWithText(FilterChip, 'Fiction'),
-      );
-      final biography = tester.widget<FilterChip>(
-        find.widgetWithText(FilterChip, 'Biography'),
-      );
-      expect(fiction.selected, isTrue);
-      expect(biography.selected, isTrue);
-    });
-
-    // BUSINESS LOGIC: Tapping a category chip reports which one was tapped
-    testWidgets('calls onCategoryToggled with the tapped category', (
-      tester,
-    ) async {
-      String? toggled;
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          availableCategories: const ['Fiction'],
-          onCategoryToggled: (c) => toggled = c,
-        ),
-      );
-
-      await tester.tap(find.widgetWithText(FilterChip, 'Fiction'));
-      await tester.pump();
-
-      expect(toggled, 'Fiction');
-    });
-
-    // REGRESSION: see the matching ChoiceChip test above — same theme gap,
-    // same fix, must hold for category chips too.
-    testWidgets('category chip labels always have an explicit, visible color', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _buildSearchBar(
-          controller: controller,
-          availableCategories: const ['Fiction', 'Biography'],
-          selectedCategories: const {'Fiction'},
-        ),
-      );
-
-      for (final label in ['Fiction', 'Biography']) {
-        final chip = tester.widget<FilterChip>(
-          find.widgetWithText(FilterChip, label),
-        );
-        expect(
-          chip.labelStyle?.color,
-          isNotNull,
-          reason: '$label chip must set an explicit label color',
-        );
-      }
     });
 
     tearDown(() => controller.dispose());

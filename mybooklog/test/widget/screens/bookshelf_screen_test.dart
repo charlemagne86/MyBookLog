@@ -213,7 +213,9 @@ void main() {
 
       expect(find.byType(BookOnShelf), findsNWidgets(3));
 
-      // The search field is always visible now — no toggle to tap first.
+      // The search field only appears after tapping the AppBar icon.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'great');
       await tester.pumpAndSettle();
 

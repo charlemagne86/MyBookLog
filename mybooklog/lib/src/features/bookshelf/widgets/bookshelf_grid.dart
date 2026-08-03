@@ -25,7 +25,10 @@ class BookshelfGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+      // No top padding here: the gap above the first row is provided by
+      // bookshelf_screen.dart's SizedBox below the chip row, kept equal to
+      // the gap above it.
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisSpacing: 32,
