@@ -17,12 +17,36 @@ class BookSearchResult {
   /// Preferred ISBN (ISBN-13 over ISBN-10), or null when neither is present.
   final String? isbn;
 
+  /// Everything below is optional detail for the book-details panel. Google
+  /// omits these inconsistently (e.g. a real lookup of "The Hobbit" came back
+  /// with no averageRating, ratingsCount, or subtitle at all) — callers must
+  /// treat every one of them as "may be missing", never assume presence.
+  final String? subtitle;
+  final String? description;
+  final String? publisher;
+
+  /// As Google sends it — "2016", "2016-10", or "2016-10-25" — not parsed
+  /// into a real date, since the granularity varies per book.
+  final String? publishedDate;
+  final int? pageCount;
+  final List<String> categories;
+  final double? averageRating;
+  final int? ratingsCount;
+
   const BookSearchResult({
     required this.volumeId,
     required this.title,
     required this.authors,
     required this.thumbnail,
     required this.isbn,
+    this.subtitle,
+    this.description,
+    this.publisher,
+    this.publishedDate,
+    this.pageCount,
+    this.categories = const <String>[],
+    this.averageRating,
+    this.ratingsCount,
   });
 
   /// The author names as one readable line ("Jane Smith, John Doe"), or
@@ -73,6 +97,11 @@ class BookSearchResult {
     final thumb = imageLinks != null
         ? imageLinks['thumbnail'] as String?
         : null;
+
+    // Google sends averageRating as either an int or a double depending on
+    // the book; num covers both, then we widen to double for a stable type.
+    final rawRating = volumeInfo['averageRating'] as num?;
+
     return BookSearchResult(
       volumeId: item['id'] as String?,
       title: volumeInfo['title'] as String? ?? 'No Title',
@@ -82,6 +111,16 @@ class BookSearchResult {
       // Normalize to https at ingest (PERF-5).
       thumbnail: toHttpsUrl(thumb),
       isbn: extractPreferredIsbn(volumeInfo['industryIdentifiers']),
+      subtitle: volumeInfo['subtitle'] as String?,
+      description: volumeInfo['description'] as String?,
+      publisher: volumeInfo['publisher'] as String?,
+      publishedDate: volumeInfo['publishedDate'] as String?,
+      pageCount: volumeInfo['pageCount'] as int?,
+      categories:
+          (volumeInfo['categories'] as List<dynamic>?)?.cast<String>() ??
+          const <String>[],
+      averageRating: rawRating?.toDouble(),
+      ratingsCount: volumeInfo['ratingsCount'] as int?,
     );
   }
 

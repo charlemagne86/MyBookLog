@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'generic_book_cover.dart';
 
 /// Draws one book in the shelf grid: the cover picture with a soft shadow
-/// (so it appears to sit on a shelf), the title underneath, a green
-/// checkmark badge when the book has been read, and a subtle "lift" animation
-/// while the user is holding their finger on it.
+/// (so it appears to sit on a shelf), the title underneath, and a green
+/// checkmark badge when the book has been read. Tapping the cover opens the
+/// book's details panel — the ink splash from that tap is standard Material
+/// feedback provided by the ancestor `InkWell` in [BookshelfGrid], not drawn
+/// here.
 ///
 /// If the cover picture is missing or fails to download, a plain green
 /// [GenericBookCover] is shown in its place. Downloaded covers are cached on
@@ -17,13 +19,11 @@ class BookOnShelf extends StatelessWidget {
     required this.imageUrl,
     required this.title,
     this.isRead = false,
-    this.isContextMenuTarget = false,
   });
 
   final String? imageUrl;
   final String title;
   final bool isRead;
-  final bool isContextMenuTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -37,67 +37,30 @@ class BookOnShelf extends StatelessWidget {
           aspectRatio: 0.67,
           child: Stack(
             children: [
-              // The three "Animated..." layers below create the lift effect
-              // during a press-and-hold: the cover slides up a touch, grows
-              // slightly, and gains a green outline and glow.
-              AnimatedSlide(
-                duration: const Duration(milliseconds: 140),
-                curve: Curves.easeOut,
-                offset: isContextMenuTarget
-                    ? const Offset(0.012, -0.04)
-                    : Offset.zero,
-                child: AnimatedScale(
-                  duration: const Duration(milliseconds: 140),
-                  curve: Curves.easeOut,
-                  scale: isContextMenuTarget ? 1.04 : 1.0,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    curve: Curves.easeOut,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(6),
-                      border: isContextMenuTarget
-                          ? Border.all(
-                              color: colorScheme.primary.withAlpha(
-                                (0.92 * 255).round(),
-                              ),
-                              width: 2.6,
-                            )
-                          : null,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withAlpha((0.34 * 255).round()),
-                          blurRadius: 16,
-                          spreadRadius: 0.4,
-                          offset: const Offset(0, 7),
-                        ),
-                        BoxShadow(
-                          color: isContextMenuTarget
-                              ? colorScheme.primary.withAlpha(
-                                  (0.44 * 255).round(),
-                                )
-                              : Colors.transparent,
-                          blurRadius: isContextMenuTarget ? 24 : 8,
-                          spreadRadius: isContextMenuTarget ? 1.9 : 0,
-                          offset: isContextMenuTarget
-                              ? const Offset(2, 12)
-                              : const Offset(0, 2),
-                        ),
-                      ],
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withAlpha((0.34 * 255).round()),
+                      blurRadius: 16,
+                      spreadRadius: 0.4,
+                      offset: const Offset(0, 7),
                     ),
-                    child: imageUrl != null && imageUrl!.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl!,
-                              fit: BoxFit.contain,
-                              errorWidget: (context, url, error) =>
-                                  const GenericBookCover(),
-                            ),
-                          )
-                        : const GenericBookCover(),
-                  ),
+                  ],
                 ),
+                child: imageUrl != null && imageUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl!,
+                          fit: BoxFit.contain,
+                          errorWidget: (context, url, error) =>
+                              const GenericBookCover(),
+                        ),
+                      )
+                    : const GenericBookCover(),
               ),
               // The small round checkmark badge in the top-left corner,
               // shown only on books marked as read.

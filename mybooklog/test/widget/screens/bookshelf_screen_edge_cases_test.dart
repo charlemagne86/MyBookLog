@@ -139,30 +139,21 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Open search
-      final searchButton = find.byIcon(Icons.search);
-      if (searchButton.evaluate().isNotEmpty) {
-        await tester.tap(searchButton.first);
-        await tester.pumpAndSettle();
+      // The search field only appears after tapping the AppBar icon.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'xyz123notabook');
+      await tester.pumpAndSettle();
 
-        // Type search that doesn't match
-        final searchField = find.byType(TextField);
-        if (searchField.evaluate().isNotEmpty) {
-          await tester.enterText(searchField.first, 'xyz123notabook');
-          await tester.pumpAndSettle();
-
-          // Should show no results message
-          expect(find.byType(GridView), findsNothing);
-          expect(
-            find.byWidgetPredicate(
-              (widget) =>
-                  widget is Text &&
-                  widget.data?.contains('No books match') == true,
-            ),
-            findsOneWidget,
-          );
-        }
-      }
+      // Should show no results message
+      expect(find.byType(GridView), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && widget.data?.contains('No books match') == true,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('preserves search state during reload', (
@@ -199,21 +190,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Do a search
-      final searchButton = find.byIcon(Icons.search);
-      if (searchButton.evaluate().isNotEmpty) {
-        await tester.tap(searchButton.first);
-        await tester.pumpAndSettle();
+      // The search field only appears after tapping the AppBar icon.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'ham');
+      await tester.pumpAndSettle();
 
-        final searchField = find.byType(TextField);
-        if (searchField.evaluate().isNotEmpty) {
-          await tester.enterText(searchField.first, 'ham');
-          await tester.pumpAndSettle();
-
-          // Should show one result (Hamlet)
-          expect(find.byType(Text), findsWidgets);
-        }
-      }
+      // Should show one result (Hamlet)
+      expect(find.byType(Text), findsWidgets);
     });
 
     testWidgets('displays very long book titles without overflow', (

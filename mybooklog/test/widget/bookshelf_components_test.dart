@@ -2,10 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mybooklog/src/data/models/shelf_book.dart';
+import 'package:mybooklog/src/features/bookshelf/widgets/book_on_shelf.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_empty_state.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_grid.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_loading_state.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/bookshelf_search_bar.dart';
+
+/// Builds a [BookshelfSearchBar] with sensible defaults, overridable per
+/// test.
+Widget _buildSearchBar({
+  required TextEditingController controller,
+  String searchQuery = '',
+  int visibleBooksCount = 0,
+  ValueChanged<String>? onChanged,
+  VoidCallback? onClear,
+}) {
+  return MaterialApp(
+    home: Scaffold(
+      body: BookshelfSearchBar(
+        controller: controller,
+        searchQuery: searchQuery,
+        visibleBooksCount: visibleBooksCount,
+        onChanged: onChanged ?? (_) {},
+        onClear: onClear ?? () {},
+      ),
+    ),
+  );
+}
 
 // BUSINESS LOGIC:
 // Refactored bookshelf_screen into smaller components for testability.
@@ -25,59 +48,44 @@ void main() {
 
     // BUSINESS LOGIC: User can type to filter books
     testWidgets('displays search input field', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: '',
-              visibleBooksCount: 0,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSearchBar(controller: controller));
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('Search title or author'), findsOneWidget);
     });
 
-    // BUSINESS LOGIC: Show guidance until 3 characters entered
-    testWidgets('shows character requirement message', (tester) async {
+    // TECHNICAL: The bar only appears after a deliberate tap on the search
+    // icon, so it should grab the keyboard immediately.
+    testWidgets('autofocuses, since opening it is a deliberate action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSearchBar(controller: controller));
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.autofocus, isTrue);
+    });
+
+    // BUSINESS LOGIC: No guidance clutter below the 3-character threshold —
+    // the field is self-explanatory once opened deliberately.
+    testWidgets('shows no helper text until 3 characters are entered', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: 'ab',
-              visibleBooksCount: 0,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
-        ),
+        _buildSearchBar(controller: controller, searchQuery: 'ab'),
       );
 
-      expect(find.text('Enter at least 3 characters!'), findsOneWidget);
+      expect(find.text('Enter at least 3 characters!'), findsNothing);
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.decoration?.helperText, isNull);
     });
 
     // BUSINESS LOGIC: Show match count after threshold
     testWidgets('displays match count when search active', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: 'abc',
-              visibleBooksCount: 5,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
+        _buildSearchBar(
+          controller: controller,
+          searchQuery: 'abc',
+          visibleBooksCount: 5,
         ),
       );
 
@@ -87,17 +95,10 @@ void main() {
     // BUSINESS LOGIC: Singular "book" when one match
     testWidgets('uses singular form for single result', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: 'abc',
-              visibleBooksCount: 1,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
+        _buildSearchBar(
+          controller: controller,
+          searchQuery: 'abc',
+          visibleBooksCount: 1,
         ),
       );
 
@@ -109,18 +110,7 @@ void main() {
       controller.text = 'search text';
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: 'search text',
-              visibleBooksCount: 0,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
-        ),
+        _buildSearchBar(controller: controller, searchQuery: 'search text'),
       );
 
       expect(find.byIcon(Icons.close), findsOneWidget);
@@ -128,20 +118,7 @@ void main() {
 
     // BUSINESS LOGIC: Clear button hidden when empty
     testWidgets('hides clear button when empty', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: '',
-              visibleBooksCount: 0,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(_buildSearchBar(controller: controller));
 
       expect(find.byIcon(Icons.close), findsNothing);
     });
@@ -151,17 +128,10 @@ void main() {
       bool cleared = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfSearchBar(
-              controller: controller,
-              searchQuery: 'text',
-              visibleBooksCount: 0,
-              totalBooksCount: 10,
-              onChanged: (_) {},
-              onClear: () => cleared = true,
-            ),
-          ),
+        _buildSearchBar(
+          controller: controller,
+          searchQuery: 'text',
+          onClear: () => cleared = true,
         ),
       );
 
@@ -197,11 +167,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: BookshelfGrid(
-              books: testBooks,
-              selectedBookId: null,
-              onBookLongPress: (_, _) {},
-            ),
+            body: BookshelfGrid(books: testBooks, onBookTap: (_) {}),
           ),
         ),
       );
@@ -214,55 +180,33 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: BookshelfGrid(
-              books: testBooks,
-              selectedBookId: null,
-              onBookLongPress: (_, _) {},
-            ),
+            body: BookshelfGrid(books: testBooks, onBookTap: (_) {}),
           ),
         ),
       );
 
-      expect(find.byType(GestureDetector), findsExactly(2));
+      expect(find.byType(BookOnShelf), findsExactly(2));
     });
 
-    // BUSINESS LOGIC: Long-press triggers callback
-    testWidgets('calls onBookLongPress on long press', (tester) async {
-      bool longPressed = false;
+    // BUSINESS LOGIC: Tapping a book opens its details panel
+    testWidgets('calls onBookTap with the tapped book', (tester) async {
+      ShelfBook? tapped;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: BookshelfGrid(
               books: testBooks,
-              selectedBookId: null,
-              onBookLongPress: (_, _) => longPressed = true,
+              onBookTap: (book) => tapped = book,
             ),
           ),
         ),
       );
 
-      await tester.longPress(find.byType(GestureDetector).first);
+      await tester.tap(find.byType(BookOnShelf).first);
       await tester.pumpAndSettle();
 
-      expect(longPressed, isTrue);
-    });
-
-    // BUSINESS LOGIC: Selected book highlighted
-    testWidgets('highlights selected book', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BookshelfGrid(
-              books: testBooks,
-              selectedBookId: 'book-1',
-              onBookLongPress: (_, _) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(GridView), findsOneWidget);
+      expect(tapped?.bookId, 'book-1');
     });
 
     // BUSINESS LOGIC: Handle empty grid
@@ -270,11 +214,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: BookshelfGrid(
-              books: [],
-              selectedBookId: null,
-              onBookLongPress: (_, _) {},
-            ),
+            body: BookshelfGrid(books: const [], onBookTap: (_) {}),
           ),
         ),
       );

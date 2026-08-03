@@ -33,7 +33,11 @@ class BookshelfRepository {
   Future<List<ShelfBook>> fetchShelf() async {
     final rows = await _client
         .from('bookshelf_items')
-        .select('*, books_catalog(id, title, author, thumbnail_uri)')
+        .select(
+          '*, books_catalog(id, title, author, thumbnail_uri, description, '
+          'page_count, published_date, publisher, categories, '
+          'google_average_rating, google_ratings_count)',
+        )
         .eq('bookshelf_user_id', _uid);
     // Convert each raw database row into a typed ShelfBook object the
     // screens can display.
@@ -56,6 +60,13 @@ class BookshelfRepository {
     required String title,
     required String author,
     required String? thumbnail,
+    String? description,
+    int? pageCount,
+    String? publishedDate,
+    String? publisher,
+    List<String>? categories,
+    double? googleAverageRating,
+    int? googleRatingsCount,
   }) async {
     final result = await _client.rpc(
       'add_book_to_shelf',
@@ -64,6 +75,13 @@ class BookshelfRepository {
         'p_title': title,
         'p_author': author,
         'p_thumbnail_uri': thumbnail,
+        'p_description': description,
+        'p_page_count': pageCount,
+        'p_published_date': publishedDate,
+        'p_publisher': publisher,
+        'p_categories': categories,
+        'p_google_average_rating': googleAverageRating,
+        'p_google_ratings_count': googleRatingsCount,
       },
     );
     return result is Map && result['already_on_shelf'] == true;
@@ -89,6 +107,15 @@ class BookshelfRepository {
           'is_read': isRead,
           'marked_read_on': isRead ? DateTime.now().toIso8601String() : null,
         })
+        .eq('bookshelf_user_id', _uid)
+        .eq('book_id', bookId);
+  }
+
+  /// Saves the user's own 1-5 star rating for a book on their shelf.
+  Future<void> setRating(String bookId, {required int? rating}) async {
+    await _client
+        .from('bookshelf_items')
+        .update({'rating': rating})
         .eq('bookshelf_user_id', _uid)
         .eq('book_id', bookId);
   }

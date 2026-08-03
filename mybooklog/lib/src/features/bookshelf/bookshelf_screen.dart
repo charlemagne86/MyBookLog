@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +6,9 @@ import '../../core/router/app_router.dart';
 import '../../data/models/shelf_book.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/bookshelf_repository.dart';
+import 'widgets/book_details_panel.dart';
 import 'widgets/bookshelf_empty_state.dart';
+import 'widgets/bookshelf_filter_row.dart';
 import 'widgets/bookshelf_grid.dart';
 import 'widgets/bookshelf_loading_state.dart';
 import 'widgets/bookshelf_search_bar.dart';
@@ -16,8 +17,11 @@ import 'widgets/bookshelf_search_bar.dart';
 ///
 /// Books are shown as a grid of covers, three per row. From here the user can:
 ///   * tap + to search for and add a new book,
-///   * tap the magnifying glass to filter the shelf by title or author,
-///   * press and hold a book to remove it or mark it read/unread,
+///   * tap the magnifying glass to search by title or author,
+///   * use the read/unread + category chips (visible whenever search isn't
+///     open) to narrow the shelf,
+///   * tap a book to open its details panel — summary, rating, mark
+///     read/unread, and remove all live there,
 ///   * tap the door icon to log out.
 class BookshelfScreen extends StatefulWidget {
   const BookshelfScreen({super.key});
@@ -31,16 +35,15 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   List<ShelfBook> _books = [];
   // True while the first load is in flight (shows the spinner).
   bool _loading = true;
-  // Whether the filter box is currently open, and what's typed into it.
+  // Whether the search field is open, and what's typed into it. Closing it
+  // clears the text so the shelf reverts to just the chip filters below.
   bool _showSearchBar = false;
   String _searchQuery = '';
   final _searchController = TextEditingController();
-  // Which book (if any) is currently "lifted" because its press-and-hold
-  // menu is open — used purely for the visual highlight effect.
-  String? _contextMenuBookSelectionKey;
-
-  static const String _menuActionRemove = 'remove';
-  static const String _menuActionToggleRead = 'toggle_read';
+  // Read/unread and category narrowing, applied together with the search
+  // text below in _visibleBooks.
+  ReadFilter _readFilter = ReadFilter.all;
+  final Set<String> _selectedCategories = {};
 
   BookshelfRepository get _repo => context.read<BookshelfRepository>();
 
@@ -73,13 +76,35 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   @override
   void didPopNext() => _fetchBooks();
 
-  /// The books to actually show on screen. If the filter box has fewer than
-  /// three characters typed, we show everything (filtering on one or two
-  /// letters would flicker uselessly while the user is still typing).
+  /// The books to actually show on screen: search text, read/unread status,
+  /// and category selection all narrow the shelf together. If the search
+  /// box has fewer than three characters typed, text search is skipped
+  /// entirely (filtering on one or two letters would flicker uselessly
+  /// while the user is still typing) but the other two filters still apply.
   List<ShelfBook> get _visibleBooks {
     final query = _searchQuery.trim();
-    if (query.length < 3) return _books;
-    return _books.where((b) => b.matchesQuery(query)).toList();
+    return _books.where((b) {
+      if (query.length >= 3 && !b.matchesQuery(query)) return false;
+      if (_readFilter == ReadFilter.unread && b.isRead) return false;
+      if (_readFilter == ReadFilter.read && !b.isRead) return false;
+      if (_selectedCategories.isNotEmpty &&
+          !b.categories.any(_selectedCategories.contains)) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  /// Distinct categories across the whole shelf (not just the currently
+  /// visible books), sorted for a stable chip order. Empty when nothing on
+  /// the shelf has a category.
+  List<String> get _availableCategories {
+    final categories = <String>{};
+    for (final book in _books) {
+      categories.addAll(book.categories);
+    }
+    final sorted = categories.toList()..sort();
+    return sorted;
   }
 
   /// Loads (or reloads) the user's books from the database. Shows a spinner
@@ -105,60 +130,27 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
     }
   }
 
-  /// Runs when the user presses and holds a book.
-  ///
-  /// The sequence: visually "lift" the pressed book, give a small vibration
-  /// so the user feels the press registered, then open a little menu right
-  /// where their finger is with two choices — Remove Book, or Mark as
-  /// Read/Unread. Whatever they pick (or dismiss) is handled at the end.
-  Future<void> _onBookLongPress(ShelfBook book, Offset globalPosition) async {
-    setState(() => _contextMenuBookSelectionKey = book.bookId);
-    await HapticFeedback.selectionClick();
-    await HapticFeedback.lightImpact();
-    if (!mounted) return;
-
-    String? selectedAction;
-    try {
-      selectedAction = await showMenu<String>(
-        context: context,
-        position: RelativeRect.fromLTRB(
-          globalPosition.dx,
-          globalPosition.dy,
-          globalPosition.dx,
-          globalPosition.dy,
-        ),
-        items: [
-          const PopupMenuItem<String>(
-            value: _menuActionRemove,
-            child: Text(
-              'Remove Book',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: _menuActionToggleRead,
-            child: Text(
-              book.isRead ? 'Mark as Unread' : 'Mark as Read',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      );
-    } finally {
-      // The menu has closed (chosen or dismissed) — un-lift the book.
-      if (mounted) setState(() => _contextMenuBookSelectionKey = null);
-    }
-
-    if (selectedAction == _menuActionRemove) {
-      await _removeBook(book);
-    } else if (selectedAction == _menuActionToggleRead) {
-      await _toggleReadStatus(book);
-    }
+  /// Opens the tapped book's details panel: summary, rating, mark
+  /// read/unread, and remove all live there. `book` is a snapshot taken at
+  /// tap time — the panel tracks its own optimistic UI state for
+  /// read/unread and rating rather than watching this screen's list live.
+  void _onBookTap(ShelfBook book) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => BookDetailsPanel(
+        book: book,
+        onToggleRead: () => _toggleReadStatus(book),
+        onRate: (rating) => _onSetRating(book, rating),
+        onRemove: () => _removeBook(book),
+      ),
+    );
   }
 
   /// Deletes a book from the shelf: first in the database, and only if that
   /// succeeds, from the grid on screen. A brief confirmation (or error)
-  /// message appears at the bottom either way.
+  /// message appears at the bottom either way. Rethrows on failure so the
+  /// details panel knows to undo its own optimistic UI.
   Future<void> _removeBook(ShelfBook book) async {
     try {
       await _repo.removeBook(book.bookId);
@@ -177,11 +169,13 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to remove book: $e')));
+      rethrow;
     }
   }
 
   /// Flips a book between read and unread: saves the change to the database
-  /// first, then updates the checkmark badge on screen to match.
+  /// first, then updates the checkmark badge on screen to match. Rethrows
+  /// on failure so the details panel knows to undo its own optimistic UI.
   Future<void> _toggleReadStatus(ShelfBook book) async {
     final newValue = !book.isRead;
     try {
@@ -207,6 +201,29 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update read status: $e')),
       );
+      rethrow;
+    }
+  }
+
+  /// Saves the user's 1-5 star rating for a book. Rethrows on failure so
+  /// the details panel knows to undo its own optimistic UI.
+  Future<void> _onSetRating(ShelfBook book, int rating) async {
+    try {
+      await _repo.setRating(book.bookId, rating: rating);
+      if (!mounted) return;
+      setState(() {
+        _books = _books
+            .map(
+              (b) => b.bookId == book.bookId ? b.copyWith(rating: rating) : b,
+            )
+            .toList();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save rating: $e')));
+      rethrow;
     }
   }
 
@@ -218,14 +235,23 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
     await _fetchBooks();
   }
 
-  /// Opens or closes the shelf's filter box. Closing it also erases the
-  /// typed text so the full shelf is visible again.
+  /// Opens or closes the search field. Closing it also erases the typed
+  /// text, so the shelf reverts to whatever the chip filters below select.
   void _onSearchBook() {
     setState(() {
       _showSearchBar = !_showSearchBar;
       if (!_showSearchBar) {
         _searchController.clear();
         _searchQuery = '';
+      }
+    });
+  }
+
+  /// Adds or removes one category from the active category filter.
+  void _onCategoryToggled(String category) {
+    setState(() {
+      if (!_selectedCategories.remove(category)) {
+        _selectedCategories.add(category);
       }
     });
   }
@@ -271,19 +297,34 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
         top: false,
         child: Column(
           children: [
-            const SizedBox(height: 12),
-            if (_showSearchBar)
-              BookshelfSearchBar(
-                controller: _searchController,
-                searchQuery: _searchQuery,
-                visibleBooksCount: _visibleBooks.length,
-                totalBooksCount: _books.length,
-                onChanged: (value) => setState(() => _searchQuery = value),
-                onClear: () => setState(() {
-                  _searchController.clear();
-                  _searchQuery = '';
-                }),
-              ),
+            // Equal top and bottom gaps around the chip row: this one and
+            // the matching SizedBox below (the grid's own top padding is
+            // zeroed out so it doesn't add extra, uneven space on that side).
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _showSearchBar
+                  ? BookshelfSearchBar(
+                      controller: _searchController,
+                      searchQuery: _searchQuery,
+                      visibleBooksCount: _visibleBooks.length,
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
+                      onClear: () => setState(() {
+                        _searchController.clear();
+                        _searchQuery = '';
+                      }),
+                    )
+                  : BookshelfFilterRow(
+                      selectedFilter: _readFilter,
+                      onFilterChanged: (filter) =>
+                          setState(() => _readFilter = filter),
+                      availableCategories: _availableCategories,
+                      selectedCategories: _selectedCategories,
+                      onCategoryToggled: _onCategoryToggled,
+                    ),
+            ),
+            const SizedBox(height: 16),
             Expanded(child: _buildMainContent()),
           ],
         ),
@@ -304,10 +345,6 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
             : 'No books match your search.',
       );
     }
-    return BookshelfGrid(
-      books: _visibleBooks,
-      selectedBookId: _contextMenuBookSelectionKey,
-      onBookLongPress: _onBookLongPress,
-    );
+    return BookshelfGrid(books: _visibleBooks, onBookTap: _onBookTap);
   }
 }

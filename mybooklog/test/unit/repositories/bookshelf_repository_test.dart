@@ -131,21 +131,32 @@ void main() {
         {
           'book_id': 42,
           'is_read': true,
+          'rating': 4,
           'books_catalog': {
             'id': 42,
             'title': 'The Great Gatsby',
             'author': 'F. Scott Fitzgerald',
             'thumbnail_uri': 'http://example.com/gatsby.jpg',
+            'description': 'A tragic tale set in the Jazz Age.',
+            'page_count': 180,
+            'published_date': '2004-09-30',
+            'publisher': 'Scribner',
+            'categories': ['Fiction'],
+            'google_average_rating': 3.9,
+            'google_ratings_count': 512,
           },
         },
         {
           'book_id': 43,
           'is_read': false,
+          'rating': null,
           'books_catalog': {
             'id': 43,
             'title': 'To Kill a Mockingbird',
             'author': 'Harper Lee',
             'thumbnail_uri': null,
+            // No detail fields at all — mirrors a real Google response
+            // (e.g. "The Hobbit") that omitted rating/subtitle entirely.
           },
         },
       ];
@@ -168,6 +179,46 @@ void main() {
         expect(shelf[1].isRead, isFalse);
       });
 
+      test(
+        'returns the optional detail fields and the user\'s rating',
+        () async {
+          final table = FakeQueryBuilder(
+            selectBuilder: FakeFilterBuilder(result: joinedRows),
+          );
+          when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+          final shelf = await repository.fetchShelf();
+
+          expect(shelf[0].rating, 4);
+          expect(shelf[0].description, 'A tragic tale set in the Jazz Age.');
+          expect(shelf[0].pageCount, 180);
+          expect(shelf[0].publishedDate, '2004-09-30');
+          expect(shelf[0].publisher, 'Scribner');
+          expect(shelf[0].categories, ['Fiction']);
+          expect(shelf[0].googleAverageRating, 3.9);
+          expect(shelf[0].googleRatingsCount, 512);
+        },
+      );
+
+      test('leaves the optional detail fields null when Google never had them '
+          '(mirrors a real omitted-field API response)', () async {
+        final table = FakeQueryBuilder(
+          selectBuilder: FakeFilterBuilder(result: joinedRows),
+        );
+        when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+        final shelf = await repository.fetchShelf();
+
+        expect(shelf[1].rating, isNull);
+        expect(shelf[1].description, isNull);
+        expect(shelf[1].pageCount, isNull);
+        expect(shelf[1].publishedDate, isNull);
+        expect(shelf[1].publisher, isNull);
+        expect(shelf[1].categories, isEmpty);
+        expect(shelf[1].googleAverageRating, isNull);
+        expect(shelf[1].googleRatingsCount, isNull);
+      });
+
       test('fetches shelf and catalog data in one joined query', () async {
         final table = FakeQueryBuilder(
           selectBuilder: FakeFilterBuilder(result: joinedRows),
@@ -179,7 +230,9 @@ void main() {
         // The join is the PERF-1 guarantee: one request, not N+1.
         expect(
           table.selectedColumns,
-          '*, books_catalog(id, title, author, thumbnail_uri)',
+          '*, books_catalog(id, title, author, thumbnail_uri, description, '
+          'page_count, published_date, publisher, categories, '
+          'google_average_rating, google_ratings_count)',
         );
       });
 
@@ -312,8 +365,55 @@ void main() {
           'p_title': 'The Great Gatsby',
           'p_author': 'F. Scott Fitzgerald',
           'p_thumbnail_uri': 'https://example.com/gatsby.jpg',
+          'p_description': null,
+          'p_page_count': null,
+          'p_published_date': null,
+          'p_publisher': null,
+          'p_categories': null,
+          'p_google_average_rating': null,
+          'p_google_ratings_count': null,
         });
       });
+
+      test(
+        'forwards the optional detail fields to the RPC when given',
+        () async {
+          stubRpc(result: {'already_on_shelf': false});
+
+          await repository.addBook(
+            isbn: '9780743273565',
+            title: 'The Great Gatsby',
+            author: 'F. Scott Fitzgerald',
+            thumbnail: 'https://example.com/gatsby.jpg',
+            description: 'A tragic tale set in the Jazz Age.',
+            pageCount: 180,
+            publishedDate: '2004-09-30',
+            publisher: 'Scribner',
+            categories: const ['Fiction'],
+            googleAverageRating: 3.9,
+            googleRatingsCount: 512,
+          );
+
+          final captured =
+              verify(
+                    () => client.rpc<dynamic>(
+                      'add_book_to_shelf',
+                      params: captureAny(named: 'params'),
+                    ),
+                  ).captured.single
+                  as Map<String, dynamic>;
+          expect(
+            captured['p_description'],
+            'A tragic tale set in the Jazz Age.',
+          );
+          expect(captured['p_page_count'], 180);
+          expect(captured['p_published_date'], '2004-09-30');
+          expect(captured['p_publisher'], 'Scribner');
+          expect(captured['p_categories'], ['Fiction']);
+          expect(captured['p_google_average_rating'], 3.9);
+          expect(captured['p_google_ratings_count'], 512);
+        },
+      );
 
       test('propagates RPC failures (e.g. permission denied)', () async {
         stubRpc(error: const PostgrestException(message: 'permission denied'));
@@ -439,6 +539,56 @@ void main() {
 
         expect(
           () => repository.setReadStatus('42', isRead: true),
+          throwsA(isA<PostgrestException>()),
+        );
+      });
+    });
+
+    group('setRating', () {
+      test('saves the given rating', () async {
+        final table = FakeQueryBuilder();
+        when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+        await repository.setRating('42', rating: 4);
+
+        expect(table.updatePayload?['rating'], 4);
+      });
+
+      test('updates only this user\'s copy of the book', () async {
+        final table = FakeQueryBuilder();
+        when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+        await repository.setRating('42', rating: 4);
+
+        expect(table.mutateBuilder.eqCalls, [
+          'bookshelf_user_id=$testUserId',
+          'book_id=42',
+        ]);
+      });
+
+      test('throws NotAuthenticatedException when signed out', () async {
+        logOut();
+        final table = FakeQueryBuilder();
+        when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+        await expectLater(
+          () => repository.setRating('42', rating: 4),
+          throwsA(isA<NotAuthenticatedException>()),
+        );
+        expect(table.mutateBuilder.eqCalls, isEmpty);
+      });
+
+      test('propagates server errors during update', () async {
+        when(() => client.from('bookshelf_items')).thenAnswer(
+          (_) => FakeQueryBuilder(
+            mutateBuilder: FakeFilterBuilder(
+              error: const PostgrestException(message: 'timeout'),
+            ),
+          ),
+        );
+
+        expect(
+          () => repository.setRating('42', rating: 4),
           throwsA(isA<PostgrestException>()),
         );
       });

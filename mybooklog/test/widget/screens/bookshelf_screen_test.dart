@@ -213,19 +213,13 @@ void main() {
 
       expect(find.byType(BookOnShelf), findsNWidgets(3));
 
-      final searchButton = find.byIcon(Icons.search);
-      if (searchButton.evaluate().isNotEmpty) {
-        await tester.tap(searchButton.first);
-        await tester.pumpAndSettle();
+      // The search field only appears after tapping the AppBar icon.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'great');
+      await tester.pumpAndSettle();
 
-        final searchField = find.byType(TextField);
-        if (searchField.evaluate().isNotEmpty) {
-          await tester.enterText(searchField.first, 'great');
-          await tester.pumpAndSettle();
-
-          expect(find.byType(BookOnShelf), findsOneWidget);
-        }
-      }
+      expect(find.byType(BookOnShelf), findsOneWidget);
     });
 
     testWidgets('add book button is accessible', (WidgetTester tester) async {
