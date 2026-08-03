@@ -210,6 +210,13 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         title: book.title,
         author: book.authors.join(', '),
         thumbnail: thumbnail.isEmpty ? null : thumbnail,
+        description: book.description,
+        pageCount: book.pageCount,
+        publishedDate: book.publishedDate,
+        publisher: book.publisher,
+        categories: book.categories,
+        googleAverageRating: book.averageRating,
+        googleRatingsCount: book.ratingsCount,
       );
       if (!mounted) return;
 

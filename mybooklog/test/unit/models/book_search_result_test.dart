@@ -120,6 +120,66 @@ void main() {
         expect(result, isNotNull);
         expect(result!.thumbnail, startsWith('https://'));
       });
+
+      test('parses the optional book-details-panel fields', () {
+        // Arrange — a realistic volumeInfo shape, verified live against
+        // Google's API (Dune by Frank Herbert).
+        final volume = {
+          'id': 'vol789',
+          'volumeInfo': {
+            'title': 'Dune',
+            'subtitle': 'Deluxe Edition',
+            'authors': ['Frank Herbert'],
+            'publisher': 'Penguin',
+            'publishedDate': '2016-10-25',
+            'description': 'A long synopsis...',
+            'pageCount': 722,
+            'categories': ['Fiction'],
+            'averageRating': 4,
+            'ratingsCount': 1,
+          },
+        };
+
+        // Act
+        final result = BookSearchResult.fromGoogleVolume(volume);
+
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.subtitle, 'Deluxe Edition');
+        expect(result.publisher, 'Penguin');
+        expect(result.publishedDate, '2016-10-25');
+        expect(result.description, 'A long synopsis...');
+        expect(result.pageCount, 722);
+        expect(result.categories, ['Fiction']);
+        expect(result.averageRating, 4.0);
+        expect(result.ratingsCount, 1);
+      });
+
+      test('leaves the optional fields null/empty when Google omits them '
+          '(mirrors a real response, e.g. "The Hobbit" had no averageRating, '
+          'ratingsCount, or subtitle at all)', () {
+        // Arrange
+        final volume = {
+          'volumeInfo': {
+            'title': 'The Hobbit',
+            'authors': ['J.R.R. Tolkien'],
+          },
+        };
+
+        // Act
+        final result = BookSearchResult.fromGoogleVolume(volume);
+
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.subtitle, isNull);
+        expect(result.publisher, isNull);
+        expect(result.publishedDate, isNull);
+        expect(result.description, isNull);
+        expect(result.pageCount, isNull);
+        expect(result.categories, isEmpty);
+        expect(result.averageRating, isNull);
+        expect(result.ratingsCount, isNull);
+      });
     });
 
     group('extractPreferredIsbn', () {

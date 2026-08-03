@@ -78,6 +78,13 @@ void main() {
           title: any(named: 'title'),
           author: any(named: 'author'),
           thumbnail: any(named: 'thumbnail'),
+          description: any(named: 'description'),
+          pageCount: any(named: 'pageCount'),
+          publishedDate: any(named: 'publishedDate'),
+          publisher: any(named: 'publisher'),
+          categories: any(named: 'categories'),
+          googleAverageRating: any(named: 'googleAverageRating'),
+          googleRatingsCount: any(named: 'googleRatingsCount'),
         ),
       ).thenAnswer((_) async => false);
 

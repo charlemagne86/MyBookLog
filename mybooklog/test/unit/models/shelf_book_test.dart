@@ -87,6 +87,61 @@ void main() {
         expect(result.thumbnailUri, contains('example.com/cover.jpg'));
       });
 
+      test('parses the optional detail fields and the user\'s rating', () {
+        // Arrange
+        final row = {
+          'book_id': 'book111',
+          'is_read': false,
+          'rating': 5,
+          'books_catalog': {
+            'title': 'Dune',
+            'description': 'An epic tale of politics and technology',
+            'page_count': 412,
+            'published_date': '1965-08-01',
+            'publisher': 'Chilton Books',
+            'categories': ['Fiction', 'Science Fiction'],
+            'google_average_rating': 4.5,
+            'google_ratings_count': 3000,
+          },
+        };
+
+        // Act
+        final result = ShelfBook.fromJoinedRow(row);
+
+        // Assert
+        expect(result.rating, 5);
+        expect(result.description, 'An epic tale of politics and technology');
+        expect(result.pageCount, 412);
+        expect(result.publishedDate, '1965-08-01');
+        expect(result.publisher, 'Chilton Books');
+        expect(result.categories, ['Fiction', 'Science Fiction']);
+        expect(result.googleAverageRating, 4.5);
+        expect(result.googleRatingsCount, 3000);
+      });
+
+      test('leaves the optional detail fields null/empty when Google never had '
+          'them (mirrors a real omitted-field API response)', () {
+        // Arrange
+        final row = {
+          'book_id': 'book222',
+          'is_read': false,
+          'books_catalog': {'title': 'The Hobbit'},
+        };
+
+        // Act
+        final result = ShelfBook.fromJoinedRow(row);
+
+        // Assert
+        expect(result.rating, isNull);
+        expect(result.description, isNull);
+        expect(result.pageCount, isNull);
+        expect(result.publishedDate, isNull);
+        expect(result.publisher, isNull);
+        expect(result.categories, isEmpty);
+        expect(result.googleAverageRating, isNull);
+        expect(result.googleRatingsCount, isNull);
+      });
+
       test('handles empty thumbnail URL', () {
         // Arrange
         final row = {
@@ -235,6 +290,21 @@ void main() {
 
         expect(copy.author, isNull);
         expect(copy.title, 'Untitled'); // Other fields unchanged
+      });
+
+      test('creates copy with rating changed', () {
+        final copy = original.copyWith(rating: 3);
+
+        expect(copy.rating, 3);
+        expect(copy.title, original.title);
+        expect(copy.isRead, original.isRead);
+      });
+
+      test('copyWith preserves rating when not overridden', () {
+        final rated = original.copyWith(rating: 3);
+        final copy = rated.copyWith(isRead: true);
+
+        expect(copy.rating, 3);
       });
     });
   });

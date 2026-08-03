@@ -147,6 +147,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenAnswer((_) async => false); // false = newly added
         await pumpPage(tester, results: makeBooks(3), totalItems: 3);
@@ -163,6 +170,13 @@ void main() {
             title: 'Book 1',
             author: 'Author 1',
             thumbnail: null,
+            description: null,
+            pageCount: null,
+            publishedDate: null,
+            publisher: null,
+            categories: const [],
+            googleAverageRating: null,
+            googleRatingsCount: null,
           ),
         ).called(1);
         // Success lands the user on their shelf.
@@ -178,6 +192,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenAnswer((_) async => true); // true = already on shelf
         await pumpPage(tester, results: makeBooks(3), totalItems: 3);
@@ -209,6 +230,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenAnswer((_) async => false);
         await pumpPage(
@@ -228,6 +256,13 @@ void main() {
             title: 'Book 0',
             author: 'Author 0',
             thumbnail: null,
+            description: null,
+            pageCount: null,
+            publishedDate: null,
+            publisher: null,
+            categories: const [],
+            googleAverageRating: null,
+            googleRatingsCount: null,
           ),
         ).called(1);
       });
@@ -256,6 +291,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         );
       });
@@ -269,6 +311,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenThrow(Exception('network down'));
         await pumpPage(tester, results: makeBooks(3), totalItems: 3);
@@ -281,6 +330,64 @@ void main() {
         expect(find.textContaining('Failed to add book'), findsOneWidget);
         // The button is back in its idle state so the user can try again.
         expect(find.byType(AddToShelfButton), findsOneWidget);
+      });
+
+      testWidgets('forwards the book-details-panel fields to the repository', (
+        tester,
+      ) async {
+        when(
+          () => repository.addBook(
+            isbn: any(named: 'isbn'),
+            title: any(named: 'title'),
+            author: any(named: 'author'),
+            thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
+          ),
+        ).thenAnswer((_) async => false);
+        final books = [
+          BookSearchResult(
+            volumeId: 'vol-0',
+            title: 'Dune',
+            authors: const ['Frank Herbert'],
+            isbn: '9780000000000',
+            thumbnail: '',
+            description: 'A long synopsis...',
+            pageCount: 722,
+            publishedDate: '2016-10-25',
+            publisher: 'Penguin',
+            categories: const ['Fiction'],
+            averageRating: 4.0,
+            ratingsCount: 1,
+          ),
+        ];
+        await pumpPage(tester, results: books, totalItems: 1);
+
+        await tester.tap(find.text('Dune'));
+        await tester.pump();
+        await tester.tap(find.byType(AddToShelfButton));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => repository.addBook(
+            isbn: '9780000000000',
+            title: 'Dune',
+            author: 'Frank Herbert',
+            thumbnail: null,
+            description: 'A long synopsis...',
+            pageCount: 722,
+            publishedDate: '2016-10-25',
+            publisher: 'Penguin',
+            categories: const ['Fiction'],
+            googleAverageRating: 4.0,
+            googleRatingsCount: 1,
+          ),
+        ).called(1);
       });
     });
 
@@ -297,6 +404,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenAnswer((_) async => false);
         final books = [
@@ -321,6 +435,13 @@ void main() {
             title: 'Book 0',
             author: 'Author 0',
             thumbnail: 'https://covers.example.com/good.jpg',
+            description: null,
+            pageCount: null,
+            publishedDate: null,
+            publisher: null,
+            categories: const [],
+            googleAverageRating: null,
+            googleRatingsCount: null,
           ),
         ).called(1);
       });
@@ -346,6 +467,13 @@ void main() {
               title: any(named: 'title'),
               author: any(named: 'author'),
               thumbnail: any(named: 'thumbnail'),
+              description: any(named: 'description'),
+              pageCount: any(named: 'pageCount'),
+              publishedDate: any(named: 'publishedDate'),
+              publisher: any(named: 'publisher'),
+              categories: any(named: 'categories'),
+              googleAverageRating: any(named: 'googleAverageRating'),
+              googleRatingsCount: any(named: 'googleRatingsCount'),
             ),
           ).thenAnswer((_) async => false);
           final editions = [
@@ -378,6 +506,13 @@ void main() {
               title: 'Dune',
               author: 'Frank Herbert',
               thumbnail: 'https://covers.example.com/good.jpg', // borrowed
+              description: null,
+              pageCount: null,
+              publishedDate: null,
+              publisher: null,
+              categories: const [],
+              googleAverageRating: null,
+              googleRatingsCount: null,
             ),
           ).called(1);
         },
@@ -395,6 +530,13 @@ void main() {
             title: any(named: 'title'),
             author: any(named: 'author'),
             thumbnail: any(named: 'thumbnail'),
+            description: any(named: 'description'),
+            pageCount: any(named: 'pageCount'),
+            publishedDate: any(named: 'publishedDate'),
+            publisher: any(named: 'publisher'),
+            categories: any(named: 'categories'),
+            googleAverageRating: any(named: 'googleAverageRating'),
+            googleRatingsCount: any(named: 'googleRatingsCount'),
           ),
         ).thenAnswer((_) async => false);
         final books = [
@@ -419,6 +561,13 @@ void main() {
             title: 'Book 0',
             author: 'Author 0',
             thumbnail: null,
+            description: null,
+            pageCount: null,
+            publishedDate: null,
+            publisher: null,
+            categories: const [],
+            googleAverageRating: null,
+            googleRatingsCount: null,
           ),
         ).called(1);
         // The book still lands on the shelf despite no valid cover —

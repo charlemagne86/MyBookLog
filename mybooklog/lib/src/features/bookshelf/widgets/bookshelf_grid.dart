@@ -5,25 +5,22 @@ import 'book_on_shelf.dart';
 
 /// BUSINESS LOGIC:
 /// Display user's books in a 3-column grid.
-/// Each book is tappable for context menu (remove/read-status).
-/// Highlighted book shows visual lift effect.
+/// Each book opens its details panel on tap.
 ///
 /// TECHNICAL:
 /// Takes list of visible books (already filtered).
-/// Takes callbacks for long-press and book selection state.
-/// Uses GridView.builder for efficient rendering.
-/// Shows tactile feedback via isContextMenuTarget property.
+/// Uses GridView.builder for efficient rendering. Each cell wraps its
+/// BookOnShelf in an InkWell so a tap gets standard Material ink feedback
+/// before onBookTap opens the details panel.
 class BookshelfGrid extends StatelessWidget {
   const BookshelfGrid({
     super.key,
     required this.books,
-    required this.selectedBookId,
-    required this.onBookLongPress,
+    required this.onBookTap,
   });
 
   final List<ShelfBook> books;
-  final String? selectedBookId;
-  final Function(ShelfBook book, Offset globalPosition) onBookLongPress;
+  final ValueChanged<ShelfBook> onBookTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,17 +35,14 @@ class BookshelfGrid extends StatelessWidget {
       itemCount: books.length,
       itemBuilder: (context, index) {
         final book = books[index];
-        final isSelected = selectedBookId == book.bookId;
 
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onLongPressStart: (details) =>
-              onBookLongPress(book, details.globalPosition),
+        return InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: () => onBookTap(book),
           child: BookOnShelf(
             imageUrl: book.thumbnailUri,
             title: book.title,
             isRead: book.isRead,
-            isContextMenuTarget: isSelected,
           ),
         );
       },
