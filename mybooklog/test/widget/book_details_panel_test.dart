@@ -172,27 +172,24 @@ void main() {
         expect(stars.rating, 3); // back to the original
       });
 
-      testWidgets(
-        'tapping the star matching the current rating clears it and '
-        'calls onRate with null',
-        (tester) async {
-          int? reported = -1; // sentinel so "still -1" means "never called"
-          await pumpPanel(
-            tester,
-            book: fullBook,
-            onRate: (r) async => reported = r,
-          );
+      testWidgets('tapping the star matching the current rating clears it and '
+          'calls onRate with null', (tester) async {
+        int? reported = -1; // sentinel so "still -1" means "never called"
+        await pumpPanel(
+          tester,
+          book: fullBook,
+          onRate: (r) async => reported = r,
+        );
 
-          // fullBook starts at 3 stars filled; tapping the 3rd filled star
-          // again should clear the rating rather than re-set it to 3.
-          await tester.tap(find.byIcon(Icons.star).at(2));
-          await tester.pumpAndSettle();
+        // fullBook starts at 3 stars filled; tapping the 3rd filled star
+        // again should clear the rating rather than re-set it to 3.
+        await tester.tap(find.byIcon(Icons.star).at(2));
+        await tester.pumpAndSettle();
 
-          expect(reported, isNull);
-          final stars = tester.widget<StarRating>(find.byType(StarRating));
-          expect(stars.rating, isNull);
-        },
-      );
+        expect(reported, isNull);
+        final stars = tester.widget<StarRating>(find.byType(StarRating));
+        expect(stars.rating, isNull);
+      });
     });
 
     group('Google\'s rating', () {
