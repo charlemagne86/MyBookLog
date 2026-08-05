@@ -86,16 +86,37 @@ void main() {
     });
 
     group('read/unread', () {
-      testWidgets('shows "Mark as Read" for an unread book', (tester) async {
+      testWidgets('shows "Mark as Read" for an unread book, as the solid '
+          '(elevated) button', (tester) async {
         await pumpPanel(tester, book: fullBook);
 
-        expect(find.text('Mark as Read'), findsOneWidget);
+        // Scoped to the "Mark as Read" label specifically — "Remove from
+        // Shelf" is also an ElevatedButton, so a bare byType(ElevatedButton)
+        // count would double-match it.
+        expect(
+          find.widgetWithText(ElevatedButton, 'Mark as Read'),
+          findsOneWidget,
+        );
+        expect(find.byType(OutlinedButton), findsNothing);
       });
 
-      testWidgets('shows "Mark as Unread" for a read book', (tester) async {
+      testWidgets('shows "Mark as Unread" for a read book, with the '
+          'foreground/background flipped to the outlined button', (
+        tester,
+      ) async {
         await pumpPanel(tester, book: fullBook.copyWith(isRead: true));
 
-        expect(find.text('Mark as Unread'), findsOneWidget);
+        expect(
+          find.widgetWithText(OutlinedButton, 'Mark as Unread'),
+          findsOneWidget,
+        );
+        // "Remove from Shelf" is still an ElevatedButton, so this confirms
+        // only the read/unread button itself switched type, not a coincidence
+        // of the whole panel's button styling changing.
+        expect(
+          find.widgetWithText(ElevatedButton, 'Remove from Shelf'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('tapping the button flips the label immediately and calls '
@@ -113,7 +134,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(called, isTrue);
-        expect(find.text('Mark as Unread'), findsOneWidget);
+        expect(
+          find.widgetWithText(OutlinedButton, 'Mark as Unread'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('rolls back the flip if onToggleRead fails', (tester) async {
@@ -126,9 +150,13 @@ void main() {
         await tester.tap(find.text('Mark as Read'));
         await tester.pumpAndSettle();
 
-        // Back to the original, unread label — the optimistic flip was
-        // undone rather than left showing a save that didn't happen.
-        expect(find.text('Mark as Read'), findsOneWidget);
+        // Back to the original, unread label and button style — the
+        // optimistic flip was undone rather than left showing a save that
+        // didn't happen.
+        expect(
+          find.widgetWithText(ElevatedButton, 'Mark as Read'),
+          findsOneWidget,
+        );
       });
     });
 
