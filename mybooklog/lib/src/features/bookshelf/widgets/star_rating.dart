@@ -11,7 +11,11 @@ import 'package:flutter/material.dart';
 /// A row of [starCount] star icons (filled up to [rating], outlined beyond
 /// it). When [onRate] is null the row is display-only (used for Google's
 /// rating, which nobody can edit by tapping); when it's provided, tapping
-/// star N reports a rating of N (1-indexed, so the first star reports 1).
+/// star N reports a rating of N (1-indexed, so the first star reports 1) —
+/// except tapping the star that matches the *current* rating again (e.g.
+/// tapping the 3rd star when the rating is already 3) reports `null`
+/// instead, so a user can clear a rating by tapping it a second time rather
+/// than being stuck re-picking a different number first.
 /// Each star uses [InkResponse] rather than [IconButton]: the app's themed
 /// icon-button minimum touch target (48x48) would force five stars wider
 /// than the space available next to a book cover.
@@ -35,8 +39,10 @@ class StarRating extends StatelessWidget {
   final double size;
   final double spacing;
 
-  /// Called with the 1-indexed star tapped. Null makes this read-only.
-  final ValueChanged<int>? onRate;
+  /// Called with the 1-indexed star tapped, or `null` when the tap cleared
+  /// the rating (tapping the currently-selected star again). The callback
+  /// field itself being null makes the whole row read-only.
+  final ValueChanged<int?>? onRate;
   final Color? filledColor;
   final Color? outlineColor;
 
@@ -64,11 +70,14 @@ class StarRating extends StatelessWidget {
               child: icon,
             );
           }
+          final isCurrentRating = starNumber == currentRating;
           return Semantics(
             button: true,
-            label: 'Rate $starNumber out of $starCount stars',
+            label: isCurrentRating
+                ? 'Clear rating'
+                : 'Rate $starNumber out of $starCount stars',
             child: InkResponse(
-              onTap: () => onRate!(starNumber),
+              onTap: () => onRate!(isCurrentRating ? null : starNumber),
               radius: size,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: spacing / 2),

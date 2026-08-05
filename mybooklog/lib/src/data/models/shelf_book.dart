@@ -86,21 +86,26 @@ class ShelfBook {
   /// read/unread flag or user rating. Used when the user toggles "read" or
   /// sets a rating so the screen can swap in the updated version without
   /// re-downloading anything.
-  ShelfBook copyWith({bool? isRead, int? rating}) => ShelfBook(
-    bookId: bookId,
-    title: title,
-    author: author,
-    thumbnailUri: thumbnailUri,
-    isRead: isRead ?? this.isRead,
-    description: description,
-    pageCount: pageCount,
-    publishedDate: publishedDate,
-    publisher: publisher,
-    categories: categories,
-    googleAverageRating: googleAverageRating,
-    googleRatingsCount: googleRatingsCount,
-    rating: rating ?? this.rating,
-  );
+  ///
+  /// `rating: null` on its own leaves the existing rating alone (it just
+  /// wasn't provided) — pass `clearRating: true` to actually blank it out,
+  /// since `null` can't otherwise be told apart from "not passed".
+  ShelfBook copyWith({bool? isRead, int? rating, bool clearRating = false}) =>
+      ShelfBook(
+        bookId: bookId,
+        title: title,
+        author: author,
+        thumbnailUri: thumbnailUri,
+        isRead: isRead ?? this.isRead,
+        description: description,
+        pageCount: pageCount,
+        publishedDate: publishedDate,
+        publisher: publisher,
+        categories: categories,
+        googleAverageRating: googleAverageRating,
+        googleRatingsCount: googleRatingsCount,
+        rating: clearRating ? null : (rating ?? this.rating),
+      );
 
   /// Interprets the "has this been read?" value from the database.
   ///

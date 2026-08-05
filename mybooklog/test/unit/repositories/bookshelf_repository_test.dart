@@ -566,6 +566,17 @@ void main() {
         ]);
       });
 
+      test('a null rating clears it (the "tap the same star again" '
+          'flow)', () async {
+        final table = FakeQueryBuilder();
+        when(() => client.from('bookshelf_items')).thenAnswer((_) => table);
+
+        await repository.setRating('42', rating: null);
+
+        expect(table.updatePayload?.containsKey('rating'), isTrue);
+        expect(table.updatePayload?['rating'], isNull);
+      });
+
       test('throws NotAuthenticatedException when signed out', () async {
         logOut();
         final table = FakeQueryBuilder();

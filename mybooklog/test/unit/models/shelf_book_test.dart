@@ -306,6 +306,14 @@ void main() {
 
         expect(copy.rating, 3);
       });
+
+      test('copyWith(clearRating: true) blanks out an existing rating', () {
+        final rated = original.copyWith(rating: 3);
+        final cleared = rated.copyWith(clearRating: true);
+
+        expect(cleared.rating, isNull);
+        expect(cleared.title, original.title); // other fields unaffected
+      });
     });
   });
 }
