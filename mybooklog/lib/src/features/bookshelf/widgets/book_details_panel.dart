@@ -176,13 +176,21 @@ class _BookDetailsPanelState extends State<BookDetailsPanel> {
                 ],
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _handleToggleRead,
-                icon: Icon(
-                  _isRead ? Icons.check_circle : Icons.check_circle_outline,
-                ),
-                label: Text(_isRead ? 'Mark as Unread' : 'Mark as Read'),
-              ),
+              // Solid green = "not read yet, tap to mark read" (a call to
+              // action); flipped to the outlined look once read, so the
+              // button itself signals "already done" rather than just
+              // relabeling the same solid button.
+              _isRead
+                  ? OutlinedButton.icon(
+                      onPressed: _handleToggleRead,
+                      icon: const Icon(Icons.check_circle),
+                      label: const Text('Mark as Unread'),
+                    )
+                  : ElevatedButton.icon(
+                      onPressed: _handleToggleRead,
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('Mark as Read'),
+                    ),
               const SizedBox(height: 16),
               Text('Your rating', style: theme.textTheme.labelLarge),
               const SizedBox(height: 4),
