@@ -205,16 +205,20 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
     }
   }
 
-  /// Saves the user's 1-5 star rating for a book. Rethrows on failure so
-  /// the details panel knows to undo its own optimistic UI.
-  Future<void> _onSetRating(ShelfBook book, int rating) async {
+  /// Saves the user's 1-5 star rating for a book, or clears it when
+  /// [rating] is null (the user tapped their current rating's star again).
+  /// Rethrows on failure so the details panel knows to undo its own
+  /// optimistic UI.
+  Future<void> _onSetRating(ShelfBook book, int? rating) async {
     try {
       await _repo.setRating(book.bookId, rating: rating);
       if (!mounted) return;
       setState(() {
         _books = _books
             .map(
-              (b) => b.bookId == book.bookId ? b.copyWith(rating: rating) : b,
+              (b) => b.bookId == book.bookId
+                  ? b.copyWith(rating: rating, clearRating: rating == null)
+                  : b,
             )
             .toList();
       });

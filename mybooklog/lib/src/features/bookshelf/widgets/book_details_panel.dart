@@ -33,7 +33,10 @@ class BookDetailsPanel extends StatefulWidget {
 
   final ShelfBook book;
   final Future<void> Function() onToggleRead;
-  final Future<void> Function(int rating) onRate;
+
+  /// `rating` is null when the user cleared their rating (tapped the
+  /// currently-selected star again).
+  final Future<void> Function(int? rating) onRate;
   final Future<void> Function() onRemove;
 
   /// Roughly where a description stops being a quick blurb and starts being
@@ -70,7 +73,7 @@ class _BookDetailsPanelState extends State<BookDetailsPanel> {
     }
   }
 
-  Future<void> _handleRate(int rating) async {
+  Future<void> _handleRate(int? rating) async {
     final previous = _rating;
     setState(() => _rating = rating);
     try {
@@ -183,7 +186,13 @@ class _BookDetailsPanelState extends State<BookDetailsPanel> {
               const SizedBox(height: 16),
               Text('Your rating', style: theme.textTheme.labelLarge),
               const SizedBox(height: 4),
-              StarRating(rating: _rating, onRate: _handleRate),
+              StarRating(
+                rating: _rating,
+                onRate: _handleRate,
+                size: 40,
+                spacing: 14,
+                filledColor: Colors.amber,
+              ),
               if (book.googleAverageRating != null) ...[
                 const SizedBox(height: 12),
                 Row(

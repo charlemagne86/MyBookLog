@@ -99,6 +99,50 @@ void main() {
       expect(reported, 1);
     });
 
+    testWidgets(
+      'tapping the star matching the current rating clears it (reports '
+      'null)',
+      (tester) async {
+        int? reported = -1; // sentinel so "still -1" means "never called"
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StarRating(rating: 3, onRate: (r) => reported = r),
+            ),
+          ),
+        );
+
+        // The stars render left-to-right, so the 3rd filled icon is star 3 —
+        // the book's current rating.
+        await tester.tap(find.byIcon(Icons.star).at(2));
+        await tester.pump();
+
+        expect(reported, isNull);
+      },
+    );
+
+    testWidgets(
+      'tapping a different star while already rated reports that star, '
+      'not null',
+      (tester) async {
+        int? reported;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StarRating(rating: 3, onRate: (r) => reported = r),
+            ),
+          ),
+        );
+
+        // Star 5 is outlined (beyond the current rating of 3); tapping it
+        // should report 5, not clear anything.
+        await tester.tap(find.byIcon(Icons.star_border).at(1));
+        await tester.pump();
+
+        expect(reported, 5);
+      },
+    );
+
     testWidgets('read-only mode (onRate: null) does not throw on tap', (
       tester,
     ) async {
