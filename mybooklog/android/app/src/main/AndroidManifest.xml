@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds don't get this auto-injected the way debug builds do
+         (Flutter's debug tooling adds it for the VM service connection);
+         without it, every network call fails at the OS level before it even
+         gets to DNS, surfacing as a confusing "host lookup failed" error. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="mybooklog"
         android:name="${applicationName}"
