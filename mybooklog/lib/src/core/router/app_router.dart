@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/repositories/auth_repository.dart';
+import '../../features/auth/forgot_password_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/signup_screen.dart';
 import '../../features/auth/splash_screen.dart';
@@ -65,11 +66,23 @@ GoRouter buildRouter(AuthRepository auth) {
       final loggedIn = auth.currentSession != null;
       final loc = state.matchedLocation;
       if (loc == '/splash') return null; // splash transitions itself
-      final onAuthScreen = loc == '/login' || loc == '/signup';
-      // Not logged in and trying to go anywhere else? Send to login.
-      if (!loggedIn && !onAuthScreen) return '/login';
-      // Already logged in but on a login/signup screen? Send to the shelf.
-      if (loggedIn && onAuthScreen) return '/shelf';
+      // Two DIFFERENT lists, deliberately not one:
+      //  * publicScreens — screens a logged-OUT user may see. Includes the
+      //    forgot-password flow, which by definition serves people who
+      //    cannot log in.
+      //  * bounceWhenLoggedIn — screens that make no sense once signed in.
+      //    Forgot-password is NOT here: verifying the emailed reset code
+      //    signs the user in MIDWAY through that flow, and bouncing them to
+      //    the shelf at that instant would strand them with their old
+      //    password never replaced. The screen itself navigates to the
+      //    shelf once the new password is saved.
+      final publicScreens =
+          loc == '/login' || loc == '/signup' || loc == '/forgot-password';
+      final bounceWhenLoggedIn = loc == '/login' || loc == '/signup';
+      // Not logged in and trying to go anywhere non-public? Send to login.
+      if (!loggedIn && !publicScreens) return '/login';
+      // Already logged in but on the login/signup screen? Send to the shelf.
+      if (loggedIn && bounceWhenLoggedIn) return '/shelf';
       return null; // otherwise, let the navigation proceed as requested
     },
     // The list of every screen in the app and the web-style address it
@@ -78,6 +91,13 @@ GoRouter buildRouter(AuthRepository auth) {
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (_, _) => const SignUpScreen()),
+      GoRoute(
+        path: '/forgot-password',
+        // The login screen passes along whatever email the user had already
+        // typed (as the route's "extra" data) so it arrives pre-filled.
+        builder: (_, state) =>
+            ForgotPasswordScreen(initialEmail: state.extra as String?),
+      ),
       GoRoute(
         path: '/shelf',
         builder: (_, _) => const BookshelfScreen(),

@@ -53,6 +53,54 @@ class AuthRepository {
   /// Signs the user out and ends their session.
   Future<void> signOut() => _client.auth.signOut();
 
+  /// BUSINESS LOGIC:
+  /// Step 1 of "Forgot password": the user gives us their email and we ask
+  /// the server to send them a 6-digit code. Importantly, this succeeds even
+  /// if no account exists for that email — the server stays silent so that
+  /// nobody can use this form to discover which emails have accounts.
+  ///
+  /// TECHNICAL:
+  /// Calls Supabase's resetPasswordForEmail. We do NOT pass a redirect link,
+  /// because the app uses the code-entry ("OTP") flow instead of email links:
+  /// the reset email's template shows the {{ .Token }} code, and the user
+  /// types it into the app. The email is trimmed first, same as sign-in.
+  Future<void> requestPasswordReset({required String email}) =>
+      _client.auth.resetPasswordForEmail(email.trim());
+
+  /// BUSINESS LOGIC:
+  /// Step 2 of "Forgot password": the user types the 6-digit code from the
+  /// email. If it matches, this proves they own the mailbox, and the server
+  /// signs them in — which is what authorizes the password change that
+  /// follows immediately after.
+  ///
+  /// TECHNICAL:
+  /// Calls verifyOTP with type "recovery" (the password-reset flavor of
+  /// one-time codes). A wrong or expired code raises an AuthException that
+  /// friendlyMessage() translates. On success Supabase stores a session, and
+  /// the router's auth listener fires — the forgot-password screen is exempt
+  /// from redirects (see app_router.dart) so the flow is not interrupted
+  /// before the new password is saved.
+  Future<void> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) => _client.auth.verifyOTP(
+    type: OtpType.recovery,
+    email: email.trim(),
+    token: code.trim(),
+  );
+
+  /// BUSINESS LOGIC:
+  /// Step 3 of "Forgot password": save the user's newly chosen password.
+  /// Only works when a session exists (i.e. right after the code above was
+  /// accepted), so a stranger cannot change a password without the code.
+  ///
+  /// TECHNICAL:
+  /// Calls updateUser on the current session. Password strength is enforced
+  /// by the screen (same validatePassword rules as signup) before this is
+  /// ever called; the server applies its own minimum-length check too.
+  Future<void> updatePassword({required String newPassword}) =>
+      _client.auth.updateUser(UserAttributes(password: newPassword));
+
   /// Translates raw technical error messages into short, friendly sentences
   /// suitable for showing on screen (e.g. "Incorrect email or password."
   /// instead of a server error code).
@@ -64,6 +112,19 @@ class AuthRepository {
       }
       if (m.contains('email not confirmed')) {
         return 'Please confirm your email address before logging in.';
+      }
+      // Password-reset codes: the server says "Token has expired or is
+      // invalid" (or similar) when the 6-digit code is wrong or too old.
+      if (m.contains('token') && (m.contains('expired') || m.contains('invalid'))) {
+        return 'That code is incorrect or has expired. '
+            'Check the code or request a new one.';
+      }
+      // The server throttles repeated reset requests and code attempts to
+      // stop guessing attacks ("rate limit" / "for security purposes ...").
+      if (m.contains('rate limit') ||
+          m.contains('security purposes') ||
+          m.contains('too many')) {
+        return 'Too many attempts. Please wait a moment and try again.';
       }
       return error.message;
     }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/features/auth/login_screen.dart';
@@ -277,27 +278,48 @@ void main() {
     });
 
     // BUSINESS LOGIC:
-    // The "Forgot password?" link is a courtesy to users, but the actual
-    // password reset feature is not yet implemented. Rather than remove the
-    // link and confuse users looking for it, we show a helpful message
-    // explaining it will be available soon.
-    testWidgets('forgot password shows not-implemented message', (
+    // The "Forgot password?" link opens the reset flow, carrying along the
+    // email the user already typed so they never have to enter it twice.
+    testWidgets('forgot password opens the reset flow with the typed email', (
       WidgetTester tester,
     ) async {
-      await _pumpLoginScreen(tester);
-
+      final mockAuth = MockAuthRepository();
       // TECHNICAL:
-      // Tap the forgot password link
+      // The link navigates via GoRouter, so this test pumps a small router:
+      // the real login screen plus a stand-in destination that records the
+      // "extra" data (the pre-filled email) it was given.
+      Object? receivedExtra;
+      final router = GoRouter(
+        initialLocation: '/login',
+        routes: [
+          GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+          GoRoute(
+            path: '/forgot-password',
+            builder: (_, state) {
+              receivedExtra = state.extra;
+              return const Scaffold(body: Text('RESET-FLOW'));
+            },
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [Provider<AuthRepository>.value(value: mockAuth)],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+
+      // Type an email, then tap the link.
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Username (email)'),
+        '  typed@example.com ',
+      );
       await tester.tap(find.text('Forgot password?'));
       await tester.pumpAndSettle();
 
-      // TECHNICAL:
-      // Verify the snackbar message appears
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(
-        find.text('Forgot password functionality is not implemented yet.'),
-        findsOneWidget,
-      );
+      // The reset flow opened, and the typed email traveled along (trimmed).
+      expect(find.text('RESET-FLOW'), findsOneWidget);
+      expect(receivedExtra, 'typed@example.com');
     });
 
     // BUSINESS LOGIC:
