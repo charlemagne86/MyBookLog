@@ -115,15 +115,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Forgot password functionality is not implemented yet.',
-                          ),
-                        ),
-                      );
-                    },
+                    // Opens the reset flow, carrying along whatever email is
+                    // already typed so the user need not enter it twice.
+                    // Pushed (not replaced) so the back button returns here.
+                    onPressed: () => context.push(
+                      '/forgot-password',
+                      extra: _usernameController.text.trim(),
+                    ),
                     child: const Text('Forgot password?'),
                   ),
                 ),

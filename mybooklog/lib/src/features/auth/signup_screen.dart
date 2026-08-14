@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/utils.dart' as utils;
 import '../../data/repositories/auth_repository.dart';
 
 /// The create-an-account screen: name, email, and password fields, with the
@@ -12,21 +13,11 @@ class SignUpScreen extends StatefulWidget {
 
   /// Checks whether a chosen password is strong enough.
   ///
-  /// The rules: at least 8 characters, containing at least one letter, one
-  /// number, and one special character (like ! or ?). If a rule is broken,
-  /// this returns the message to show under the password box; if the password
-  /// is fine, it returns nothing.
-  static String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
-    final hasLetter = RegExp(r'[A-Za-z]').hasMatch(value);
-    final hasNumber = RegExp(r'[0-9]').hasMatch(value);
-    final hasSpecial = RegExp(r'[!@#\$%^&*(),.?":{}|<>\_]').hasMatch(value);
-    if (!hasLetter || !hasNumber || !hasSpecial) {
-      return 'Password must have at least 1 letter, 1 number, and 1 special character.';
-    }
-    if (value.length < 8) return 'Password must be at least 8 characters.';
-    return null;
-  }
+  /// The actual rules live in one shared place (core/utils.dart) so signup
+  /// and password-reset enforce identical standards; this static remains as
+  /// the screen's public face of that check.
+  static String? validatePassword(String? value) =>
+      utils.validatePassword(value);
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
