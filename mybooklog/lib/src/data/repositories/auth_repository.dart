@@ -55,7 +55,7 @@ class AuthRepository {
 
   /// BUSINESS LOGIC:
   /// Step 1 of "Forgot password": the user gives us their email and we ask
-  /// the server to send them a 6-digit code. Importantly, this succeeds even
+  /// the server to send them a verification code. Importantly, this succeeds even
   /// if no account exists for that email — the server stays silent so that
   /// nobody can use this form to discover which emails have accounts.
   ///
@@ -68,7 +68,7 @@ class AuthRepository {
       _client.auth.resetPasswordForEmail(email.trim());
 
   /// BUSINESS LOGIC:
-  /// Step 2 of "Forgot password": the user types the 6-digit code from the
+  /// Step 2 of "Forgot password": the user types the verification code from the
   /// email. If it matches, this proves they own the mailbox, and the server
   /// signs them in — which is what authorizes the password change that
   /// follows immediately after.
@@ -114,7 +114,7 @@ class AuthRepository {
         return 'Please confirm your email address before logging in.';
       }
       // Password-reset codes: the server says "Token has expired or is
-      // invalid" (or similar) when the 6-digit code is wrong or too old.
+      // invalid" (or similar) when the code is wrong or too old.
       if (m.contains('token') && (m.contains('expired') || m.contains('invalid'))) {
         return 'That code is incorrect or has expired. '
             'Check the code or request a new one.';

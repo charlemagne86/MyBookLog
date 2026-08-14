@@ -9,7 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
 // BUSINESS LOGIC:
 // The forgot-password screen is a two-stage flow: ask for an email and send
-// a 6-digit code, then collect the code plus a new password. These tests
+// a verification code, then collect the code plus a new password. These tests
 // verify the behaviors that matter to users and to security:
 //  - the email typed on the login screen arrives pre-filled
 //  - the "code sent" message never reveals whether an account exists
@@ -116,7 +116,7 @@ void main() {
           find.textContaining('If an account exists for that email'),
           findsOneWidget,
         );
-        expect(find.text('6-digit code'), findsOneWidget);
+        expect(find.text('Verification code'), findsOneWidget);
         expect(find.text('New password'), findsOneWidget);
         expect(find.text('Confirm new password'), findsOneWidget);
         verify(
@@ -143,34 +143,67 @@ void main() {
         find.text('Something went wrong. Please check your connection and retry.'),
         findsOneWidget,
       );
-      expect(find.text('6-digit code'), findsNothing); // still stage 1
+      expect(find.text('Verification code'), findsNothing); // still stage 1
     });
   });
 
   group('ForgotPasswordScreen — stage 2 (code + new password)', () {
-    // BUSINESS LOGIC: Obvious mistakes are caught before any server call:
-    // short code, weak password, mismatched confirmation.
-    testWidgets('rejects a short code before calling the server', (
+    // BUSINESS LOGIC: An empty code is caught locally — no server call.
+    // Deliberately NOT testing a length requirement here: Supabase's OTP
+    // length is a per-project dashboard setting (this project currently
+    // sends 8-digit codes, not the commonly-assumed 6), so the screen must
+    // accept whatever length the server actually sends and let the server
+    // be the judge of whether the code itself is correct.
+    testWidgets('rejects an empty code before calling the server', (
       tester,
     ) async {
       final mockAuth = await _pumpScreen(tester);
       _stubSendCodeSuccess(mockAuth);
       await _advanceToStage2(tester);
 
-      await _fillStage2(tester, code: '123');
+      await _fillStage2(tester, code: '');
       await tester.tap(find.text('Reset password'));
       await tester.pump();
 
-      expect(
-        find.text('Enter the 6-digit code from the email.'),
-        findsOneWidget,
-      );
+      expect(find.text('Enter the code from the email.'), findsOneWidget);
       verifyNever(
         () => mockAuth.verifyRecoveryCode(
           email: any(named: 'email'),
           code: any(named: 'code'),
         ),
       );
+      await _disposeScreen(tester);
+    });
+
+    // BUSINESS LOGIC: An 8-digit code (this project's actual configured OTP
+    // length) must be accepted and sent to the server as-is — the earlier
+    // hardcoded 6-digit assumption would have wrongly rejected this.
+    testWidgets('accepts and submits a non-6-digit code unchanged', (
+      tester,
+    ) async {
+      final mockAuth = await _pumpScreen(tester);
+      _stubSendCodeSuccess(mockAuth);
+      when(
+        () => mockAuth.verifyRecoveryCode(
+          email: any(named: 'email'),
+          code: any(named: 'code'),
+        ),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockAuth.updatePassword(newPassword: any(named: 'newPassword')),
+      ).thenAnswer((_) async {});
+      await _advanceToStage2(tester);
+
+      await _fillStage2(tester, code: '12345678');
+      await tester.tap(find.text('Reset password'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockAuth.verifyRecoveryCode(
+          email: 'user@example.com',
+          code: '12345678',
+        ),
+      ).called(1);
       await _disposeScreen(tester);
     });
 

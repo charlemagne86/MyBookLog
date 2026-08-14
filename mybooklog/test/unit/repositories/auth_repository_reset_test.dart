@@ -7,7 +7,7 @@ import '../../mocks/mock_supabase.dart';
 
 // BUSINESS LOGIC:
 // "Forgot password" is a three-step conversation with the server: request a
-// 6-digit code by email, prove ownership by typing the code back, then save
+// verification code by email, prove ownership by typing the code back, then save
 // a new password. These tests verify AuthRepository relays each step to
 // Supabase correctly (right method, right arguments, typos trimmed) and that
 // server errors surface as friendly, actionable messages.
@@ -82,7 +82,7 @@ void main() {
   });
 
   group('AuthRepository.verifyRecoveryCode', () {
-    // BUSINESS LOGIC: Step 2 checks the 6-digit code. It must use the
+    // BUSINESS LOGIC: Step 2 checks the verification code. It must use the
     // "recovery" code type — the password-reset flavor — not signup or
     // magic-link codes.
     test('verifies the code as a recovery OTP with trimmed inputs', () async {

@@ -10,7 +10,8 @@ import '../../data/repositories/auth_repository.dart';
 
 /// BUSINESS LOGIC:
 /// The "Forgot password" screen. A user who cannot log in proves they own
-/// their account by receiving a 6-digit code at their email address and
+/// their account by receiving a one-time verification code at their email
+/// address and
 /// typing it back in, then chooses a new password — all inside the app, with
 /// no fiddly email links to tap. When the reset succeeds they are signed in
 /// and taken straight to their bookshelf; they proved they own the mailbox,
@@ -60,7 +61,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // Which of the two stages is showing: false = "enter email",
   // true = "enter code + new password".
   bool _codeSent = false;
-  // True once the server has accepted the 6-digit code. If the password save
+  // True once the server has accepted the code. If the password save
   // then fails, the retry skips re-verifying (the code is already used up).
   bool _codeVerified = false;
   // Whether the password boxes currently hide their contents as dots.
@@ -107,7 +108,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   /// Stage 1 submit (also used by Resend Code): ask the server to email a
-  /// 6-digit reset code, then advance to stage 2. The confirmation message
+  /// reset code, then advance to stage 2. The confirmation message
   /// never reveals whether the email actually has an account.
   Future<void> _sendCode() async {
     final email = _emailController.text.trim();
@@ -202,9 +203,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Text(
                     _codeSent
                         ? "If an account exists for that email, we've sent a "
-                              '6-digit code. It expires in 1 hour.'
+                              'verification code. It expires in 1 hour.'
                         : "Enter your account's email address and we'll send "
-                              'you a 6-digit code to reset your password.',
+                              'you a code to reset your password.',
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 24),
@@ -219,16 +220,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     TextFormField(
                       controller: _codeController,
                       keyboardType: TextInputType.number,
-                      maxLength: 6,
                       // Codes are digits only; block anything else at the
-                      // keyboard level to prevent typos.
+                      // keyboard level to prevent typos. Deliberately no
+                      // maxLength/exact-length check here — Supabase's
+                      // OTP length is a per-project dashboard setting
+                      // (Authentication > Providers), not a fixed constant,
+                      // so the client only checks "something was typed" and
+                      // lets the server be the source of truth on whether
+                      // the code itself is right.
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: const InputDecoration(
-                        labelText: '6-digit code',
-                        counterText: '',
+                        labelText: 'Verification code',
                       ),
-                      validator: (v) => (v == null || v.length != 6)
-                          ? 'Enter the 6-digit code from the email.'
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Enter the code from the email.'
                           : null,
                     ),
                     const SizedBox(height: 16),
