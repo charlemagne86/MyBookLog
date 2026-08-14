@@ -140,7 +140,9 @@ void main() {
       await _advanceToStage2(tester);
 
       expect(
-        find.text('Something went wrong. Please check your connection and retry.'),
+        find.text(
+          'Something went wrong. Please check your connection and retry.',
+        ),
         findsOneWidget,
       );
       expect(find.text('Verification code'), findsNothing); // still stage 1
@@ -216,7 +218,11 @@ void main() {
       _stubSendCodeSuccess(mockAuth);
       await _advanceToStage2(tester);
 
-      await _fillStage2(tester, password: 'weakpassword', confirm: 'weakpassword');
+      await _fillStage2(
+        tester,
+        password: 'weakpassword',
+        confirm: 'weakpassword',
+      );
       await tester.tap(find.text('Reset password'));
       await tester.pump();
 
@@ -416,9 +422,7 @@ void main() {
           code: '123456',
         ),
       ).called(1);
-      verify(
-        () => mockAuth.updatePassword(newPassword: 'NewPass1!'),
-      ).called(1);
+      verify(() => mockAuth.updatePassword(newPassword: 'NewPass1!')).called(1);
       // The user was told, and moved to the shelf.
       expect(find.text('Your password has been updated.'), findsOneWidget);
       expect(find.text('SHELF-DESTINATION'), findsOneWidget);

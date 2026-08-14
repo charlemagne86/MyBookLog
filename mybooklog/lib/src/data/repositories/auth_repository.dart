@@ -115,7 +115,8 @@ class AuthRepository {
       }
       // Password-reset codes: the server says "Token has expired or is
       // invalid" (or similar) when the code is wrong or too old.
-      if (m.contains('token') && (m.contains('expired') || m.contains('invalid'))) {
+      if (m.contains('token') &&
+          (m.contains('expired') || m.contains('invalid'))) {
         return 'That code is incorrect or has expired. '
             'Check the code or request a new one.';
       }

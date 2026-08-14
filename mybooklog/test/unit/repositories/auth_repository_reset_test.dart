@@ -120,7 +120,8 @@ void main() {
       ).thenThrow(const AuthException('Token has expired or is invalid'));
 
       expect(
-        () => repo.verifyRecoveryCode(email: 'user@example.com', code: '000000'),
+        () =>
+            repo.verifyRecoveryCode(email: 'user@example.com', code: '000000'),
         throwsA(isA<AuthException>()),
       );
     });
@@ -136,8 +137,9 @@ void main() {
 
       await repo.updatePassword(newPassword: 'NewPass1!');
 
-      final captured =
-          verify(() => authClient.updateUser(captureAny())).captured;
+      final captured = verify(
+        () => authClient.updateUser(captureAny()),
+      ).captured;
       expect((captured.single as UserAttributes).password, 'NewPass1!');
     });
   });
@@ -170,7 +172,10 @@ void main() {
       final friendly = AuthRepository.friendlyMessage(
         const AuthException('email rate limit exceeded'),
       );
-      expect(friendly, 'Too many attempts. Please wait a moment and try again.');
+      expect(
+        friendly,
+        'Too many attempts. Please wait a moment and try again.',
+      );
     });
 
     test('translates "for security purposes" throttle to wait message', () {
@@ -179,14 +184,20 @@ void main() {
           'For security purposes, you can only request this once every 60 seconds',
         ),
       );
-      expect(friendly, 'Too many attempts. Please wait a moment and try again.');
+      expect(
+        friendly,
+        'Too many attempts. Please wait a moment and try again.',
+      );
     });
 
     test('translates "too many requests" to wait message', () {
       final friendly = AuthRepository.friendlyMessage(
         const AuthException('Too many requests'),
       );
-      expect(friendly, 'Too many attempts. Please wait a moment and try again.');
+      expect(
+        friendly,
+        'Too many attempts. Please wait a moment and try again.',
+      );
     });
 
     // BUSINESS LOGIC: The original login errors must keep their translations
