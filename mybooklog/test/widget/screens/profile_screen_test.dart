@@ -130,11 +130,7 @@ void main() {
             password: any(named: 'password'),
           ),
         ).thenThrow(const AuthException('Invalid login credentials'));
-        await _pumpScreen(
-          tester,
-          mockAuth: mockAuth,
-          mockProfile: mockProfile,
-        );
+        await _pumpScreen(tester, mockAuth: mockAuth, mockProfile: mockProfile);
 
         await fillPasswordForm(
           tester,
@@ -159,14 +155,9 @@ void main() {
           ),
         ).thenAnswer((_) async {});
         when(
-          () =>
-              mockAuth.updatePassword(newPassword: any(named: 'newPassword')),
+          () => mockAuth.updatePassword(newPassword: any(named: 'newPassword')),
         ).thenAnswer((_) async {});
-        await _pumpScreen(
-          tester,
-          mockAuth: mockAuth,
-          mockProfile: mockProfile,
-        );
+        await _pumpScreen(tester, mockAuth: mockAuth, mockProfile: mockProfile);
 
         await fillPasswordForm(
           tester,
@@ -196,10 +187,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Delete your account?'), findsOneWidget);
-      expect(
-        find.textContaining('final and cannot be undone'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('final and cannot be undone'), findsOneWidget);
     });
 
     testWidgets('Cancel does not delete the account', (tester) async {

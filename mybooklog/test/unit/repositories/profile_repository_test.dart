@@ -48,10 +48,7 @@ class FakeFilterBuilder<T> extends Fake implements PostgrestFilterBuilder<T> {
 
   @override
   PostgrestTransformBuilder<PostgrestMap> single() =>
-      FakeFilterBuilder<PostgrestMap>(
-        result: singleResult,
-        error: singleError,
-      );
+      FakeFilterBuilder<PostgrestMap>(result: singleResult, error: singleError);
 
   @override
   Future<U> then<U>(
@@ -139,9 +136,7 @@ void main() {
 
       test('filters by the signed-in user\'s id', () async {
         final table = FakeQueryBuilder(
-          selectBuilder: FakeFilterBuilder(
-            singleResult: {'id': testUserId},
-          ),
+          selectBuilder: FakeFilterBuilder(singleResult: {'id': testUserId}),
         );
         when(() => client.from('users')).thenAnswer((_) => table);
 
@@ -150,46 +145,58 @@ void main() {
         expect(table.selectBuilder.eqCalls, ['id=$testUserId']);
       });
 
-      test('throws NotAuthenticatedException when nobody is logged in', () async {
-        logOut();
-        final table = FakeQueryBuilder();
-        when(() => client.from('users')).thenAnswer((_) => table);
+      test(
+        'throws NotAuthenticatedException when nobody is logged in',
+        () async {
+          logOut();
+          final table = FakeQueryBuilder();
+          when(() => client.from('users')).thenAnswer((_) => table);
 
-        // The guard fires while the query chain is still being built (the
-        // uid is the eq() argument), so the request is never executed.
-        await expectLater(
-          () => repository.fetchProfile(),
-          throwsA(isA<NotAuthenticatedException>()),
-        );
-        expect(table.selectBuilder.eqCalls, isEmpty);
-      });
+          // The guard fires while the query chain is still being built (the
+          // uid is the eq() argument), so the request is never executed.
+          await expectLater(
+            () => repository.fetchProfile(),
+            throwsA(isA<NotAuthenticatedException>()),
+          );
+          expect(table.selectBuilder.eqCalls, isEmpty);
+        },
+      );
     });
 
     group('updateProfile', () {
-      test('sends trimmed first and last name for the signed-in user', () async {
-        final table = FakeQueryBuilder();
-        when(() => client.from('users')).thenAnswer((_) => table);
+      test(
+        'sends trimmed first and last name for the signed-in user',
+        () async {
+          final table = FakeQueryBuilder();
+          when(() => client.from('users')).thenAnswer((_) => table);
 
-        await repository.updateProfile(
-          firstName: '  Jane  ',
-          lastName: '  Doe  ',
-        );
+          await repository.updateProfile(
+            firstName: '  Jane  ',
+            lastName: '  Doe  ',
+          );
 
-        expect(table.updatePayload, {'first_name': 'Jane', 'last_name': 'Doe'});
-        expect(table.mutateBuilder.eqCalls, ['id=$testUserId']);
-      });
+          expect(table.updatePayload, {
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+          });
+          expect(table.mutateBuilder.eqCalls, ['id=$testUserId']);
+        },
+      );
 
-      test('throws NotAuthenticatedException when nobody is logged in', () async {
-        logOut();
-        final table = FakeQueryBuilder();
-        when(() => client.from('users')).thenAnswer((_) => table);
+      test(
+        'throws NotAuthenticatedException when nobody is logged in',
+        () async {
+          logOut();
+          final table = FakeQueryBuilder();
+          when(() => client.from('users')).thenAnswer((_) => table);
 
-        await expectLater(
-          () => repository.updateProfile(firstName: 'Jane', lastName: 'Doe'),
-          throwsA(isA<NotAuthenticatedException>()),
-        );
-        expect(table.mutateBuilder.eqCalls, isEmpty);
-      });
+          await expectLater(
+            () => repository.updateProfile(firstName: 'Jane', lastName: 'Doe'),
+            throwsA(isA<NotAuthenticatedException>()),
+          );
+          expect(table.mutateBuilder.eqCalls, isEmpty);
+        },
+      );
     });
 
     group('deleteAccount', () {
@@ -206,9 +213,7 @@ void main() {
       });
 
       test('does not sign out when the RPC fails', () async {
-        when(
-          () => client.rpc<dynamic>('delete_own_account'),
-        ).thenAnswer(
+        when(() => client.rpc<dynamic>('delete_own_account')).thenAnswer(
           (_) => FakeFilterBuilder<dynamic>(
             error: PostgrestException(message: 'not authenticated'),
           ),

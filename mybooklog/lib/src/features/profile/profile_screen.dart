@@ -197,7 +197,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text('Email', style: Theme.of(context).textTheme.labelLarge),
                   const SizedBox(height: 4),
-                  Text(_username ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                  Text(
+                    _username ?? '',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                   const SizedBox(height: 24),
                   Form(
                     key: _profileFormKey,
@@ -293,7 +296,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     : Icons.visibility_off,
                               ),
                               onPressed: () => setState(
-                                () => _obscureNewPassword = !_obscureNewPassword,
+                                () =>
+                                    _obscureNewPassword = !_obscureNewPassword,
                               ),
                             ),
                           ),
@@ -330,9 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: _changingPassword
-                              ? null
-                              : _changePassword,
+                          onPressed: _changingPassword ? null : _changePassword,
                           child: _changingPassword
                               ? const SizedBox(
                                   width: 20,

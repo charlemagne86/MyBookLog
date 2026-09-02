@@ -48,16 +48,19 @@ void main() {
       expect(provider.themeMode, ThemeMode.light);
     });
 
-    test('setThemeColor notifies listeners when the color actually changes', () {
-      final provider = ThemeProvider();
-      var notified = 0;
-      provider.addListener(() => notified++);
+    test(
+      'setThemeColor notifies listeners when the color actually changes',
+      () {
+        final provider = ThemeProvider();
+        var notified = 0;
+        provider.addListener(() => notified++);
 
-      provider.setThemeColor(AppThemeColor.slate);
+        provider.setThemeColor(AppThemeColor.slate);
 
-      expect(provider.themeColor, AppThemeColor.slate);
-      expect(notified, 1);
-    });
+        expect(provider.themeColor, AppThemeColor.slate);
+        expect(notified, 1);
+      },
+    );
 
     test('setThemeColor is a no-op when already that color', () {
       final provider = ThemeProvider();

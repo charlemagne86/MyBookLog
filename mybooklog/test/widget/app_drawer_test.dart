@@ -132,27 +132,26 @@ void main() {
         expect(find.byIcon(Icons.check), findsOneWidget);
       });
 
-      testWidgets(
-        'selecting a color applies it and collapses the accordion',
-        (tester) async {
-          final themeProvider = await pumpDrawer(
-            tester,
-            onProfileTap: () {},
-            onLogoutTap: () {},
-          );
+      testWidgets('selecting a color applies it and collapses the accordion', (
+        tester,
+      ) async {
+        final themeProvider = await pumpDrawer(
+          tester,
+          onProfileTap: () {},
+          onLogoutTap: () {},
+        );
 
-          await tester.tap(find.text('Theme'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Slate'));
-          await tester.pumpAndSettle();
+        await tester.tap(find.text('Theme'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Slate'));
+        await tester.pumpAndSettle();
 
-          expect(themeProvider.themeColor, AppThemeColor.slate);
-          // Collapsed again: "Sage" (no longer selected, and no longer
-          // expanded) isn't shown anywhere now.
-          expect(find.text('Sage'), findsNothing);
-          expect(find.text('Slate'), findsOneWidget); // just the subtitle
-        },
-      );
+        expect(themeProvider.themeColor, AppThemeColor.slate);
+        // Collapsed again: "Sage" (no longer selected, and no longer
+        // expanded) isn't shown anywhere now.
+        expect(find.text('Sage'), findsNothing);
+        expect(find.text('Slate'), findsOneWidget); // just the subtitle
+      });
 
       testWidgets('tapping Theme again collapses without changing anything', (
         tester,

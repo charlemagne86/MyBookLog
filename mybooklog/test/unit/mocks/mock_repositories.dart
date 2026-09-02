@@ -209,9 +209,9 @@ class RepositorySetupHelpers {
     MockProfileRepository repo, {
     UserProfile? profile,
   }) {
-    when(
-      () => repo.fetchProfile(),
-    ).thenAnswer((_) async => profile ?? TestProfileFactory.createTestProfile());
+    when(() => repo.fetchProfile()).thenAnswer(
+      (_) async => profile ?? TestProfileFactory.createTestProfile(),
+    );
   }
 }
 
