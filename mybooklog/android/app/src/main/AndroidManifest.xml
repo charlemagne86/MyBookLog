@@ -5,7 +5,7 @@
          gets to DNS, surfacing as a confusing "host lookup failed" error. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="mybooklog"
+        android:label="MyBookLog"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

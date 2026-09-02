@@ -1,6 +1,6 @@
 {
-    "name": "mybooklog",
-    "short_name": "mybooklog",
+    "name": "MyBookLog",
+    "short_name": "MyBookLog",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
