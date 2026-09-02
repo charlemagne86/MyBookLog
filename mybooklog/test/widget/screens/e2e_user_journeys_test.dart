@@ -280,22 +280,24 @@ void main() {
       // User is on bookshelf
       expect(find.byType(BookshelfScreen), findsOneWidget);
 
-      // User taps logout button
+      // Logout lives in the side drawer now, opened via the hamburger icon.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
       final logoutButton = find.byIcon(Icons.logout);
-      if (logoutButton.evaluate().isNotEmpty) {
-        await tester.tap(logoutButton.first);
-        await tester.pumpAndSettle();
+      expect(logoutButton, findsOneWidget);
+      await tester.tap(logoutButton);
+      await tester.pumpAndSettle();
 
-        // Simulate logout by emitting signedOut event
-        when(() => mockAuthRepository.currentSession).thenReturn(null);
-        authStateController.add(AuthState(AuthChangeEvent.signedOut, null));
+      // Simulate logout by emitting signedOut event
+      when(() => mockAuthRepository.currentSession).thenReturn(null);
+      authStateController.add(AuthState(AuthChangeEvent.signedOut, null));
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        // Should be redirected to login
-        expect(find.byType(BookshelfScreen), findsNothing);
-        expect(find.byType(LoginScreen), findsOneWidget);
-      }
+      // Should be redirected to login
+      expect(find.byType(BookshelfScreen), findsNothing);
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
 
     testWidgets('search multiple times: results update with each search', (

@@ -11,6 +11,7 @@ import '../../features/auth/splash_screen.dart';
 import '../../features/book_search/add_book_page.dart';
 import '../../features/book_search/search_results_page.dart';
 import '../../features/bookshelf/bookshelf_screen.dart';
+import '../../features/profile/profile_screen.dart';
 
 /// BUSINESS LOGIC:
 /// The add-book flow (BookshelfScreen -> AddBookPage -> SearchResultsPage)
@@ -110,6 +111,7 @@ GoRouter buildRouter(AuthRepository auth) {
           ),
         ],
       ),
+      GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
     ],
   );
 }

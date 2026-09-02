@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/bookshelf_repository.dart';
+import 'data/repositories/profile_repository.dart';
 import 'data/services/google_books_service.dart';
 
 /// Root widget: the top of the entire user interface.
@@ -28,8 +29,14 @@ class MyApp extends StatefulWidget {
   /// instead of creating real instances from Supabase.
   final AuthRepository? authRepository;
   final BookshelfRepository? bookshelfRepository;
+  final ProfileRepository? profileRepository;
 
-  const MyApp({super.key, this.authRepository, this.bookshelfRepository});
+  const MyApp({
+    super.key,
+    this.authRepository,
+    this.bookshelfRepository,
+    this.profileRepository,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -39,6 +46,7 @@ class _MyAppState extends State<MyApp> {
   final ThemeProvider _themeProvider = ThemeProvider();
   late final AuthRepository _authRepository;
   late final BookshelfRepository _bookshelfRepository;
+  late final ProfileRepository _profileRepository;
   late final GoogleBooksService _googleBooksService;
   late final GoRouter _router;
 
@@ -54,6 +62,7 @@ class _MyAppState extends State<MyApp> {
     _authRepository = widget.authRepository ?? AuthRepository(client);
     _bookshelfRepository =
         widget.bookshelfRepository ?? BookshelfRepository(client);
+    _profileRepository = widget.profileRepository ?? ProfileRepository(client);
     _googleBooksService = GoogleBooksService();
     _router = buildRouter(_authRepository);
   }
@@ -72,6 +81,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         Provider<AuthRepository>.value(value: _authRepository),
         Provider<BookshelfRepository>.value(value: _bookshelfRepository),
+        Provider<ProfileRepository>.value(value: _profileRepository),
         Provider<GoogleBooksService>.value(value: _googleBooksService),
         ChangeNotifierProvider<ThemeProvider>.value(value: _themeProvider),
       ],

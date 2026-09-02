@@ -1,7 +1,9 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/data/models/shelf_book.dart';
+import 'package:mybooklog/src/data/models/user_profile.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:mybooklog/src/data/repositories/profile_repository.dart';
 
 // BUSINESS LOGIC:
 // Repositories abstract database/network operations. When testing business logic,
@@ -15,6 +17,8 @@ import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 class MockBookshelfRepository extends Mock implements BookshelfRepository {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockProfileRepository extends Mock implements ProfileRepository {}
 
 // Setup helpers for common scenarios
 class RepositorySetupHelpers {
@@ -196,6 +200,19 @@ class RepositorySetupHelpers {
       ),
     ).thenThrow(Exception('Too many login attempts. Try again later.'));
   }
+
+  // BUSINESS LOGIC:
+  // Profile: successful fetch, used by BookshelfScreen's drawer header and
+  // by ProfileScreen's own initial load.
+  // TECHNICAL: Returns the given profile (or a default test one).
+  static void setupSuccessfulFetchProfile(
+    MockProfileRepository repo, {
+    UserProfile? profile,
+  }) {
+    when(
+      () => repo.fetchProfile(),
+    ).thenAnswer((_) async => profile ?? TestProfileFactory.createTestProfile());
+  }
 }
 
 // Test data factories for common book objects
@@ -259,6 +276,23 @@ class TestBookFactory {
     return createTestBook(
       title: 'Test™ 中文 العربية 🎉',
       author: 'Author™ 中文 العربية',
+    );
+  }
+}
+
+// Test data factory for the signed-in user's profile.
+class TestProfileFactory {
+  static UserProfile createTestProfile({
+    String id = 'test-user-id',
+    String username = 'test@example.com',
+    String? firstName = 'Test',
+    String? lastName = 'User',
+  }) {
+    return UserProfile(
+      id: id,
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
     );
   }
 }
