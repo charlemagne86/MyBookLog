@@ -91,8 +91,12 @@ class _MyAppState extends State<MyApp> {
         builder: (context, themeProvider, _) {
           return MaterialApp.router(
             title: 'My Book Log',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.lightTheme(
+              seedColor: themeProvider.themeColor.seedColor,
+            ),
+            darkTheme: AppTheme.darkTheme(
+              seedColor: themeProvider.themeColor.seedColor,
+            ),
             themeMode: themeProvider.themeMode,
             routerConfig: _router,
             debugShowCheckedModeBanner: false,

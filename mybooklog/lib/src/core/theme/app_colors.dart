@@ -19,7 +19,8 @@ class AppColors {
   static const Color textSecondary = Color(0xFF706C68);
 
   // Accents
-  static const Color accentSage = Color(0xFF6E8A78); // Primary Accent
+  static const Color accentSage = Color(0xFF6E8A78); // Primary Accent (Sage theme)
+  static const Color accentBlue = Color(0xFF3D6E96); // Alternate accent (Blue theme)
 
   // Utility colors
   static const Color white = Color(0xFFFFFFFF);

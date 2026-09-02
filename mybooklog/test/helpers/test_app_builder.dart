@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/core/router/app_router.dart';
 import 'package:mybooklog/src/core/theme/app_theme.dart';
+import 'package:mybooklog/src/core/theme/theme_provider.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
 import 'package:mybooklog/src/data/repositories/profile_repository.dart';
@@ -57,10 +58,11 @@ class TestAppBuilder {
         Provider<ProfileRepository>.value(
           value: profileRepository ?? _defaultProfileRepository(),
         ),
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
       ],
       child: MaterialApp.router(
         routerConfig: finalRouter,
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme(),
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(

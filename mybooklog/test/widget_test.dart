@@ -112,7 +112,7 @@ void main() {
   testWidgets('light theme renders a basic scaffold', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme(),
         home: const Scaffold(body: Center(child: Text('My Book Log'))),
       ),
     );

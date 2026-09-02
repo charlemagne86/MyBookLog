@@ -206,10 +206,11 @@ class AppTheme {
   }
 
   /// The complete light-mode look, assembled from the helpers above.
-  /// All colors are derived from the single sage-green accent color.
-  static ThemeData get lightTheme {
+  /// All colors are derived from a single accent [seedColor] — swap it to
+  /// re-color the whole app without touching anything else here.
+  static ThemeData lightTheme({Color seedColor = AppColors.accentSage}) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.accentSage,
+      seedColor: seedColor,
       brightness: Brightness.light,
       surface: AppColors.surface,
       error: AppColors.errorRed,
@@ -324,9 +325,9 @@ class AppTheme {
   /// with white text. Less fully specified than light mode (e.g. cards,
   /// menus, and message banners still use framework defaults here); it can
   /// be expanded incrementally.
-  static ThemeData get darkTheme {
+  static ThemeData darkTheme({Color seedColor = AppColors.accentSage}) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.accentSage,
+      seedColor: seedColor,
       brightness: Brightness.dark,
     );
 
