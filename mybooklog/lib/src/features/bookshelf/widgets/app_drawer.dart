@@ -23,26 +23,26 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: SafeArea(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: AppColors.background),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Row(
-                  children: [
-                    const Icon(Icons.account_circle, size: 40),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        displayName,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.account_circle, size: 36),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      displayName,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+            const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.person_outline),
               title: const Text('Profile'),
@@ -71,7 +71,6 @@ class AppDrawer extends StatelessWidget {
               ),
               onTap: () => Navigator.of(context).pop(),
             ),
-            const Spacer(),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.logout),
