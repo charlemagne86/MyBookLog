@@ -20,56 +20,8 @@ class AppDrawer extends StatelessWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onLogoutTap;
 
-  Future<void> _showThemePicker(BuildContext context) async {
-    final themeProvider = context.read<ThemeProvider>();
-    final current = themeProvider.themeColor;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final selected = await showDialog<AppThemeColor>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Choose Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: AppThemeColor.values.map((option) {
-            return ListTile(
-              leading: Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: option.seedColor,
-                ),
-              ),
-              title: Text(option.label),
-              trailing: option == current
-                  ? Icon(Icons.check, color: colorScheme.primary)
-                  : null,
-              onTap: () => Navigator.of(dialogContext).pop(option),
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-
-    if (selected != null) {
-      themeProvider.setThemeColor(selected);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    // Rebuilds the subtitle label whenever the theme changes, since the
-    // drawer deliberately stays open after a pick so the color dot's live
-    // update is visible feedback.
-    final themeColor = context.watch<ThemeProvider>().themeColor;
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -101,23 +53,7 @@ class AppDrawer extends StatelessWidget {
                 onProfileTap();
               },
             ),
-            ListTile(
-              leading: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.primary,
-                ),
-              ),
-              title: const Text('Theme'),
-              subtitle: Text(themeColor.label),
-              // Deliberately doesn't close the drawer: picking a color shows
-              // its effect immediately in the still-open drawer (the dot
-              // above updates live), which is more convincing than a color
-              // swatch alone.
-              onTap: () => _showThemePicker(context),
-            ),
+            const _ThemeAccordion(),
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -130,6 +66,65 @@ class AppDrawer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The "Theme" row: an inline accordion (not a popup) that expands, right in
+/// place in the drawer, to list every accent color with a checkmark on the
+/// current one. Picking one applies it immediately and collapses back down.
+class _ThemeAccordion extends StatefulWidget {
+  const _ThemeAccordion();
+
+  @override
+  State<_ThemeAccordion> createState() => _ThemeAccordionState();
+}
+
+class _ThemeAccordionState extends State<_ThemeAccordion> {
+  final _controller = ExpansibleController();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final current = themeProvider.themeColor;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ExpansionTile(
+      controller: _controller,
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+      childrenPadding: EdgeInsets.zero,
+      leading: Container(
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: colorScheme.primary,
+        ),
+      ),
+      title: const Text('Theme'),
+      subtitle: Text(current.label),
+      children: AppThemeColor.values.map((option) {
+        final isSelected = option == current;
+        return ListTile(
+          contentPadding: const EdgeInsets.only(left: 44, right: 16),
+          leading: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: option.seedColor,
+            ),
+          ),
+          title: Text(option.label),
+          trailing: isSelected
+              ? Icon(Icons.check, color: colorScheme.primary)
+              : null,
+          onTap: () {
+            themeProvider.setThemeColor(option);
+            _controller.collapse();
+          },
+        );
+      }).toList(),
     );
   }
 }

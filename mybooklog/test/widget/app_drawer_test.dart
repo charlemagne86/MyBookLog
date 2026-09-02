@@ -4,8 +4,8 @@
 /// This is the side menu's whole contract with the rest of the app: show
 /// the signed-in user's name, report exactly which item was tapped so the
 /// parent screen can navigate or sign out, and let the user pick an accent
-/// color live — the drawer stays open through a pick so the color dot's
-/// update is visible feedback.
+/// color inline — an accordion row that expands right in the drawer (not a
+/// popup), auto-collapsing once a color is picked.
 library;
 
 import 'package:flutter/material.dart';
@@ -52,7 +52,7 @@ void main() {
       expect(find.text('Jane Doe'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
       expect(find.text('Theme'), findsOneWidget);
-      expect(find.text('Sage'), findsOneWidget); // current theme's label
+      expect(find.text('Sage'), findsOneWidget); // current theme, collapsed
       expect(find.text('Logout'), findsOneWidget);
     });
 
@@ -89,29 +89,35 @@ void main() {
       expect(logoutTapped, isTrue);
     });
 
-    group('Theme picker', () {
-      testWidgets('tapping Theme opens a picker without navigating away', (
-        tester,
-      ) async {
-        var profileTapped = false;
-        var logoutTapped = false;
-        await pumpDrawer(
-          tester,
-          onProfileTap: () => profileTapped = true,
-          onLogoutTap: () => logoutTapped = true,
-        );
+    group('Theme accordion', () {
+      testWidgets(
+        'tapping Theme expands color options inline, without leaving the '
+        'drawer',
+        (tester) async {
+          var profileTapped = false;
+          var logoutTapped = false;
+          await pumpDrawer(
+            tester,
+            onProfileTap: () => profileTapped = true,
+            onLogoutTap: () => logoutTapped = true,
+          );
 
-        await tester.tap(find.text('Theme'));
-        await tester.pumpAndSettle();
+          await tester.tap(find.text('Theme'));
+          await tester.pumpAndSettle();
 
-        expect(profileTapped, isFalse);
-        expect(logoutTapped, isFalse);
-        expect(find.text('Choose Theme'), findsOneWidget);
-        // The drawer itself is still open underneath the dialog.
-        expect(find.text('Logout'), findsOneWidget);
-      });
+          expect(profileTapped, isFalse);
+          expect(logoutTapped, isFalse);
+          // Slate only ever appears as an expanded option row, never in the
+          // collapsed subtitle (that shows the *current* color) — seeing it
+          // proves the accordion expanded in place.
+          expect(find.text('Slate'), findsOneWidget);
+          // Still the same open drawer, not a separate dialog/route.
+          expect(find.text('Profile'), findsOneWidget);
+          expect(find.text('Logout'), findsOneWidget);
+        },
+      );
 
-      testWidgets('lists every color option with the current one checked', (
+      testWidgets('shows a checkmark next to the current selection only', (
         tester,
       ) async {
         await pumpDrawer(tester, onProfileTap: () {}, onLogoutTap: () {});
@@ -119,21 +125,38 @@ void main() {
         await tester.tap(find.text('Theme'));
         await tester.pumpAndSettle();
 
-        // Scoped to the dialog: the drawer behind it also shows the current
-        // theme's label in its own subtitle.
-        final dialog = find.byType(AlertDialog);
-        for (final option in AppThemeColor.values) {
-          expect(
-            find.descendant(of: dialog, matching: find.text(option.label)),
-            findsOneWidget,
-          );
-        }
-        // Only the current (default Sage) selection shows a checkmark.
+        // "Sage" now appears twice: the collapsed-row subtitle plus the
+        // expanded option row.
+        expect(find.text('Sage'), findsNWidgets(2));
+        expect(find.text('Slate'), findsOneWidget);
         expect(find.byIcon(Icons.check), findsOneWidget);
       });
 
-      testWidgets('selecting a color updates the provider and the drawer '
-          'label', (tester) async {
+      testWidgets(
+        'selecting a color applies it and collapses the accordion',
+        (tester) async {
+          final themeProvider = await pumpDrawer(
+            tester,
+            onProfileTap: () {},
+            onLogoutTap: () {},
+          );
+
+          await tester.tap(find.text('Theme'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Slate'));
+          await tester.pumpAndSettle();
+
+          expect(themeProvider.themeColor, AppThemeColor.slate);
+          // Collapsed again: "Sage" (no longer selected, and no longer
+          // expanded) isn't shown anywhere now.
+          expect(find.text('Sage'), findsNothing);
+          expect(find.text('Slate'), findsOneWidget); // just the subtitle
+        },
+      );
+
+      testWidgets('tapping Theme again collapses without changing anything', (
+        tester,
+      ) async {
         final themeProvider = await pumpDrawer(
           tester,
           onProfileTap: () {},
@@ -142,30 +165,11 @@ void main() {
 
         await tester.tap(find.text('Theme'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Blue'));
-        await tester.pumpAndSettle();
-
-        expect(themeProvider.themeColor, AppThemeColor.blue);
-        // Dialog closed, drawer stayed open, label reflects the new pick.
-        expect(find.text('Choose Theme'), findsNothing);
-        expect(find.text('Logout'), findsOneWidget);
-        expect(find.text('Blue'), findsOneWidget);
-      });
-
-      testWidgets('Cancel leaves the theme unchanged', (tester) async {
-        final themeProvider = await pumpDrawer(
-          tester,
-          onProfileTap: () {},
-          onLogoutTap: () {},
-        );
-
         await tester.tap(find.text('Theme'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
         expect(themeProvider.themeColor, AppThemeColor.sage);
-        expect(find.text('Choose Theme'), findsNothing);
+        expect(find.text('Slate'), findsNothing); // only shown while expanded
       });
     });
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router/app_router.dart';
@@ -31,11 +32,19 @@ class MyApp extends StatefulWidget {
   final BookshelfRepository? bookshelfRepository;
   final ProfileRepository? profileRepository;
 
+  /// Resolved once, before `runApp`, since [SharedPreferences.getInstance]
+  /// is async — passed in so the saved theme is available on the very
+  /// first frame instead of flashing the default before it loads. Null in
+  /// contexts that don't care (most widget tests), where theme choice just
+  /// isn't persisted.
+  final SharedPreferences? sharedPreferences;
+
   const MyApp({
     super.key,
     this.authRepository,
     this.bookshelfRepository,
     this.profileRepository,
+    this.sharedPreferences,
   });
 
   @override
@@ -43,7 +52,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final ThemeProvider _themeProvider = ThemeProvider();
+  late final ThemeProvider _themeProvider;
   late final AuthRepository _authRepository;
   late final BookshelfRepository _bookshelfRepository;
   late final ProfileRepository _profileRepository;
@@ -58,6 +67,7 @@ class _MyAppState extends State<MyApp> {
 
     // TESTING: Use injected repositories if provided (for integration tests),
     // otherwise create real instances from Supabase.
+    _themeProvider = ThemeProvider(prefs: widget.sharedPreferences);
     final client = Supabase.instance.client;
     _authRepository = widget.authRepository ?? AuthRepository(client);
     _bookshelfRepository =

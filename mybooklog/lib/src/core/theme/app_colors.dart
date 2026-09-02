@@ -20,7 +20,7 @@ class AppColors {
 
   // Accents
   static const Color accentSage = Color(0xFF6E8A78); // Primary Accent (Sage theme)
-  static const Color accentBlue = Color(0xFF3D6E96); // Alternate accent (Blue theme)
+  static const Color accentSlate = Color(0xFF3D6E96); // Alternate accent (Slate theme)
 
   // Utility colors
   static const Color white = Color(0xFFFFFFFF);
