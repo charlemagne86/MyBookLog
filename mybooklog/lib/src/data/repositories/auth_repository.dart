@@ -129,6 +129,15 @@ class AuthRepository {
       }
       return error.message;
     }
+    // Database/RPC calls (profile updates, account deletion) fail with this
+    // type instead of AuthException.
+    if (error is PostgrestException) {
+      final m = error.message.toLowerCase();
+      if (m.contains('not authenticated')) {
+        return 'Your session has expired. Please log in again.';
+      }
+      return 'Something went wrong saving your changes. Please try again.';
+    }
     // Anything unexpected (e.g. no internet) gets a generic, calm message.
     return 'Something went wrong. Please check your connection and retry.';
   }

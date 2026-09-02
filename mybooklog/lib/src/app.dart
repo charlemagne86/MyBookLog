@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router/app_router.dart';
@@ -8,6 +9,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/bookshelf_repository.dart';
+import 'data/repositories/profile_repository.dart';
 import 'data/services/google_books_service.dart';
 
 /// Root widget: the top of the entire user interface.
@@ -28,17 +30,32 @@ class MyApp extends StatefulWidget {
   /// instead of creating real instances from Supabase.
   final AuthRepository? authRepository;
   final BookshelfRepository? bookshelfRepository;
+  final ProfileRepository? profileRepository;
 
-  const MyApp({super.key, this.authRepository, this.bookshelfRepository});
+  /// Resolved once, before `runApp`, since [SharedPreferences.getInstance]
+  /// is async — passed in so the saved theme is available on the very
+  /// first frame instead of flashing the default before it loads. Null in
+  /// contexts that don't care (most widget tests), where theme choice just
+  /// isn't persisted.
+  final SharedPreferences? sharedPreferences;
+
+  const MyApp({
+    super.key,
+    this.authRepository,
+    this.bookshelfRepository,
+    this.profileRepository,
+    this.sharedPreferences,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  final ThemeProvider _themeProvider = ThemeProvider();
+  late final ThemeProvider _themeProvider;
   late final AuthRepository _authRepository;
   late final BookshelfRepository _bookshelfRepository;
+  late final ProfileRepository _profileRepository;
   late final GoogleBooksService _googleBooksService;
   late final GoRouter _router;
 
@@ -50,10 +67,12 @@ class _MyAppState extends State<MyApp> {
 
     // TESTING: Use injected repositories if provided (for integration tests),
     // otherwise create real instances from Supabase.
+    _themeProvider = ThemeProvider(prefs: widget.sharedPreferences);
     final client = Supabase.instance.client;
     _authRepository = widget.authRepository ?? AuthRepository(client);
     _bookshelfRepository =
         widget.bookshelfRepository ?? BookshelfRepository(client);
+    _profileRepository = widget.profileRepository ?? ProfileRepository(client);
     _googleBooksService = GoogleBooksService();
     _router = buildRouter(_authRepository);
   }
@@ -72,6 +91,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         Provider<AuthRepository>.value(value: _authRepository),
         Provider<BookshelfRepository>.value(value: _bookshelfRepository),
+        Provider<ProfileRepository>.value(value: _profileRepository),
         Provider<GoogleBooksService>.value(value: _googleBooksService),
         ChangeNotifierProvider<ThemeProvider>.value(value: _themeProvider),
       ],
@@ -81,8 +101,12 @@ class _MyAppState extends State<MyApp> {
         builder: (context, themeProvider, _) {
           return MaterialApp.router(
             title: 'My Book Log',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.lightTheme(
+              seedColor: themeProvider.themeColor.seedColor,
+            ),
+            darkTheme: AppTheme.darkTheme(
+              seedColor: themeProvider.themeColor.seedColor,
+            ),
             themeMode: themeProvider.themeMode,
             routerConfig: _router,
             debugShowCheckedModeBanner: false,
