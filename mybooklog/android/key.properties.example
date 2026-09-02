@@ -1,0 +1,4 @@
+storePassword=REPLACE_ME
+keyPassword=REPLACE_ME
+keyAlias=mybooklog-upload
+storeFile=/home/charlie/keystores/mybooklog-upload.jks
