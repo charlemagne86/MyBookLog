@@ -71,8 +71,8 @@ SDK-bundled tools at `~/Android/Sdk` work correctly.
 
 ## Useful facts about this app
 
-- Android application ID: `com.example.mybooklog`
-- To force-stop and relaunch cleanly: `adb shell am force-stop com.example.mybooklog`
+- Android application ID: `com.charlemagne86.mybooklog`
+- To force-stop and relaunch cleanly: `adb shell am force-stop com.charlemagne86.mybooklog`
 - To hot-reload after a code change instead of a full relaunch, send `r`
   to the backgrounded `flutter run` process's stdin — since it's
   `nohup`'d to a log file, it's simpler to kill and rerun step 4, or use
