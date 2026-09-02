@@ -5,10 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mybooklog/src/core/router/app_router.dart';
 import 'package:mybooklog/src/core/theme/app_theme.dart';
+import 'package:mybooklog/src/core/theme/theme_provider.dart';
 import 'package:mybooklog/src/data/repositories/auth_repository.dart';
 import 'package:mybooklog/src/data/repositories/bookshelf_repository.dart';
+import 'package:mybooklog/src/data/repositories/profile_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../unit/mocks/mock_repositories.dart';
 
 /// BUSINESS LOGIC:
 /// Widget tests need complete app context: routing, theme, dependency injection,
@@ -22,12 +26,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class TestAppBuilder {
   final BookshelfRepository bookshelfRepository;
   final AuthRepository authRepository;
+  final ProfileRepository? profileRepository;
   final GoRouter? router;
   final StreamController<AuthState>? authStateController;
 
   TestAppBuilder({
     required this.bookshelfRepository,
     required this.authRepository,
+    this.profileRepository,
     this.router,
     this.authStateController,
   });
@@ -49,10 +55,14 @@ class TestAppBuilder {
       providers: [
         Provider<BookshelfRepository>.value(value: bookshelfRepository),
         Provider<AuthRepository>.value(value: authRepository),
+        Provider<ProfileRepository>.value(
+          value: profileRepository ?? _defaultProfileRepository(),
+        ),
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
       ],
       child: MaterialApp.router(
         routerConfig: finalRouter,
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.lightTheme(),
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(
@@ -75,6 +85,17 @@ class TestAppBuilder {
   /// enforces auth boundaries (logged-in users can't see login screen, etc).
   GoRouter _createDefaultRouter() {
     return buildRouter(authRepository);
+  }
+
+  /// Tests that don't care about the drawer/profile just need
+  /// BookshelfScreen to render without throwing; a stubbed mock does that
+  /// without every existing caller having to pass one explicitly.
+  ProfileRepository _defaultProfileRepository() {
+    final mock = MockProfileRepository();
+    when(
+      () => mock.fetchProfile(),
+    ).thenAnswer((_) async => TestProfileFactory.createTestProfile());
+    return mock;
   }
 }
 

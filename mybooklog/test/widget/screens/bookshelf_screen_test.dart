@@ -262,6 +262,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // Logout now lives in the side drawer, opened via the hamburger icon.
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
       expect(find.byIcon(Icons.logout), findsOneWidget);
     });
 

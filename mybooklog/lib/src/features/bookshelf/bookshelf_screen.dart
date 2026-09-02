@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../../core/router/app_router.dart';
 import '../../data/models/shelf_book.dart';
+import '../../data/models/user_profile.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/bookshelf_repository.dart';
+import '../../data/repositories/profile_repository.dart';
+import 'widgets/app_drawer.dart';
 import 'widgets/book_details_panel.dart';
 import 'widgets/bookshelf_empty_state.dart';
 import 'widgets/bookshelf_filter_row.dart';
@@ -22,7 +25,7 @@ import 'widgets/bookshelf_search_bar.dart';
 ///     open) to narrow the shelf,
 ///   * tap a book to open its details panel — summary, rating, mark
 ///     read/unread, and remove all live there,
-///   * tap the door icon to log out.
+///   * tap the hamburger icon to open the side menu (profile, theme, logout).
 class BookshelfScreen extends StatefulWidget {
   const BookshelfScreen({super.key});
 
@@ -44,6 +47,8 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   // text below in _visibleBooks.
   ReadFilter _readFilter = ReadFilter.all;
   final Set<String> _selectedCategories = {};
+  // The drawer's header name; null until the first fetch resolves.
+  UserProfile? _profile;
 
   BookshelfRepository get _repo => context.read<BookshelfRepository>();
 
@@ -51,6 +56,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   void initState() {
     super.initState();
     _fetchBooks();
+    _fetchProfile();
   }
 
   @override
@@ -74,7 +80,10 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   /// or the whole stack collapsed via a single `go('/shelf')`. This is what
   /// makes a newly added book show up immediately, with no manual reload.
   @override
-  void didPopNext() => _fetchBooks();
+  void didPopNext() {
+    _fetchBooks();
+    _fetchProfile();
+  }
 
   /// The books to actually show on screen: search text, read/unread status,
   /// and category selection all narrow the shelf together. If the search
@@ -239,6 +248,27 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
     await _fetchBooks();
   }
 
+  /// Loads the signed-in user's name for the drawer header. Failures are
+  /// silent here — the drawer falls back to a generic label, and the
+  /// Profile screen itself will surface any real error when opened.
+  Future<void> _fetchProfile() async {
+    try {
+      final profile = await context.read<ProfileRepository>().fetchProfile();
+      if (!mounted) return;
+      setState(() => _profile = profile);
+    } catch (_) {
+      // Drawer falls back to a generic label; nothing else to do here.
+    }
+  }
+
+  /// Opens the Profile screen, and when the user comes back, refreshes the
+  /// drawer header in case their name changed.
+  Future<void> _onOpenProfile() async {
+    await context.push('/profile');
+    if (!mounted) return;
+    await _fetchProfile();
+  }
+
   /// Opens or closes the search field. Closing it also erases the typed
   /// text, so the shelf reverts to whatever the chip filters below select.
   void _onSearchBook() {
@@ -277,13 +307,13 @@ class _BookshelfScreenState extends State<BookshelfScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: AppDrawer(
+        displayName: _profile?.displayName ?? 'My Account',
+        onProfileTap: _onOpenProfile,
+        onLogoutTap: _onLogout,
+      ),
       appBar: AppBar(
         title: const Text('My Bookshelf'),
-        leading: IconButton(
-          icon: const Icon(Icons.logout, size: 32),
-          tooltip: 'Logout',
-          onPressed: _onLogout,
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search, size: 32),
