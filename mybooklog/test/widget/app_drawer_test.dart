@@ -107,10 +107,11 @@ void main() {
 
           expect(profileTapped, isFalse);
           expect(logoutTapped, isFalse);
-          // Slate only ever appears as an expanded option row, never in the
-          // collapsed subtitle (that shows the *current* color) — seeing it
-          // proves the accordion expanded in place.
-          expect(find.text('Slate'), findsOneWidget);
+          // Indigo/Terracotta only ever appear as expanded option rows,
+          // never in the collapsed subtitle (that shows the *current*
+          // color) — seeing them proves the accordion expanded in place.
+          expect(find.text('Indigo'), findsOneWidget);
+          expect(find.text('Terracotta'), findsOneWidget);
           // Still the same open drawer, not a separate dialog/route.
           expect(find.text('Profile'), findsOneWidget);
           expect(find.text('Logout'), findsOneWidget);
@@ -126,9 +127,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // "Sage" now appears twice: the collapsed-row subtitle plus the
-        // expanded option row.
+        // expanded option row. The other options appear once each (row only).
         expect(find.text('Sage'), findsNWidgets(2));
-        expect(find.text('Slate'), findsOneWidget);
+        expect(find.text('Indigo'), findsOneWidget);
+        expect(find.text('Terracotta'), findsOneWidget);
         expect(find.byIcon(Icons.check), findsOneWidget);
       });
 
@@ -143,14 +145,15 @@ void main() {
 
         await tester.tap(find.text('Theme'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Slate'));
+        await tester.tap(find.text('Indigo'));
         await tester.pumpAndSettle();
 
-        expect(themeProvider.themeColor, AppThemeColor.slate);
+        expect(themeProvider.themeColor, AppThemeColor.indigo);
         // Collapsed again: "Sage" (no longer selected, and no longer
         // expanded) isn't shown anywhere now.
         expect(find.text('Sage'), findsNothing);
-        expect(find.text('Slate'), findsOneWidget); // just the subtitle
+        expect(find.text('Indigo'), findsOneWidget); // just the subtitle
+        expect(find.text('Terracotta'), findsNothing); // collapsed away too
       });
 
       testWidgets('tapping Theme again collapses without changing anything', (
@@ -168,7 +171,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(themeProvider.themeColor, AppThemeColor.sage);
-        expect(find.text('Slate'), findsNothing); // only shown while expanded
+        expect(find.text('Indigo'), findsNothing); // only shown while expanded
       });
     });
   });
