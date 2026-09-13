@@ -38,7 +38,22 @@
     margin-bottom: 2rem;
   }
   a {
-    color: #3d6e96;
+    color: #6e8a78;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  .header img {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+  .header h1 {
+    margin: 0;
   }
   ul {
     padding-left: 1.3rem;
@@ -61,13 +76,16 @@
     h2 { border-bottom-color: #3a3a3a; }
     strong { color: #ffffff; }
     footer { border-top-color: #3a3a3a; color: #a8a49e; }
-    a { color: #7fb0d6; }
+    a { color: #9cc2ac; }
   }
 </style>
 </head>
 <body>
 
-<h1>MyBookLog Privacy Policy</h1>
+<div class="header">
+  <img src="app_icon.png" alt="MyBookLog app icon" width="64" height="64">
+  <h1>MyBookLog Privacy Policy</h1>
+</div>
 <p class="meta"><strong>Effective Date:</strong> September 13, 2026</p>
 
 <p>This Privacy Policy explains what information MyBookLog ("the app",
