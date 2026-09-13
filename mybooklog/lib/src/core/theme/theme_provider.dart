@@ -17,7 +17,8 @@ import 'app_colors.dart';
 /// [ThemeProvider] — keep it in sync with the case name if you rename one.
 enum AppThemeColor {
   sage('Sage', AppColors.accentSage),
-  slate('Slate', AppColors.accentSlate);
+  indigo('Indigo', AppColors.accentIndigo),
+  terracotta('Terracotta', AppColors.accentTerracotta);
 
   const AppThemeColor(this.label, this.seedColor);
 

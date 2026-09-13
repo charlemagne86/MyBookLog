@@ -55,9 +55,9 @@ void main() {
         var notified = 0;
         provider.addListener(() => notified++);
 
-        provider.setThemeColor(AppThemeColor.slate);
+        provider.setThemeColor(AppThemeColor.indigo);
 
-        expect(provider.themeColor, AppThemeColor.slate);
+        expect(provider.themeColor, AppThemeColor.indigo);
         expect(notified, 1);
       },
     );
@@ -75,19 +75,38 @@ void main() {
     group('persistence', () {
       test('with no prefs given, the choice just isn\'t remembered', () {
         final provider = ThemeProvider();
-        provider.setThemeColor(AppThemeColor.slate);
+        provider.setThemeColor(AppThemeColor.indigo);
         // A fresh provider with no store still starts at the default —
         // nothing to load from, and nothing should throw either.
         expect(ThemeProvider().themeColor, AppThemeColor.sage);
       });
 
       test('loads a previously-saved color on construction', () async {
+        SharedPreferences.setMockInitialValues({'theme_color': 'indigo'});
+        final prefs = await SharedPreferences.getInstance();
+
+        final provider = ThemeProvider(prefs: prefs);
+
+        expect(provider.themeColor, AppThemeColor.indigo);
+      });
+
+      test('loads Terracotta the same way', () async {
+        SharedPreferences.setMockInitialValues({'theme_color': 'terracotta'});
+        final prefs = await SharedPreferences.getInstance();
+
+        final provider = ThemeProvider(prefs: prefs);
+
+        expect(provider.themeColor, AppThemeColor.terracotta);
+      });
+
+      test('a stale value from a since-renamed case ("slate", now "indigo") '
+          'falls back to Sage instead of crashing', () async {
         SharedPreferences.setMockInitialValues({'theme_color': 'slate'});
         final prefs = await SharedPreferences.getInstance();
 
         final provider = ThemeProvider(prefs: prefs);
 
-        expect(provider.themeColor, AppThemeColor.slate);
+        expect(provider.themeColor, AppThemeColor.sage);
       });
 
       test('falls back to Sage when the saved value is unrecognized', () async {
@@ -105,11 +124,11 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         final prefs = await SharedPreferences.getInstance();
 
-        ThemeProvider(prefs: prefs).setThemeColor(AppThemeColor.slate);
+        ThemeProvider(prefs: prefs).setThemeColor(AppThemeColor.indigo);
 
-        expect(prefs.getString('theme_color'), 'slate');
+        expect(prefs.getString('theme_color'), 'indigo');
         // A brand-new provider reading the same store picks it up.
-        expect(ThemeProvider(prefs: prefs).themeColor, AppThemeColor.slate);
+        expect(ThemeProvider(prefs: prefs).themeColor, AppThemeColor.indigo);
       });
     });
   });

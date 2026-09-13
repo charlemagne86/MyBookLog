@@ -22,9 +22,14 @@ class AppColors {
   static const Color accentSage = Color(
     0xFF6E8A78,
   ); // Primary Accent (Sage theme)
-  static const Color accentSlate = Color(
-    0xFF3D6E96,
-  ); // Alternate accent (Slate theme)
+  static const Color accentIndigo = Color(
+    0xFF5B5EA6,
+  ); // Alternate accent (Indigo theme)
+  static const Color accentTerracotta = Color(
+    0xFFA9652D,
+  ); // Alternate accent (Terracotta theme) — kept clearly distinct in hue
+  // (~27°) and saturation from errorRed (~3° hue) so it never reads as a
+  // shade of the destructive/error red.
 
   // Utility colors
   static const Color white = Color(0xFFFFFFFF);
