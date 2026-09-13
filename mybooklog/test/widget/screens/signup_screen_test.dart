@@ -2,8 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mybooklog/src/core/config/app_config.dart';
+import 'package:mybooklog/src/data/repositories/auth_repository.dart';
+import 'package:mybooklog/src/features/auth/signup_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
+import '../../helpers/fake_url_launcher_platform.dart';
 import '../../helpers/test_app_builder.dart';
 import '../../unit/mocks/mock_repositories.dart';
 
@@ -191,6 +197,49 @@ void main() {
       final fields = find.byType(TextField);
       expect(fields, findsWidgets);
       expect(fields.evaluate().length, greaterThanOrEqualTo(2));
+    });
+  });
+
+  group('Privacy Policy link', () {
+    late UrlLauncherPlatform originalPlatform;
+    late FakeUrlLauncherPlatform fakePlatform;
+
+    setUp(() {
+      originalPlatform = UrlLauncherPlatform.instance;
+      fakePlatform = FakeUrlLauncherPlatform();
+      UrlLauncherPlatform.instance = fakePlatform;
+    });
+
+    tearDown(() {
+      UrlLauncherPlatform.instance = originalPlatform;
+    });
+
+    /// Pumps SignUpScreen directly (not through the router), so this test
+    /// is guaranteed to be exercising the actual signup form rather than
+    /// whatever screen the router's redirect logic happens to land on.
+    Future<void> pumpSignUpScreen(WidgetTester tester) async {
+      await tester.pumpWidget(
+        Provider<AuthRepository>.value(
+          value: MockAuthRepository(),
+          child: const MaterialApp(home: SignUpScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows a Privacy Policy link', (tester) async {
+      await pumpSignUpScreen(tester);
+
+      expect(find.text('Privacy Policy'), findsOneWidget);
+    });
+
+    testWidgets('tapping it launches the configured URL', (tester) async {
+      await pumpSignUpScreen(tester);
+
+      await tester.tap(find.text('Privacy Policy'));
+      await tester.pumpAndSettle();
+
+      expect(fakePlatform.lastLaunchedUrl, AppConfig.privacyPolicyUrl);
     });
   });
 }

@@ -10,9 +10,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mybooklog/src/core/config/app_config.dart';
 import 'package:mybooklog/src/core/theme/theme_provider.dart';
 import 'package:mybooklog/src/features/bookshelf/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+import '../helpers/fake_url_launcher_platform.dart';
 
 void main() {
   group('AppDrawer', () {
@@ -54,6 +58,7 @@ void main() {
       expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Sage'), findsOneWidget); // current theme, collapsed
       expect(find.text('Logout'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsOneWidget);
     });
 
     testWidgets('tapping Profile closes the drawer and calls onProfileTap', (
@@ -173,6 +178,42 @@ void main() {
         expect(themeProvider.themeColor, AppThemeColor.sage);
         expect(find.text('Indigo'), findsNothing); // only shown while expanded
       });
+    });
+
+    group('Privacy Policy link', () {
+      late UrlLauncherPlatform originalPlatform;
+      late FakeUrlLauncherPlatform fakePlatform;
+
+      setUp(() {
+        originalPlatform = UrlLauncherPlatform.instance;
+        fakePlatform = FakeUrlLauncherPlatform();
+        UrlLauncherPlatform.instance = fakePlatform;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalPlatform;
+      });
+
+      testWidgets(
+        'tapping it closes the drawer and launches the configured URL',
+        (tester) async {
+          var profileTapped = false;
+          var logoutTapped = false;
+          await pumpDrawer(
+            tester,
+            onProfileTap: () => profileTapped = true,
+            onLogoutTap: () => logoutTapped = true,
+          );
+
+          await tester.tap(find.text('Privacy Policy'));
+          await tester.pumpAndSettle();
+
+          expect(fakePlatform.lastLaunchedUrl, AppConfig.privacyPolicyUrl);
+          expect(profileTapped, isFalse);
+          expect(logoutTapped, isFalse);
+          expect(find.text('Privacy Policy'), findsNothing); // drawer closed
+        },
+      );
     });
   });
 }
