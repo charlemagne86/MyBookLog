@@ -1,4 +1,6 @@
-// Small, dependency-free helpers shared across the app.
+// Small helpers shared across the app.
+
+import 'package:url_launcher/url_launcher.dart';
 
 /// Rewrites a web address that starts with the insecure `http://` prefix so
 /// it starts with the secure `https://` prefix instead.
@@ -39,4 +41,15 @@ String toHttpsUrl(String? url) {
     return 'https://${url.substring('http://'.length)}';
   }
   return url;
+}
+
+/// Opens a web address in the device's browser (not inside the app).
+///
+/// Used for links to external pages the app doesn't own, like the Privacy
+/// Policy. Returns whether it succeeded, so the caller can show its own
+/// error message if not — this function has no UI of its own.
+Future<bool> launchExternalUrl(String url) async {
+  final uri = Uri.parse(url);
+  if (!await canLaunchUrl(uri)) return false;
+  return launchUrl(uri, mode: LaunchMode.externalApplication);
 }

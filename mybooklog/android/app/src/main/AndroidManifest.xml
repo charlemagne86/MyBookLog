@@ -46,5 +46,13 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Required for url_launcher's canLaunchUrl to find a browser on
+             Android 11+ (package visibility) — without this, opening the
+             Privacy Policy link silently fails even with a browser
+             installed. See https://developer.android.com/training/package-visibility -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>

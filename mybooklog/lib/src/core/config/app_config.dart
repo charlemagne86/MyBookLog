@@ -38,4 +38,10 @@ class AppConfig {
 
   /// Whether a Google Books API key was provided at build time.
   static bool get hasGoogleBooksApiKey => googleBooksApiKey.isNotEmpty;
+
+  /// The app's published Privacy Policy — also the web-accessible
+  /// account-deletion request path Play Store requires. Hosted via GitHub
+  /// Pages from the `docs/` folder at the repo root.
+  static const String privacyPolicyUrl =
+      'https://charlemagne86.github.io/MyBookLog/';
 }

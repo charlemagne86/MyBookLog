@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/utils.dart' as utils;
 
 /// The bookshelf screen's side menu: the user's name up top, then Profile
 /// and Theme. Navigation/auth (Profile, Logout) are reported to the parent
@@ -61,6 +63,27 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pop();
                 onLogoutTap();
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('Privacy Policy'),
+              onTap: () async {
+                // Captured before closing the drawer/awaiting, so it stays
+                // valid even if the drawer's own BuildContext doesn't.
+                final messenger = ScaffoldMessenger.of(context);
+                Navigator.of(context).pop();
+                final opened = await utils.launchExternalUrl(
+                  AppConfig.privacyPolicyUrl,
+                );
+                if (!opened) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text("Couldn't open the Privacy Policy."),
+                    ),
+                  );
+                }
               },
             ),
           ],

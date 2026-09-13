@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/utils.dart' as utils;
 import '../../data/repositories/auth_repository.dart';
 
@@ -93,6 +94,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _isSubmitting = false;
         });
       }
+    }
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    final opened = await utils.launchExternalUrl(AppConfig.privacyPolicyUrl);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Couldn't open the Privacy Policy.")),
+      );
     }
   }
 
@@ -204,6 +214,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    Text(
+                      'By signing up, you agree to our ',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    GestureDetector(
+                      onTap: _openPrivacyPolicy,
+                      child: Text(
+                        'Privacy Policy',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    Text('.', style: Theme.of(context).textTheme.bodySmall),
+                  ],
                 ),
               ],
             ),
